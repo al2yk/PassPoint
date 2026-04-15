@@ -22,7 +22,7 @@ object UserRepository {
             actSystem?.edit()?.putString("id", value)?.apply()
         }
 
-    var user_token: String
+    var user_token: String?
         get() = actSystem?.getString("user_token", "") ?: ""
         set(value) {
             actSystem?.edit()?.putString("user_token", value)?.apply()

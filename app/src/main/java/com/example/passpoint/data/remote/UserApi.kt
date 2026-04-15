@@ -10,7 +10,7 @@ interface UserApi {
 
     @POST("/auth/v1/signup")
     suspend fun signUp(@Body signUpRequest: AuthRequest): AuthResponse
-    @POST("/rest/v1/profiles")
+    @POST("/rest/v1/users")
     suspend fun createUser(@Body user: User)
     @POST("/auth/v1/token?grant_type=password")
     suspend fun signIn(@Body signInRequest: AuthRequest): AuthResponse

@@ -2,6 +2,7 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.AuthResponse
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.mapper.Mapper
 import com.example.passpoint.data.remote.UserApi
@@ -11,15 +12,16 @@ import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.repository.Repository
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.toString
 
 class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi
 ) : Repository {
     override suspend fun signUp(
         name: String,
-        surname: String,
         email: String,
-        password: String
+        password: String,
+        surname: String
     ): Result<AuthResponseModel> {
         return try {
             val response = userApi.signUp(AuthRequest(email, password))
@@ -34,10 +36,10 @@ class UserRepositoryImpl @Inject constructor(
             val userDto = User(
                 id = UUID.randomUUID(),
                 email = email,
+                user_id = response.user.id,
                 name = name,
                 surname = surname,
-                role = "",
-                user_id = response.user.id
+                role = 1
             )
             Log.d("UserDTO signUp", userDto.toString())
 
@@ -49,6 +51,7 @@ class UserRepositoryImpl @Inject constructor(
             Result.Failure(exception = Exception(e.message))
         }
     }
+
 
     override suspend fun signIn(
         email: String,

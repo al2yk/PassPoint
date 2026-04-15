@@ -9,6 +9,7 @@ val BrandTonal50= Color(0xFFF6E9E3)
 val BrandTonal200 = Color(0xFFFFB086)
 
 val White = Color(0xFFFFFFFF)
+val White90 = Color(0xE6FFFFFF)
 val White70 = Color(0xB3FFFFFF)
 val White60 = Color(0x99FFFFFF)
 val White50 = Color(0x80FFFFFF)

@@ -45,6 +45,7 @@ import com.example.passpoint.presentation.components.PrimaryButton
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.WarningMessage
+import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.BrandTonal200
 import com.example.passpoint.presentation.theme.ButtonHeight
@@ -93,7 +94,7 @@ fun SignInView(controller: NavHostController, viewModel: SingInViewModel = hiltV
             item {
                 SpacerHeight(60)
                 AuthTitle("Войдите в систему используя реквизиты", !isBusy)
-                SpacerHeight(36)
+                SpacerHeight(30)
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -209,7 +210,9 @@ fun SignInView(controller: NavHostController, viewModel: SingInViewModel = hiltV
                 modifier = Modifier.fillMaxWidth()
             ) {
                 TextButton(
-                    onClick = {},
+                    onClick = {
+                        controller.navigate(NavigationRoutes.SIGNUP)
+                    },
                     modifier = Modifier
                         .height(ButtonHeight)
                         .weight(1f),
