@@ -1,0 +1,9 @@
+package com.example.passpoint.presentation.navigation
+
+object NavigationRoutes  {
+    const val SPLASH ="splash"
+    const val ONBOARDING ="on boarding"
+    const val SIGNIN ="sign in"
+    const val SIGNUP ="sign up"
+    const val MAIN ="main"
+}
