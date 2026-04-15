@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.passpoint.presentation.screens.authorization.SignInView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
 import com.example.passpoint.presentation.screens.splash.SplashView
 import com.example.passpoint.presentation.theme.Background
@@ -33,10 +34,10 @@ fun Navigation() {
                     SplashView(controller)
                 }
                 composable(NavigationRoutes.ONBOARDING) {
-                    OnboardingView()
+                    OnboardingView(controller = controller)
                 }
                 composable(NavigationRoutes.SIGNIN) {
-
+                    SignInView(controller)
                 }
                 composable(NavigationRoutes.SIGNUP) {
 

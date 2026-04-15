@@ -3,7 +3,6 @@
 package com.example.passpoint.presentation.screens.onboarding
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -22,26 +21,34 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.presentation.components.PagerIndicator
 import com.example.passpoint.presentation.components.PrimaryButton
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.isCompactLayoutRequired
+import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.ButtonHeight
 import kotlin.math.absoluteValue
 
 @Composable
 fun OnboardingView(
+    controller: NavHostController,
     pagesViewModel: OnboardingPagingViewModel = viewModel()
 ) {
     val currentScreen = pagesViewModel.currentScreen.collectAsState().value
 
     val onSkipClicked: () -> Unit = {
-
+        UserRepository.act = 1
+        controller.navigate(NavigationRoutes.SIGNIN){
+            popUpTo(NavigationRoutes.ONBOARDING) {
+                inclusive = true
+            }
+        }
     }
 
     val pagerState = rememberPagerState(

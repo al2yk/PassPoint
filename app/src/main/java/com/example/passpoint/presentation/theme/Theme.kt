@@ -68,7 +68,8 @@ val WhiteColorScheme = lightColorScheme(
     surfaceDim = Gray450,
     // arrow right go to action
     inverseSurface = Gray800,
-    onTertiaryContainer = White50
+    onTertiaryContainer = White50,
+    outline = White70,
 )
 val DarkColorScheme = lightColorScheme(
     // Button Color; leading icon in the chips;
@@ -127,8 +128,8 @@ val DarkColorScheme = lightColorScheme(
     surfaceDim = Gray450,
     // arrow right go to action
     inverseSurface = White,
-    onTertiaryContainer = White50
-
+    onTertiaryContainer = White50,
+    outline = White70
 )
 val ButtonHeight = 48.dp
 
