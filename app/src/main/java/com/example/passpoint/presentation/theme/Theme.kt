@@ -3,50 +3,144 @@ package com.example.passpoint.presentation.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+val WhiteColorScheme = lightColorScheme(
+    // Button Color; leading icon in the chips;
+    primary = BrandColor,
+    // Text in button
+    onPrimary = White,
+
+    background = White,
+    onBackground = Black900,
+
+    // Elevated Card Container; ModalSheet!!!
+    surfaceContainerLow = White,
+    // ModalBottomSheet container; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    surfaceContainerLowest = Gray300,
+
+    // EmployeeDialog; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    surfaceContainerHighest = Gray300,
+    //Dialog
+    surfaceContainerHigh = White,
+    // Dialog title
+    onSurface = Black900,
+
+    // FilledTonalIconButton container
+    secondaryContainer = White,
+    // FilledTonalIconButton icon
+    onSecondaryContainer = Black850,
+
+    // OutlinedButton container
+    outlineVariant = Gray500,
+    // OutlinedButton title|icon  && dragHandle ModalSheet(but I need Gray500)
+    onSurfaceVariant = Black900,
+
+    // Assist chip.
+    // Assist chip title (only warning) ----->
+    onTertiary = Brown900,
+    // Assist chip icon; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    onTertiaryFixedVariant = Brown800,
+    // Assist chip background; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    tertiaryFixed = Yellow100,
+    // Assist chip icon (only error) ----->
+    tertiaryFixedDim = Red800,
+    // Assist chip title
+    tertiaryContainer = Red900,
+    // Assist chip background
+    onTertiaryFixed = Red50,
+
+
+    // Radio Button unselected; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    onPrimaryFixedVariant = Gray300,
+
+    // Slider inactive track; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    inverseOnSurface = Gray400,
+
+    // SeeAllSelectedDevicesModalSheet SN
+    surfaceTint = Gray600,
+    //Divider
+    surfaceDim = Gray450,
+    // arrow right go to action
+    inverseSurface = Gray800,
+    onTertiaryContainer = White50
 )
+val DarkColorScheme = lightColorScheme(
+    // Button Color; leading icon in the chips;
+    primary = BrandColor,
+    // Text in button
+    onPrimary = White,
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    background = Black900,
+    onBackground = White,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    // Elevated Card Container; ModalSheet!!!
+    surfaceContainerLow = Black900,
+    // ModalBottomSheet container; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    surfaceContainerLowest = Black,
+
+    // EmployeeDialog; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    surfaceContainerHighest = Black,
+    //Dialog
+    surfaceContainerHigh = Black900,
+    //Dialog title
+    onSurface = White,
+
+    // FilledTonalIconButton container (employee data поменять)
+    secondaryContainer = Black900,
+    // FilledTonalIconButton icon
+    onSecondaryContainer = White,
+
+    // OutlinedButton container
+    outlineVariant = Gray500,
+    // OutlinedButton title|icon (radio button, unselected)
+    onSurfaceVariant = White,
+
+
+    // Assist chip.
+    // Assist chip title (only warning) ----->
+    onTertiary = Yellow200,
+    // Assist chip icon; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    onTertiaryFixedVariant = Yellow500,
+    // Assist chip background; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    tertiaryFixed = Brown900,
+    // Assist chip icon (only error) ----->
+    tertiaryFixedDim = Red500,
+    // Assist chip title
+    tertiaryContainer = Red300,
+    // Assist chip background
+    onTertiaryFixed = Red900,
+
+    // Radio Button unselected; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    onPrimaryFixedVariant = Gray900,
+
+    // Slider inactive track; ИСПОЛЬЗУЮ РАНДОМНЫЙ
+    inverseOnSurface = Gray400,
+    // SeeAllSelectedDevicesModalSheet SN
+    surfaceTint = Gray600,
+    //Divider
+    surfaceDim = Gray450,
+    // arrow right go to action
+    inverseSurface = White,
+    onTertiaryContainer = White50
+
 )
+val ButtonHeight = 48.dp
+
 
 @Composable
 fun PassPointTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
         darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        else -> WhiteColorScheme
     }
 
     MaterialTheme(
