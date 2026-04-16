@@ -182,7 +182,9 @@ fun SignInView(controller: NavHostController, viewModel: SingInViewModel = hiltV
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         TextButton(
-                            onClick = {}
+                            onClick = {
+                                controller.navigate(NavigationRoutes.CHANGEPASSWORD)
+                            }
                         ) {
                             Text("Забыли пароль? ", color = if (isBusy) White50 else White60)
                         }

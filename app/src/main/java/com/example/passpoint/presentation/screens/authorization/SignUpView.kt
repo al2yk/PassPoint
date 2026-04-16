@@ -57,7 +57,6 @@ import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.White
 import com.example.passpoint.presentation.theme.White50
 import com.example.passpoint.presentation.theme.White60
-import com.example.passpoint.presentation.theme.White70
 import com.example.passpoint.presentation.theme.White90
 import com.example.passpoint.presentation.viewModel.SignUpViewModel
 
@@ -371,7 +370,7 @@ fun SignUpView(controller: NavController, viewModel: SignUpViewModel = hiltViewM
                     shape = MaterialTheme.shapes.small,
                 ) {
                     Text(
-                        "Зарегистрироваться",
+                        "Вход",
                         color = if (!isBusy) White else White50
                     )
                 }
@@ -387,7 +386,7 @@ fun SignUpView(controller: NavController, viewModel: SignUpViewModel = hiltViewM
                         .focusRequester(buttonFocusRequester)
                 ) {
                     Text(
-                        "Войти",
+                        "Зарегистрироваться",
                         color = if (!isBusy) BrandColor else BrandTonal200
                     )
                 }

@@ -2,8 +2,11 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
-import com.example.passpoint.data.dto.AuthResponse
+import com.example.passpoint.data.dto.NewPasswordResponse
+import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
+import com.example.passpoint.data.dto.VerifyOTPResponse
+import com.example.passpoint.data.dto.VerifyOTPdto
 import com.example.passpoint.data.mapper.Mapper
 import com.example.passpoint.data.remote.UserApi
 import com.example.passpoint.domain.UserRepository
@@ -12,7 +15,6 @@ import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.repository.Repository
 import java.util.UUID
 import javax.inject.Inject
-import kotlin.toString
 
 class UserRepositoryImpl @Inject constructor(
     private val userApi: UserApi
@@ -70,6 +72,48 @@ class UserRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             Log.e("ERROR SignIn", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun sendOTP(email: String) {
+        try {
+            val response = userApi.sendOTP(OTPRequest(email = email))
+            Log.d("Response sendOTP", response.toString())
+
+        } catch (e: Exception) {
+            Log.e("ERROR sendOTP", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun verifyOTP(
+        email: String,
+        token: String
+    ): Result<VerifyOTPResponse> {
+        return try {
+            val response = userApi.verifyOTP(VerifyOTPdto("email", email, token))
+            Log.d("Response verifyOTP", response.toString())
+            UserRepository.user_token = response.access_token
+            UserRepository.user_token?.let { Log.d("UserRepository.user_token", it) }
+            Result.Success(data = response)
+
+        } catch (e: Exception) {
+            Log.e("ERROR verifyOTP", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun newPassword(
+        email: String,
+        password: String
+    ): Result<NewPasswordResponse> {
+        return try {
+            val response = userApi.newPassword(AuthRequest(email = email, password = password))
+            Log.d("Response newPassword", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR newPassword", e.message.toString())
             Result.Failure(exception = Exception(e.message))
         }
     }

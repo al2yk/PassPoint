@@ -11,6 +11,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.passpoint.presentation.screens.authorization.SignInView
 import com.example.passpoint.presentation.screens.authorization.SignUpView
+import com.example.passpoint.presentation.screens.authorization.changePassword.ChangePasswordView
+import com.example.passpoint.presentation.screens.authorization.changePassword.otp.OTPVIew
+import com.example.passpoint.presentation.screens.authorization.changePassword.setpassword.SetPasswordView
+import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
 import com.example.passpoint.presentation.screens.splash.SplashView
 import com.example.passpoint.presentation.theme.Background
@@ -43,7 +47,18 @@ fun Navigation() {
                 composable(NavigationRoutes.SIGNUP) {
                     SignUpView(controller)
                 }
-
+                composable(NavigationRoutes.CHANGEPASSWORD) {
+                    ChangePasswordView(controller)
+                }
+                composable(NavigationRoutes.OTP) {
+                    OTPVIew(controller)
+                }
+                composable(NavigationRoutes.SETPASSWORD) {
+                    SetPasswordView(controller)
+                }
+                composable(NavigationRoutes.MAIN) {
+                    MainView(controller)
+                }
             }
         }
     }

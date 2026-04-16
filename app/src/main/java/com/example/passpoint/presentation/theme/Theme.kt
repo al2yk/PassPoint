@@ -1,13 +1,9 @@
 package com.example.passpoint.presentation.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 val WhiteColorScheme = lightColorScheme(
@@ -70,6 +66,7 @@ val WhiteColorScheme = lightColorScheme(
     inverseSurface = Gray800,
     onTertiaryContainer = White50,
     outline = White70,
+
 )
 val DarkColorScheme = lightColorScheme(
     // Button Color; leading icon in the chips;
@@ -129,7 +126,8 @@ val DarkColorScheme = lightColorScheme(
     // arrow right go to action
     inverseSurface = White,
     onTertiaryContainer = White50,
-    outline = White70
+    outline = White70,
+
 )
 val ButtonHeight = 48.dp
 
