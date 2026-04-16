@@ -3,6 +3,7 @@ package com.example.passpoint.data.repository
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.NewPasswordResponse
+import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
@@ -41,7 +42,8 @@ class UserRepositoryImpl @Inject constructor(
                 user_id = response.user.id,
                 name = name,
                 surname = surname,
-                role = 1
+                role = 1,
+                photo = ""
             )
             Log.d("UserDTO signUp", userDto.toString())
 
@@ -114,6 +116,27 @@ class UserRepositoryImpl @Inject constructor(
             Result.Success(data = response)
         } catch (e: Exception) {
             Log.e("ERROR newPassword", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+    override suspend fun getProfile(userId: String): Result<List<User>> {
+        return try {
+            val response = userApi.getProfile("eq.$userId")
+            Log.d("Response getProfile", response.toString())
+           Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getProfile", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getNews(): Result<List<News>> {
+        return try {
+            val response = userApi.getNews()
+            Log.d("Response getNews", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getNews", e.message.toString())
             Result.Failure(exception = Exception(e.message))
         }
     }

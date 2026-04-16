@@ -81,4 +81,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

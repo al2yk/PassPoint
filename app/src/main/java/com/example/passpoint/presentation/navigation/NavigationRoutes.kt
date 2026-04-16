@@ -6,6 +6,8 @@ object NavigationRoutes  {
     const val SIGNIN ="sign in"
     const val SIGNUP ="sign up"
     const val MAIN ="main"
+    const val PROFILE ="PROFILE"
+    const val MINE ="MINE"
     const val CHANGEPASSWORD ="change password"
     const val OTP ="OTP"
     const val SETPASSWORD ="set password"

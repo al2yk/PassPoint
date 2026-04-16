@@ -1,0 +1,349 @@
+package com.example.passpoint.presentation.screens.main
+
+import android.util.Log
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
+import com.example.passpoint.R
+import com.example.passpoint.domain.UserRepository
+import com.example.passpoint.presentation.components.AboutProgramDialog
+import com.example.passpoint.presentation.components.LogOutDialog
+import com.example.passpoint.presentation.components.SpacerHeight
+import com.example.passpoint.presentation.components.SpacerWidth
+import com.example.passpoint.presentation.navigation.NavigationRoutes
+import com.example.passpoint.presentation.theme.AppTheme
+import com.example.passpoint.presentation.theme.BrandColor
+import com.example.passpoint.presentation.theme.ButtonHeight
+import com.example.passpoint.presentation.theme.Gray350
+import com.example.passpoint.presentation.theme.Gray400
+import com.example.passpoint.presentation.theme.Gray500
+import com.example.passpoint.presentation.theme.Gray800
+import com.example.passpoint.presentation.viewModel.ProfileViewModel
+
+@Composable
+fun ProfileView(
+    controller: NavHostController,
+    innerPadding: PaddingValues,
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
+    val state = viewModel.state
+    val currentTheme by viewModel.currentTheme.collectAsState()
+    var showAboutDialog by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
+    val role = when(state.role){
+        1-> "Участник"
+        2-> "Куратор"
+        3-> "Администратор"
+        else -> "Участник"
+    }
+    Box(
+        modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+    ) {
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                .verticalScroll(rememberScrollState())
+        ) {
+            SpacerHeight(8)
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                //Фото
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp, horizontal = 18.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(CircleShape)
+                            .background(Gray350)
+                    ) {
+                        Log.e("photo",state.photo)
+                        // Фото пользователя
+                        val imgState = rememberAsyncImagePainter(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(state.photo)
+                                .size(Size.ORIGINAL).build()
+                        ).state
+                        if (imgState is AsyncImagePainter.State.Error) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .fillMaxSize(0.85f)
+                                    .align(Alignment.Center),
+                                tint = Gray800
+                            )
+                        }
+                        if (imgState is AsyncImagePainter.State.Success) {
+                            Image(
+                                modifier = Modifier
+                                    .fillMaxWidth(1f)
+                                    .clip(RoundedCornerShape(15.dp)),
+                                painter = imgState.painter,
+                                contentDescription = "",
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                    }
+                    SpacerHeight(6)
+                    Text(
+                        text = "${state.name} ${state.surname}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(horizontal = 2.dp)
+                    )
+                }
+
+                Row(modifier = Modifier.padding(start = 16.dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.badge_24dp),
+                        contentDescription = null,
+                        tint = Gray500,
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    SpacerWidth(12)
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "Статус",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Gray500
+                        )
+                        Text(
+                            role,
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+                SpacerHeight(15)
+                Row(modifier = Modifier.padding(start = 16.dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.mail_24dp),
+                        contentDescription = null,
+                        tint = Gray500,
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    SpacerWidth(12)
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "Email",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Gray500
+                        )
+                        Text(
+                            state.email,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+
+                SpacerHeight(15)
+                Row(modifier = Modifier.padding(start = 16.dp)) {
+                    Icon(
+                        painter = painterResource(R.drawable.article_24dp),
+                        contentDescription = null,
+                        tint = Gray500,
+                        modifier = Modifier.size(20.dp)
+                    )
+
+                    SpacerWidth(12)
+                    Column {
+                        Text(
+                            "Мои сертификаты",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Gray500
+                        )
+                        Text(
+                            "0",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+                SpacerHeight(10)
+            }
+            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                Text("Тема", style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(top = 10.dp, start = 20.dp))
+                SpacerHeight(16)
+                AppTheme.entries.forEach { themeOption ->
+                    val title = when (themeOption) {
+                        AppTheme.SYSTEM -> "Как в системе"
+                        AppTheme.LIGHT -> "Светлая"
+                        AppTheme.DARK -> "Тёмная"
+                    }
+                    val interactionSource = remember { MutableInteractionSource() }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(ButtonHeight)
+                            .selectable(
+                                selected = (currentTheme == themeOption),
+                                onClick = { viewModel.onThemeSelected(themeOption) },
+                                role = Role.RadioButton,
+                                interactionSource = interactionSource,
+                                indication = ripple(color = MaterialTheme.colorScheme.primary)
+                            )
+                            .padding(horizontal = 20.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (currentTheme == themeOption),
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(
+                                unselectedColor = Gray400
+                            )
+                        )
+                        SpacerWidth(10)
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                SpacerHeight(10)
+            }
+
+            ElevatedCard(
+                modifier = Modifier.height(100.dp),
+            ) {
+                Button(
+                    onClick = { showAboutDialog = true }, shape = RectangleShape,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.info_24dp),
+                            contentDescription = "",
+                            modifier = Modifier.size(20.dp),
+                            tint = Gray500
+                        )
+                        SpacerWidth(12)
+                        Text(
+                            text = "О программе",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Button(
+                    onClick = { showLogoutDialog = true }, shape = RectangleShape,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.logout_24dp),
+                            contentDescription = "",
+                            modifier = Modifier.size(20.dp),
+                            tint = BrandColor
+                        )
+                        SpacerWidth(12)
+                        Text(
+                            text = "Выйти",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = BrandColor
+                        )
+                    }
+                }
+            }
+            SpacerHeight(8)
+            if (showAboutDialog) {
+                AboutProgramDialog(onDismiss = { showAboutDialog = false })
+            }
+            if (showLogoutDialog) {
+                LogOutDialog(
+                    onDismiss = { showLogoutDialog = false },
+                    onConfirm = {
+                        showLogoutDialog = false
+                        UserRepository.act = 1
+                        controller.navigate(NavigationRoutes.SIGNIN) { popUpTo(0) }
+                    }
+                )
+            }
+        }
+    }
+}
