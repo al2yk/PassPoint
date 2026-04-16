@@ -16,6 +16,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.R
 import com.example.passpoint.presentation.components.SpacerWidth
+import com.example.passpoint.presentation.viewModel.SplashViewModel
 
 @Composable
 fun SplashView(controller: NavHostController, viewModel: SplashViewModel = hiltViewModel()) {

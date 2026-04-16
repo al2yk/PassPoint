@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.screens.splash
+package com.example.passpoint.presentation.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

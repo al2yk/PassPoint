@@ -1,0 +1,120 @@
+package com.example.passpoint.data.repository
+
+import android.util.Log
+import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.NewPasswordResponse
+import com.example.passpoint.data.dto.OTPRequest
+import com.example.passpoint.data.dto.User
+import com.example.passpoint.data.dto.VerifyOTPResponse
+import com.example.passpoint.data.dto.VerifyOTPdto
+import com.example.passpoint.data.mapper.Mapper
+import com.example.passpoint.data.remote.UserApi
+import com.example.passpoint.domain.UserRepository
+import com.example.passpoint.domain.model.AuthResponseModel
+import com.example.passpoint.domain.model.Result
+import com.example.passpoint.domain.repository.Repository
+import java.util.UUID
+import javax.inject.Inject
+
+class UserRepositoryImpl @Inject constructor(
+    private val userApi: UserApi
+) : Repository {
+    override suspend fun signUp(
+        name: String,
+        email: String,
+        password: String,
+        surname: String
+    ): Result<AuthResponseModel> {
+        return try {
+            val response = userApi.signUp(AuthRequest(email, password))
+            Log.d("Response signUp", response.toString())
+
+            UserRepository.user_token = response.access_token
+            UserRepository.email = email
+
+            val authData = Mapper.mapToDomain(response)
+            Log.d("AuthData signUp", authData.toString())
+
+            val userDto = User(
+                id = UUID.randomUUID(),
+                email = email,
+                user_id = response.user.id,
+                name = name,
+                surname = surname,
+                role = 1
+            )
+            Log.d("UserDTO signUp", userDto.toString())
+
+            userApi.createUser(userDto)
+
+            Result.Success(data = authData)
+        } catch (e: Exception) {
+            Log.e("ERROR", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+
+    override suspend fun signIn(
+        email: String,
+        password: String
+    ): Result<AuthResponseModel> {
+        return try {
+            val response = userApi.signIn(AuthRequest(email, password))
+            Log.d("Response signIn", response.toString())
+
+            if (response.access_token == null) {
+                return Result.Failure(exception = Exception("Ошибка Авторизации"))
+            }
+            UserRepository.user_token = response.access_token
+            val authData = Mapper.mapToDomain(response)
+            Result.Success(data = authData)
+
+        } catch (e: Exception) {
+            Log.e("ERROR SignIn", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun sendOTP(email: String) {
+        try {
+            val response = userApi.sendOTP(OTPRequest(email = email))
+            Log.d("Response sendOTP", response.toString())
+
+        } catch (e: Exception) {
+            Log.e("ERROR sendOTP", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun verifyOTP(
+        email: String,
+        token: String
+    ): Result<VerifyOTPResponse> {
+        return try {
+            val response = userApi.verifyOTP(VerifyOTPdto("email", email, token))
+            Log.d("Response verifyOTP", response.toString())
+            UserRepository.user_token = response.access_token
+            UserRepository.user_token?.let { Log.d("UserRepository.user_token", it) }
+            Result.Success(data = response)
+
+        } catch (e: Exception) {
+            Log.e("ERROR verifyOTP", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun newPassword(
+        email: String,
+        password: String
+    ): Result<NewPasswordResponse> {
+        return try {
+            val response = userApi.newPassword(AuthRequest(email = email, password = password))
+            Log.d("Response newPassword", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR newPassword", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+}
