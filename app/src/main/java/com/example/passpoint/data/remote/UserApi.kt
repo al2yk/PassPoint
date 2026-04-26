@@ -4,6 +4,7 @@ import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.AuthResponse
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
+import com.example.passpoint.data.dto.NewsCategory
 import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
@@ -32,4 +33,6 @@ interface UserApi {
     suspend fun getProfile(@Query("user_id") userId: String): List<User>
     @GET("/rest/v1/news?select=*")
     suspend fun getNews():  List<News>
+    @GET("/rest/v1/newsCategory?select=*")
+    suspend fun getCategory():  List<NewsCategory>
 }

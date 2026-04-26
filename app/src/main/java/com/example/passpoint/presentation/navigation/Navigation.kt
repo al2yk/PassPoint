@@ -14,10 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.passpoint.R
 import com.example.passpoint.presentation.components.BottomMenu
 import com.example.passpoint.presentation.components.MainEnum
@@ -29,35 +31,64 @@ import com.example.passpoint.presentation.screens.authorization.changePassword.s
 import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.main.MineView
 import com.example.passpoint.presentation.screens.main.ProfileView
+import com.example.passpoint.presentation.screens.main.news.NewsDetailView
+import com.example.passpoint.presentation.screens.main.news.NewsView
+import com.example.passpoint.presentation.screens.nointernet.NoInternetView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
 import com.example.passpoint.presentation.screens.splash.SplashView
-import com.example.passpoint.presentation.theme.Background
 import com.example.passpoint.presentation.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Navigation() {
+fun Navigation(isOnline: Boolean) {
     val controller = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Определяем, нужно ли показывать TopBar и BottomBar
-    val isMainScreen = currentRoute in setOf(
+    // Экраны с верхним и нижним баром
+    val screensWithBottomBar = setOf(
         NavigationRoutes.MAIN,
         NavigationRoutes.PROFILE,
         NavigationRoutes.MINE
     )
 
+    // Экраны только с верхним баром (без нижнего) — точное совпадение
+    val screensWithTopBarOnly = setOf(
+        NavigationRoutes.NEWS
+    )
+
+    // Проверка, является ли текущий маршрут детальным экраном новости
+    val isNewsDetail = currentRoute?.startsWith(NavigationRoutes.NEWS_DETAIL) == true
+
+    val showBottomBar = isOnline && currentRoute in screensWithBottomBar
+    val showTopBar = isOnline && (
+            currentRoute in screensWithBottomBar ||
+                    currentRoute in screensWithTopBarOnly ||
+                    isNewsDetail
+            )
+
     Scaffold(
         topBar = {
-            if (isMainScreen) {
+            if (showTopBar) {
                 TopAppBar(
-                    title = { Text(getTitleForRoute(currentRoute), color = White) },
+                    title = { Text(getTitleForRoute(currentRoute, isNewsDetail), color = White) },
                     navigationIcon = {
-                        if (currentRoute != NavigationRoutes.MAIN && currentRoute != NavigationRoutes.PROFILE && currentRoute != NavigationRoutes.MINE) {
+                        // Показываем кнопку "Назад", если это не главные экраны и не экран входа
+                        if (currentRoute != NavigationRoutes.MAIN &&
+                            currentRoute != NavigationRoutes.PROFILE &&
+                            currentRoute != NavigationRoutes.MINE &&
+                            !isNewsDetail
+                        ) {
+                            // Для NEWS_DETAIL кнопка назад всё равно нужна, поэтому условие исправлено
+                        }
+                        // Нужно показывать кнопку назад на всех экранах, кроме MAIN, PROFILE, MINE
+                        if (currentRoute != NavigationRoutes.MAIN &&
+                            currentRoute != NavigationRoutes.PROFILE &&
+                            currentRoute != NavigationRoutes.MINE
+                        ) {
                             IconButton(onClick = { controller.navigateUp() }) {
                                 Icon(
-                                    painter = painterResource(R.drawable.arrow_back_24dp), // добавьте свою иконку
+                                    painter = painterResource(R.drawable.arrow_back_24dp),
                                     contentDescription = "Назад",
                                     tint = White
                                 )
@@ -71,27 +102,25 @@ fun Navigation() {
             }
         },
         bottomBar = {
-            if (isMainScreen) {
+            if (showBottomBar) {
                 BottomMenu(
                     selectedScreen = mapRouteToMainEnum(currentRoute),
                     onItemSelected = { selectedEnum ->
                         val route = mapMainEnumToRoute(selectedEnum)
                         controller.navigate(route) {
-                            // Очищаем стек до стартового пункта назначения
                             popUpTo(controller.graph.findStartDestination().id) {
                                 saveState = true
                             }
-                            // Избегаем множественных копий одного и того же назначения
                             launchSingleTop = true
-                            // Восстанавливаем состояние, если оно было сохранено
                             restoreState = true
                         }
                     }
                 )
             }
-        }
+        },
+        modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        Background(modifier = Modifier.fillMaxSize()) {
+        if (isOnline) {
             NavHost(
                 startDestination = NavigationRoutes.SPLASH,
                 navController = controller,
@@ -127,17 +156,32 @@ fun Navigation() {
                 composable(NavigationRoutes.PROFILE) {
                     ProfileView(controller, innerPadding)
                 }
+                composable(NavigationRoutes.NEWS) {
+                    NewsView(controller, innerPadding)
+                }
+                composable(
+                    route = NavigationRoutes.NEWS_DETAIL + "?newsId={newsId}",
+                    arguments = listOf(navArgument("newsId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val newsId = backStackEntry.arguments?.getInt("newsId") ?: -1
+                    NewsDetailView(innerPadding)
+                }
             }
+        } else {
+            NoInternetView()
         }
     }
 }
 
-private fun getTitleForRoute(route: String?): String = when (route) {
-    NavigationRoutes.MAIN -> "PassPoint"
-    NavigationRoutes.PROFILE -> "Профиль"
-    NavigationRoutes.MINE -> "Моё"
+private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = when {
+    route == NavigationRoutes.MAIN -> "PassPoint"
+    route == NavigationRoutes.PROFILE -> "Профиль"
+    route == NavigationRoutes.MINE -> "Моё"
+    route == NavigationRoutes.NEWS -> "Новости"
+    isNewsDetail -> "Новость"
     else -> "PassPoint"
 }
+
 private fun mapRouteToMainEnum(route: String?): MainEnum = when (route) {
     NavigationRoutes.PROFILE -> MainEnum.PROFILE
     NavigationRoutes.MAIN -> MainEnum.HOME
@@ -145,7 +189,6 @@ private fun mapRouteToMainEnum(route: String?): MainEnum = when (route) {
     else -> MainEnum.HOME
 }
 
-/** Преобразует элемент BottomMenu в маршрут для навигации */
 private fun mapMainEnumToRoute(enum: MainEnum): String = when (enum) {
     MainEnum.PROFILE -> NavigationRoutes.PROFILE
     MainEnum.HOME -> NavigationRoutes.MAIN

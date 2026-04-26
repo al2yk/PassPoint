@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
+import com.example.passpoint.data.dto.NewsCategory
 import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
@@ -137,6 +138,17 @@ class UserRepositoryImpl @Inject constructor(
             Result.Success(data = response)
         } catch (e: Exception) {
             Log.e("ERROR getNews", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getCategory(): Result<List<NewsCategory>> {
+        return try {
+            val response = userApi.getCategory()
+            Log.d("Response getCategory", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getCategory", e.message.toString())
             Result.Failure(exception = Exception(e.message))
         }
     }

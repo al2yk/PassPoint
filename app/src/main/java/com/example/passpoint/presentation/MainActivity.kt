@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.example.passpoint.domain.UserRepository
+import com.example.passpoint.domain.utils.AndroidNetworkMonitor
 import com.example.passpoint.presentation.navigation.Navigation
 import com.example.passpoint.presentation.theme.AppTheme
 import com.example.passpoint.presentation.theme.PassPointTheme
@@ -21,16 +22,27 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var themeManager: ThemeManager
 
+    private lateinit var networkMonitor: AndroidNetworkMonitor
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        networkMonitor = AndroidNetworkMonitor(this)
+
         setContent {
+            val isOnline by networkMonitor.isConnected.collectAsState(initial = false)
             val theme by themeManager.themeFlow.collectAsState(initial = AppTheme.SYSTEM)
+
             PassPointTheme(selectedTheme = theme) {
-                val context = LocalContext.current
-                UserRepository.init(context)
-                Navigation()
+                UserRepository.init(this)
+                Navigation(isOnline = isOnline)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        networkMonitor.unregister()
     }
 }

@@ -11,4 +11,6 @@ object NavigationRoutes  {
     const val CHANGEPASSWORD ="change password"
     const val OTP ="OTP"
     const val SETPASSWORD ="set password"
+    const val NEWS ="News"
+    const val NEWS_DETAIL = "news_detail"
 }

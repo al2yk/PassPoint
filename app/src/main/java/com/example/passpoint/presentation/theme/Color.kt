@@ -4,8 +4,8 @@ import androidx.compose.ui.graphics.Color
 
 val BrandColor= Color(0xFFFF5A00)
 val BrandColor50 = Color(0x80FF5A00)
-val Brand50= Color(0xFFFFF2EB)
-val BrandTonal50= Color(0xFFF6E9E3)
+val Brand50 = Color(0xFFFFF2EB)
+val BrandTonal50 = Color(0xFFF6E9E3)
 val BrandTonal200 = Color(0xFFFFB086)
 
 val White = Color(0xFFFFFFFF)

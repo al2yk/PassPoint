@@ -68,8 +68,8 @@ val WhiteColorScheme = lightColorScheme(
     outline = White70,
     surfaceBright = Brand50,
     surfaceVariant = BrandColor,
-    onErrorContainer = BrandColor
-
+    onErrorContainer = BrandColor,
+    inversePrimary = Brand50
 )
 val DarkColorScheme = lightColorScheme(
     // Button Color; leading icon in the chips;
@@ -132,7 +132,8 @@ val DarkColorScheme = lightColorScheme(
     outline = White70,
     surfaceBright = Gray400,
     surfaceVariant = Black900,
-    onErrorContainer = White
+    onErrorContainer = White,
+    inversePrimary = Brand50
 
 
 )

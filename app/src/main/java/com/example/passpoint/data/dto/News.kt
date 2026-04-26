@@ -5,5 +5,6 @@ data class News(
     val title: String,
     val new_text: String,
     val photo: String,
-    val news_category: Int
+    val news_category: Int,
+    val create: String
 )
