@@ -152,4 +152,15 @@ class UserRepositoryImpl @Inject constructor(
             Result.Failure(exception = Exception(e.message))
         }
     }
+
+    override suspend fun getCurators(): Result<List<User>> {
+        return try {
+            val response = userApi.getCurators("eq.2")
+            Log.d("Response getCurators", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getCurators", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
 }

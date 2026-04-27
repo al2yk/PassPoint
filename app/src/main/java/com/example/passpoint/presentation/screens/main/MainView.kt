@@ -2,6 +2,7 @@ package com.example.passpoint.presentation.screens.main
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,11 +11,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,6 +39,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.passpoint.R
+import com.example.passpoint.presentation.components.CuratorItem
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.BrandColor
@@ -103,9 +108,14 @@ fun MainView(
             }
 
             else -> {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                ) {
                     SpacerHeight(8)
                     val new = state.news.lastOrNull()
+                    // NEWS
                     ElevatedCard {
                         Column(
                             modifier = Modifier
@@ -181,6 +191,58 @@ fun MainView(
                             }
                         }
                     }
+                    SpacerHeight(8)
+                    // CURATORS
+                    ElevatedCard {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text("Наши кураторы", style = MaterialTheme.typography.headlineSmall)
+                            SpacerHeight(16)
+
+                            if (state.curators.isEmpty()) {
+                                Text(
+                                    text = "Кураторы не найдены",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Gray600
+                                )
+                            } else {
+                                val rows = state.curators.chunked(2)
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    rows.forEachIndexed { index, row ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            row.forEach { curator ->
+                                                Box(modifier = Modifier.weight(1f)) {
+                                                    CuratorItem(curator = curator)
+                                                }
+                                            }
+                                            if (row.size == 1) {
+                                                Box(modifier = Modifier.weight(1f))
+                                            }
+                                        }
+                                        if (index < rows.lastIndex) {
+                                            HorizontalDivider(
+                                                modifier = Modifier.padding(vertical = 8.dp),
+                                                thickness = 1.dp,
+                                                color = MaterialTheme.colorScheme.outlineVariant.copy(
+                                                    alpha = 0.2f
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    SpacerHeight(8)
                 }
             }
         }

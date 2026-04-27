@@ -35,4 +35,6 @@ interface UserApi {
     suspend fun getNews():  List<News>
     @GET("/rest/v1/newsCategory?select=*")
     suspend fun getCategory():  List<NewsCategory>
+    @GET("/rest/v1/users?select=*")
+    suspend fun getCurators(@Query("role") role: String): List<User>
 }

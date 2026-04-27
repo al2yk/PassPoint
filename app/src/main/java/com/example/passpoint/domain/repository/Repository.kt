@@ -17,4 +17,5 @@ interface Repository {
     suspend fun getProfile(userId: String): Result<List<User>>
     suspend fun getNews(): Result<List<News>>
     suspend fun getCategory(): Result<List<NewsCategory>>
+    suspend fun getCurators(): Result<List<User>>
 }

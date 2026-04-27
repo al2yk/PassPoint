@@ -136,7 +136,7 @@ fun NewsView(
                             }
                         }
                     }
-                    SpacerHeight(16)
+                    SpacerHeight(8)
                     LazyColumn {
                         if (filteredNews.isEmpty()) {
                             item {
@@ -167,14 +167,18 @@ fun NewsView(
                                             placeholder = painterResource(R.drawable.nophoto),
                                             error = painterResource(R.drawable.nophoto)
                                         )
-                                        Image(
+                                        Box(
                                             modifier = Modifier
                                                 .size(120.dp)
-                                                .clip(RoundedCornerShape(20.dp)),
-                                            painter = painter,
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Crop
-                                        )
+                                                .clip(RoundedCornerShape(20.dp))
+                                        ) {
+                                            Image(
+                                                modifier = Modifier.fillMaxSize(),
+                                                painter = painter,
+                                                contentDescription = "",
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
