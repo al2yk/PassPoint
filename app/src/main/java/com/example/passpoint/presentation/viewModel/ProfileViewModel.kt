@@ -17,12 +17,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.presentation.screens.main.ProfileState
-import kotlin.toString
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val themeManager: ThemeManager,
-    private val getProfilee: GetProfileUseCase
+    private val getProfileUseCase: GetProfileUseCase
 ) : ViewModel() {
 
     private val _currentTheme = MutableStateFlow<AppTheme>(AppTheme.SYSTEM)
@@ -31,15 +30,13 @@ class ProfileViewModel @Inject constructor(
     private val _state = mutableStateOf(ProfileState())
     val state: ProfileState get() = _state.value
 
-    fun updatestate(newstate: ProfileState) {
-        _state.value = newstate
-    }
     init {
         viewModelScope.launch {
             themeManager.themeFlow.collect { theme ->
                 _currentTheme.value = theme
             }
         }
+        loadProfile()
     }
 
     fun onThemeSelected(theme: AppTheme) {
@@ -47,33 +44,47 @@ class ProfileViewModel @Inject constructor(
             themeManager.saveTheme(theme)
         }
     }
-    init {
-        getProfile()
+
+    fun retry() {
+        loadProfile()
     }
 
-    fun getProfile() {
+    private fun loadProfile() {
         viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                when (val result = getProfilee.invoke(UserRepository.ID)) {
+                when (val result = getProfileUseCase.invoke(UserRepository.ID)) {
                     is Result.Failure -> {
-                        Log.e("fail", result.toString())
+                        val message = result.exception.message ?: "Ошибка загрузки профиля"
+                        _state.value = _state.value.copy(isLoading = false, error = message)
                     }
-
                     is Result.Success<List<User>> -> {
-                        val user = result.data[0]
-
-                        _state.value = _state.value.copy(
-                            name = user.name,
-                            surname = user.surname,
-                            email = user.email,
-                            photo = user.photo,
-                            role = user.role
-                        )
-                        Log.e("Огонь", "получен профиль")
+                        val users = result.data
+                        if (users.isEmpty()) {
+                            _state.value = _state.value.copy(
+                                isLoading = false,
+                                error = "Профиль не найден"
+                            )
+                        } else {
+                            val user = users.first()
+                            _state.value = _state.value.copy(
+                                name = user.name,
+                                surname = user.surname,
+                                email = user.email,
+                                photo = user.photo,
+                                role = user.role,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
                     }
                 }
             } catch (e: Exception) {
-                Log.d("не получен профиль", e.toString())
+                Log.e("ProfileViewModel", "Ошибка загрузки профиля", e)
+                _state.value = _state.value.copy(
+                    isLoading = false,
+                    error = e.message ?: "Неизвестная ошибка"
+                )
             }
         }
     }

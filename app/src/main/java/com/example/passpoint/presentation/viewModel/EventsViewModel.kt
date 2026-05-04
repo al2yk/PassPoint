@@ -6,71 +6,65 @@ import androidx.lifecycle.viewModelScope
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.*
-import com.example.passpoint.presentation.screens.main.ConfirmAction
-import com.example.passpoint.presentation.screens.main.ConfirmDialogState
-import com.example.passpoint.presentation.screens.main.MainState
+import com.example.passpoint.presentation.screens.main.events.ConfirmAction
+import com.example.passpoint.presentation.screens.main.events.ConfirmDialogState
+import com.example.passpoint.presentation.screens.main.events.EventsState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    private val getNewsUseCase: GetNewsUseCase,
+class EventsViewModel @Inject constructor(
     private val getEventsUseCase: GetEventsUseCase,
-    private val getCuratorsUseCase: GetCuratorsUseCase,
     private val getUserRegistrationsUseCase: GetUserEventRegistrationsUseCase,
     private val registerForEventUseCase: RegisterForEventUseCase,
     private val unregisterFromEventUseCase: UnregisterFromEventUseCase
 ) : ViewModel() {
 
-    private val _state = mutableStateOf(MainState())
-    val state: MainState get() = _state.value
+    private val _state = mutableStateOf(EventsState())
+    val state: EventsState get() = _state.value
 
     init {
-        loadAllData()
+        loadEventsAndRegistrations()
     }
 
     fun retry() {
-        loadAllData()
+        loadEventsAndRegistrations()
     }
 
-    private fun loadAllData() {
+    private fun loadEventsAndRegistrations() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
-            val newsDeferred = async { getNewsUseCase() }
-            val eventsDeferred = async { getEventsUseCase() }
-            val curatorsDeferred = async { getCuratorsUseCase() }
-            val registrationsDeferred = async { getUserRegistrationsUseCase(UserRepository.ID) }
+            val eventsResult = getEventsUseCase()
+            val registrationsResult = getUserRegistrationsUseCase(UserRepository.ID)
 
-            val newsResult = newsDeferred.await()
-            val eventsResult = eventsDeferred.await()
-            val curatorsResult = curatorsDeferred.await()
-            val registrationsResult = registrationsDeferred.await()
+            val error = when {
+                eventsResult is Result.Failure -> "Ошибка загрузки мероприятий"
+                registrationsResult is Result.Failure -> "Ошибка загрузки регистраций"
+                else -> null
+            }
 
-            var errorMessage: String? = null
-            if (newsResult is Result.Failure) errorMessage = "Ошибка загрузки новостей"
-            if (eventsResult is Result.Failure) errorMessage = "Ошибка загрузки мероприятий"
-            if (curatorsResult is Result.Failure) errorMessage = "Ошибка загрузки кураторов"
-            if (registrationsResult is Result.Failure) errorMessage = "Ошибка загрузки регистраций"
-
-            val news = (newsResult as? Result.Success)?.data ?: emptyList()
             val events = (eventsResult as? Result.Success)?.data ?: emptyList()
-            val curators = (curatorsResult as? Result.Success)?.data ?: emptyList()
             val registrations = (registrationsResult as? Result.Success)?.data ?: emptyList()
+            val today = LocalDate.now()
+            val upcoming = events.filter { event ->
+                runCatching { LocalDate.parse(event.date) >= today }.getOrDefault(false)
+            }
+            val past = events.filter { event ->
+                runCatching { LocalDate.parse(event.date) < today }.getOrDefault(false)
+            }
 
             _state.value = _state.value.copy(
                 isLoading = false,
-                error = errorMessage,
-                news = news,
-                events = events,
-                curators = curators,
+                error = error,
+                upcomingEvents = upcoming,
+                pastEvents = past,
                 registrations = registrations
             )
         }
     }
 
-    // === Диалог подтверждения ===
     fun showRegisterConfirm(eventId: Int) {
         _state.value = _state.value.copy(confirmDialog = ConfirmDialogState(eventId, ConfirmAction.REGISTER))
     }
@@ -87,21 +81,28 @@ class MainViewModel @Inject constructor(
         val dialog = _state.value.confirmDialog ?: return
         hideDialog()
         when (dialog.action) {
-            ConfirmAction.REGISTER -> registerForEvent(dialog.eventId)
-            ConfirmAction.UNREGISTER -> unregisterForEvent(dialog.eventId)
+            ConfirmAction.REGISTER -> register(dialog.eventId)
+            ConfirmAction.UNREGISTER -> unregister(dialog.eventId)
         }
     }
 
-    // === Регистрация/отмена ===
-    private fun registerForEvent(eventId: Int) {
+    fun showUpcoming() {
+        _state.value = _state.value.copy(isShowingPast = false)
+    }
+
+    fun showPast() {
+        _state.value = _state.value.copy(isShowingPast = true)
+    }
+
+    private fun register(eventId: Int) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             when (val result = registerForEventUseCase(eventId, UserRepository.ID)) {
                 is Result.Success -> {
                     val newReg = result.data
-                    val updated = _state.value.registrations + newReg
+                    val updatedRegistrations = _state.value.registrations + newReg
                     _state.value = _state.value.copy(
-                        registrations = updated,
+                        registrations = updatedRegistrations,
                         isRegistrationLoading = false
                     )
                 }
@@ -115,7 +116,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun unregisterForEvent(eventId: Int) {
+    private fun unregister(eventId: Int) {
         val reg = _state.value.registrations.find { it.event == eventId } ?: return
         viewModelScope.launch {
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)

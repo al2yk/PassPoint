@@ -21,9 +21,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
@@ -76,273 +78,308 @@ fun ProfileView(
     val currentTheme by viewModel.currentTheme.collectAsState()
     var showAboutDialog by remember { mutableStateOf(false) }
     var showLogoutDialog by remember { mutableStateOf(false) }
-    val role = when(state.role){
-        1-> "Участник"
-        2-> "Куратор"
-        3-> "Администратор"
+    val role = when (state.role) {
+        1 -> "Участник"
+        2 -> "Куратор"
+        3 -> "Администратор"
         else -> "Участник"
     }
+
     Box(
         modifier = Modifier
             .padding(innerPadding)
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
+        when {
+            state.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
-                .verticalScroll(rememberScrollState())
-        ) {
-            SpacerHeight(8)
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                //Фото
+            state.error != null -> {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 18.dp)
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Box(
+                    Text(text = state.error ?: "Ошибка", style = MaterialTheme.typography.bodyLarge)
+                    SpacerHeight(16)
+                    OutlinedButton(
+                        onClick = { viewModel.retry() },
                         modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape)
-                            .background(Gray350)
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp)
+                            .height(ButtonHeight),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Log.e("photo",state.photo)
-                        // Фото пользователя
-                        val imgState = rememberAsyncImagePainter(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(state.photo)
-                                .size(Size.ORIGINAL).build()
-                        ).state
-                        if (imgState is AsyncImagePainter.State.Error) {
+                        Text("Повторить")
+                    }
+                }
+            }
+
+            else -> {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    SpacerHeight(0)
+                    ElevatedCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        //Фото
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp, horizontal = 18.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .clip(CircleShape)
+                                    .background(Gray350)
+                            ) {
+                                Log.e("photo", state.photo)
+                                // Фото пользователя
+                                val imgState = rememberAsyncImagePainter(
+                                    model = ImageRequest.Builder(LocalContext.current)
+                                        .data(state.photo)
+                                        .size(Size.ORIGINAL).build()
+                                ).state
+                                if (imgState is AsyncImagePainter.State.Error) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
+                                        contentDescription = "",
+                                        modifier = Modifier
+                                            .fillMaxSize(0.85f)
+                                            .align(Alignment.Center),
+                                        tint = Gray800
+                                    )
+                                }
+                                if (imgState is AsyncImagePainter.State.Success) {
+                                    Image(
+                                        modifier = Modifier
+                                            .fillMaxWidth(1f)
+                                            .clip(RoundedCornerShape(15.dp)),
+                                        painter = imgState.painter,
+                                        contentDescription = "",
+                                        contentScale = ContentScale.Crop
+                                    )
+                                }
+                            }
+                            SpacerHeight(6)
+                            Text(
+                                text = "${state.name} ${state.surname}",
+                                style = MaterialTheme.typography.headlineSmall,
+                                modifier = Modifier.padding(horizontal = 2.dp)
+                            )
+                        }
+
+                        Row(modifier = Modifier.padding(start = 16.dp)) {
                             Icon(
-                                painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .fillMaxSize(0.85f)
-                                    .align(Alignment.Center),
-                                tint = Gray800
+                                painter = painterResource(R.drawable.badge_24dp),
+                                contentDescription = null,
+                                tint = Gray500,
+                                modifier = Modifier.size(20.dp)
                             )
+
+                            SpacerWidth(12)
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    "Статус",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray500
+                                )
+                                Text(
+                                    role,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
                         }
-                        if (imgState is AsyncImagePainter.State.Success) {
-                            Image(
-                                modifier = Modifier
-                                    .fillMaxWidth(1f)
-                                    .clip(RoundedCornerShape(15.dp)),
-                                painter = imgState.painter,
-                                contentDescription = "",
-                                contentScale = ContentScale.Crop
+                        SpacerHeight(15)
+                        Row(modifier = Modifier.padding(start = 16.dp)) {
+                            Icon(
+                                painter = painterResource(R.drawable.mail_24dp),
+                                contentDescription = null,
+                                tint = Gray500,
+                                modifier = Modifier.size(20.dp)
                             )
+
+                            SpacerWidth(12)
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Text(
+                                    "Email",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray500
+                                )
+                                Text(
+                                    state.email,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+
+                        SpacerHeight(15)
+                        Row(modifier = Modifier.padding(start = 16.dp)) {
+                            Icon(
+                                painter = painterResource(R.drawable.article_24dp),
+                                contentDescription = null,
+                                tint = Gray500,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            SpacerWidth(12)
+                            Column {
+                                Text(
+                                    "Мои сертификаты",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray500
+                                )
+                                Text(
+                                    "0",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                            }
+                        }
+                        SpacerHeight(10)
+                    }
+                    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "Тема", style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(top = 10.dp, start = 20.dp)
+                        )
+                        SpacerHeight(16)
+                        AppTheme.entries.forEach { themeOption ->
+                            val title = when (themeOption) {
+                                AppTheme.SYSTEM -> "Как в системе"
+                                AppTheme.LIGHT -> "Светлая"
+                                AppTheme.DARK -> "Тёмная"
+                            }
+                            val interactionSource = remember { MutableInteractionSource() }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(ButtonHeight)
+                                    .selectable(
+                                        selected = (currentTheme == themeOption),
+                                        onClick = { viewModel.onThemeSelected(themeOption) },
+                                        role = Role.RadioButton,
+                                        interactionSource = interactionSource,
+                                        indication = ripple(color = MaterialTheme.colorScheme.primary)
+                                    )
+                                    .padding(horizontal = 20.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = (currentTheme == themeOption),
+                                    onClick = null,
+                                    colors = RadioButtonDefaults.colors(
+                                        unselectedColor = Gray400
+                                    )
+                                )
+                                SpacerWidth(10)
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                        SpacerHeight(10)
+                    }
+
+                    ElevatedCard(
+                        modifier = Modifier.height(100.dp),
+                    ) {
+                        Button(
+                            onClick = { showAboutDialog = true }, shape = RectangleShape,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(ButtonHeight),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 16.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.info_24dp),
+                                    contentDescription = "",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = Gray500
+                                )
+                                SpacerWidth(12)
+                                Text(
+                                    text = "О программе",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                        Button(
+                            onClick = { showLogoutDialog = true }, shape = RectangleShape,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(ButtonHeight),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent
+                            ),
+                            contentPadding = PaddingValues(0.dp)
+
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 16.dp),
+                                horizontalArrangement = Arrangement.Start,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.logout_24dp),
+                                    contentDescription = "",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = BrandColor
+                                )
+                                SpacerWidth(12)
+                                Text(
+                                    text = "Выйти",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = BrandColor
+                                )
+                            }
                         }
                     }
-                    SpacerHeight(6)
-                    Text(
-                        text = "${state.name} ${state.surname}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(horizontal = 2.dp)
-                    )
-                }
-
-                Row(modifier = Modifier.padding(start = 16.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.badge_24dp),
-                        contentDescription = null,
-                        tint = Gray500,
-                        modifier = Modifier.size(20.dp)
-                    )
-
-                    SpacerWidth(12)
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            "Статус",
-                            style = MaterialTheme.typography.displaySmall,
-                            color = Gray500
-                        )
-                        Text(
-                            role,
-                            style = MaterialTheme.typography.bodyLarge,
+                    SpacerHeight(8)
+                    if (showAboutDialog) {
+                        AboutProgramDialog(onDismiss = { showAboutDialog = false })
+                    }
+                    if (showLogoutDialog) {
+                        LogOutDialog(
+                            onDismiss = { showLogoutDialog = false },
+                            onConfirm = {
+                                showLogoutDialog = false
+                                UserRepository.act = 1
+                                controller.navigate(NavigationRoutes.SIGNIN) { popUpTo(0) }
+                            }
                         )
                     }
                 }
-                SpacerHeight(15)
-                Row(modifier = Modifier.padding(start = 16.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.mail_24dp),
-                        contentDescription = null,
-                        tint = Gray500,
-                        modifier = Modifier.size(20.dp)
-                    )
-
-                    SpacerWidth(12)
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            "Email",
-                            style = MaterialTheme.typography.displaySmall,
-                            color = Gray500
-                        )
-                        Text(
-                            state.email,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-
-                SpacerHeight(15)
-                Row(modifier = Modifier.padding(start = 16.dp)) {
-                    Icon(
-                        painter = painterResource(R.drawable.article_24dp),
-                        contentDescription = null,
-                        tint = Gray500,
-                        modifier = Modifier.size(20.dp)
-                    )
-
-                    SpacerWidth(12)
-                    Column {
-                        Text(
-                            "Мои сертификаты",
-                            style = MaterialTheme.typography.displaySmall,
-                            color = Gray500
-                        )
-                        Text(
-                            "0",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
-                SpacerHeight(10)
-            }
-            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Тема", style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(top = 10.dp, start = 20.dp))
-                SpacerHeight(16)
-                AppTheme.entries.forEach { themeOption ->
-                    val title = when (themeOption) {
-                        AppTheme.SYSTEM -> "Как в системе"
-                        AppTheme.LIGHT -> "Светлая"
-                        AppTheme.DARK -> "Тёмная"
-                    }
-                    val interactionSource = remember { MutableInteractionSource() }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(ButtonHeight)
-                            .selectable(
-                                selected = (currentTheme == themeOption),
-                                onClick = { viewModel.onThemeSelected(themeOption) },
-                                role = Role.RadioButton,
-                                interactionSource = interactionSource,
-                                indication = ripple(color = MaterialTheme.colorScheme.primary)
-                            )
-                            .padding(horizontal = 20.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = (currentTheme == themeOption),
-                            onClick = null,
-                            colors = RadioButtonDefaults.colors(
-                                unselectedColor = Gray400
-                            )
-                        )
-                        SpacerWidth(10)
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-                SpacerHeight(10)
-            }
-
-            ElevatedCard(
-                modifier = Modifier.height(100.dp),
-            ) {
-                Button(
-                    onClick = { showAboutDialog = true }, shape = RectangleShape,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(ButtonHeight),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.info_24dp),
-                            contentDescription = "",
-                            modifier = Modifier.size(20.dp),
-                            tint = Gray500
-                        )
-                        SpacerWidth(12)
-                        Text(
-                            text = "О программе",
-                            style = MaterialTheme.typography.displaySmall,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                }
-                Button(
-                    onClick = { showLogoutDialog = true }, shape = RectangleShape,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(ButtonHeight),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(0.dp)
-
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.logout_24dp),
-                            contentDescription = "",
-                            modifier = Modifier.size(20.dp),
-                            tint = BrandColor
-                        )
-                        SpacerWidth(12)
-                        Text(
-                            text = "Выйти",
-                            style = MaterialTheme.typography.displaySmall,
-                            color = BrandColor
-                        )
-                    }
-                }
-            }
-            SpacerHeight(8)
-            if (showAboutDialog) {
-                AboutProgramDialog(onDismiss = { showAboutDialog = false })
-            }
-            if (showLogoutDialog) {
-                LogOutDialog(
-                    onDismiss = { showLogoutDialog = false },
-                    onConfirm = {
-                        showLogoutDialog = false
-                        UserRepository.act = 1
-                        controller.navigate(NavigationRoutes.SIGNIN) { popUpTo(0) }
-                    }
-                )
             }
         }
     }

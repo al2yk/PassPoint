@@ -2,6 +2,8 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.NewsCategory
@@ -120,11 +122,12 @@ class UserRepositoryImpl @Inject constructor(
             Result.Failure(exception = Exception(e.message))
         }
     }
+
     override suspend fun getProfile(userId: String): Result<List<User>> {
         return try {
             val response = userApi.getProfile("eq.$userId")
             Log.d("Response getProfile", response.toString())
-           Result.Success(data = response)
+            Result.Success(data = response)
         } catch (e: Exception) {
             Log.e("ERROR getProfile", e.message.toString())
             Result.Failure(exception = Exception(e.message))
@@ -161,6 +164,49 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("ERROR getCurators", e.message.toString())
             Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getEvent(): Result<List<Event>> {
+        return try {
+            val response = userApi.getEvents()
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getEvents", e.message.toString())
+            Result.Failure(exception = e)
+        }
+    }
+
+
+    override suspend fun registerForEvent(eventId: Int, userId: String): Result<EventRegistration> {
+        return try {
+
+            val registration = EventRegistration(user = userId, event = eventId)
+            val response = userApi.createEventRegistration(registration)
+            if (response.isNotEmpty()) {
+                Result.Success(response.first())
+            } else {
+                Result.Failure(Exception("Сервер вернул пустой ответ"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun unregisterFromEvent(registrationId: Long?) {
+        try {
+            userApi.deleteEventRegistration("eq.$registrationId")
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun getUserRegistrations(userId: String): Result<List<EventRegistration>> {
+        return try {
+            val response = userApi.getUserEventRegistrations("eq.$userId")
+            Result.Success(response)
+        } catch (e: Exception) {
+            Result.Failure(exception = e)
         }
     }
 }

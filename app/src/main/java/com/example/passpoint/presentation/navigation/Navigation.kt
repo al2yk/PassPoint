@@ -31,6 +31,8 @@ import com.example.passpoint.presentation.screens.authorization.changePassword.s
 import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.main.MineView
 import com.example.passpoint.presentation.screens.main.ProfileView
+import com.example.passpoint.presentation.screens.main.events.EventsView
+import com.example.passpoint.presentation.screens.main.events.PastEventsView
 import com.example.passpoint.presentation.screens.main.news.NewsDetailView
 import com.example.passpoint.presentation.screens.main.news.NewsView
 import com.example.passpoint.presentation.screens.nointernet.NoInternetView
@@ -54,7 +56,9 @@ fun Navigation(isOnline: Boolean) {
 
     // Экраны только с верхним баром (без нижнего) — точное совпадение
     val screensWithTopBarOnly = setOf(
-        NavigationRoutes.NEWS
+        NavigationRoutes.NEWS,
+        NavigationRoutes.EVENTS,
+        NavigationRoutes.PAST_EVENTS
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -166,6 +170,12 @@ fun Navigation(isOnline: Boolean) {
                     val newsId = backStackEntry.arguments?.getInt("newsId") ?: -1
                     NewsDetailView(innerPadding)
                 }
+                composable(NavigationRoutes.EVENTS) {
+                    EventsView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.PAST_EVENTS) {
+                    PastEventsView(controller = controller, innerPadding = innerPadding)
+                }
             }
         } else {
             NoInternetView()
@@ -179,6 +189,8 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.MINE -> "Моё"
     route == NavigationRoutes.NEWS -> "Новости"
     isNewsDetail -> "Новость"
+    route == NavigationRoutes.EVENTS -> "Мероприятия"
+    route == NavigationRoutes.PAST_EVENTS -> "Прошедшие мероприятия"
     else -> "PassPoint"
 }
 

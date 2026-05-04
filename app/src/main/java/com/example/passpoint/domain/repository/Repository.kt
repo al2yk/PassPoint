@@ -1,5 +1,7 @@
 package com.example.passpoint.domain.repository
 
+import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.NewsCategory
@@ -18,4 +20,8 @@ interface Repository {
     suspend fun getNews(): Result<List<News>>
     suspend fun getCategory(): Result<List<NewsCategory>>
     suspend fun getCurators(): Result<List<User>>
+    suspend fun getEvent(): Result<List<Event>>
+    suspend fun registerForEvent(eventId: Int, userId: String): Result<EventRegistration>
+    suspend fun unregisterFromEvent(registrationId: Long?)
+    suspend fun getUserRegistrations(userId: String): Result<List<EventRegistration>>
 }

@@ -2,6 +2,8 @@ package com.example.passpoint.data.remote
 
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.AuthResponse
+import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.NewsCategory
@@ -10,7 +12,9 @@ import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
 import com.example.passpoint.data.dto.VerifyOTPdto
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
@@ -37,4 +41,13 @@ interface UserApi {
     suspend fun getCategory():  List<NewsCategory>
     @GET("/rest/v1/users?select=*")
     suspend fun getCurators(@Query("role") role: String): List<User>
+    @GET("/rest/v1/events?select=*")
+    suspend fun getEvents(): List<Event>
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/event_registrations")
+    suspend fun createEventRegistration(@Body registration: EventRegistration): List<EventRegistration>
+    @DELETE("/rest/v1/event_registrations")
+    suspend fun deleteEventRegistration(@Query("id") idFilter: String)
+    @GET("/rest/v1/event_registrations?select=*")
+    suspend fun getUserEventRegistrations(@Query("user") userFilter: String): List<EventRegistration>
 }

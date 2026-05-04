@@ -42,7 +42,7 @@ fun CuratorItem(curator: User) {
             )
             Box(
                 modifier = Modifier
-                    .width(155.dp)
+                    .width(165.dp)
                     .height(165.dp)
                     .clip(RoundedCornerShape(20.dp)),
                 contentAlignment = Alignment.Center
@@ -63,7 +63,7 @@ fun CuratorItem(curator: User) {
         } else {
             Box(
                 modifier = Modifier
-                    .width(155.dp)
+                    .width(165.dp)
                     .height(165.dp)
                     .clip(RoundedCornerShape(20.dp)),
                 contentAlignment = Alignment.Center

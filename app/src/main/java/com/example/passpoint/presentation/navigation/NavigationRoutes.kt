@@ -13,4 +13,6 @@ object NavigationRoutes  {
     const val SETPASSWORD ="set password"
     const val NEWS ="News"
     const val NEWS_DETAIL = "news_detail"
+    const val EVENTS = "events"
+    const val PAST_EVENTS = "past_events"
 }

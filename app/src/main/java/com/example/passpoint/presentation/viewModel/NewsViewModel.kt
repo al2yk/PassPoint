@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.example.passpoint.data.dto.News
-import com.example.passpoint.data.dto.NewsCategory
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.GetCategoryUseCase
 import com.example.passpoint.domain.useCase.GetNewsUseCase
@@ -19,8 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewsViewModel @Inject constructor(
-    private val getNews: GetNewsUseCase,
-    private val getCategory: GetCategoryUseCase,
+    private val getNewsUseCase: GetNewsUseCase,
+    private val getCategoryUseCase: GetCategoryUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -30,12 +29,36 @@ class NewsViewModel @Inject constructor(
     private val imageLoader = ImageLoader.Builder(context).build()
 
     init {
-        retry()
+        loadData()
     }
 
     fun retry() {
-        getNews()
-        getCategory()
+        loadData()
+    }
+
+    private fun loadData() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true, error = null)
+            val newsResult = getNewsUseCase()
+            val categoryResult = getCategoryUseCase()
+
+            val error = when {
+                newsResult is Result.Failure -> "Ошибка загрузки новостей: ${newsResult.exception.message}"
+                categoryResult is Result.Failure -> "Ошибка загрузки категорий: ${categoryResult.exception.message}"
+                else -> null
+            }
+
+            val news = (newsResult as? Result.Success)?.data ?: emptyList()
+            val categories = (categoryResult as? Result.Success)?.data ?: emptyList()
+
+            _state.value = _state.value.copy(
+                isLoading = false,
+                error = error,
+                news = news,
+                category = categories
+            )
+            if (news.isNotEmpty()) preloadImages(news)
+        }
     }
 
     fun selectCategory(categoryId: Int) {
@@ -49,64 +72,6 @@ class NewsViewModel @Inject constructor(
                     .data(news.photo)
                     .build()
                 imageLoader.enqueue(request)
-            }
-        }
-    }
-
-    private fun getNews() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
-            try {
-                when (val result = getNews.invoke()) {
-                    is Result.Failure -> {
-                        _state.value = _state.value.copy(
-                            isLoading = false,
-                            error = "Не удалось загрузить новости"
-                        )
-                    }
-                    is Result.Success<List<News>> -> {
-                        val newsData = result.data
-                        preloadImages(newsData) // Предзагрузка
-                        _state.value = _state.value.copy(
-                            news = newsData,
-                            isLoading = false,
-                            error = if (state.category.isEmpty() && _state.value.error != null) _state.value.error else null
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = "Ошибка сети: ${e.message}"
-                )
-            }
-        }
-    }
-
-    private fun getCategory() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, error = null)
-            try {
-                when (val result = getCategory.invoke()) {
-                    is Result.Failure -> {
-                        _state.value = _state.value.copy(
-                            isLoading = false,
-                            error = "Не удалось загрузить категории"
-                        )
-                    }
-                    is Result.Success<List<NewsCategory>> -> {
-                        _state.value = _state.value.copy(
-                            category = result.data,
-                            isLoading = false,
-                            error = if (state.news.isEmpty() && _state.value.error != null) _state.value.error else null
-                        )
-                    }
-                }
-            } catch (e: Exception) {
-                _state.value = _state.value.copy(
-                    isLoading = false,
-                    error = "Ошибка сети: ${e.message}"
-                )
             }
         }
     }

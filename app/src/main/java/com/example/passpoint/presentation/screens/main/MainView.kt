@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,13 +41,17 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.passpoint.R
+import com.example.passpoint.domain.utils.formatDateRu
 import com.example.passpoint.presentation.components.CuratorItem
+import com.example.passpoint.presentation.components.OutlinedBrandButton
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.Gray600
+import com.example.passpoint.presentation.theme.White
 import com.example.passpoint.presentation.viewModel.MainViewModel
+import java.time.LocalDate
 
 @Composable
 fun MainView(
@@ -77,7 +83,7 @@ fun MainView(
                         .fillMaxSize()
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
                         text = state.error,
@@ -131,34 +137,40 @@ fun MainView(
                                     color = Gray600
                                 )
                                 SpacerHeight(10)
-                                val imgState = rememberAsyncImagePainter(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(new.photo)
-                                        .size(Size.ORIGINAL).build()
-                                ).state
-                                if (imgState is AsyncImagePainter.State.Error) {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
+
+                                if (new.photo.isNotBlank()) {
+                                    val imgState = rememberAsyncImagePainter(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(new.photo)
+                                            .size(Size.ORIGINAL).build()
+                                    ).state
+
+                                    if (imgState is AsyncImagePainter.State.Error) {
+                                        Box(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            CircularProgressIndicator()
+                                        }
                                     }
+                                    if (imgState is AsyncImagePainter.State.Success) {
+                                        Image(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(220.dp)
+                                                .clip(RoundedCornerShape(15.dp)),
+                                            painter = imgState.painter,
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    }
+                                    SpacerHeight(5)
                                 }
-                                if (imgState is AsyncImagePainter.State.Success) {
-                                    Image(
-                                        modifier = Modifier
-                                            .fillMaxWidth(1f)
-                                            .height(220.dp)
-                                            .clip(RoundedCornerShape(15.dp)),
-                                        painter = imgState.painter,
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
-                                SpacerHeight(5)
+
+                                // Кнопка "Посмотреть все новости" (остаётся без изменений)
                                 Button(
                                     onClick = { controller.navigate(NavigationRoutes.NEWS) },
-                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    contentPadding = PaddingValues(horizontal = 0.dp),
                                     shape = RoundedCornerShape(0.dp),
                                     colors = ButtonDefaults.buttonColors(
                                         containerColor = Color.Transparent
@@ -168,7 +180,8 @@ fun MainView(
                                         Text(
                                             "Посмотреть все новости",
                                             modifier = Modifier.weight(1f),
-                                            color = BrandColor
+                                            color = BrandColor,
+                                            style = MaterialTheme.typography.titleMedium
                                         )
                                         Icon(
                                             contentDescription = "",
@@ -188,6 +201,185 @@ fun MainView(
                                     style = MaterialTheme.typography.displaySmall,
                                     color = Gray600
                                 )
+                                SpacerHeight(16)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                                )
+                                SpacerHeight(10)
+                                Button(
+                                    onClick = { controller.navigate(NavigationRoutes.NEWS) },
+                                    contentPadding = PaddingValues(horizontal = 0.dp),
+                                    shape = RoundedCornerShape(0.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            "Посмотреть все новости",
+                                            modifier = Modifier.weight(1f),
+                                            color = BrandColor,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(
+                                            contentDescription = "",
+                                            painter = painterResource(R.drawable.arrow_outward_24dp),
+                                            tint = BrandColor
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    SpacerHeight(8)
+                    ElevatedCard {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            val today = LocalDate.now()
+                            val upcomingEvents = state.events.filter {
+                                try {
+                                    LocalDate.parse(it.date) >= today
+                                } catch (e: Exception) {
+                                    false
+                                }
+                            }
+                            val event = upcomingEvents.minByOrNull { LocalDate.parse(it.date) }
+
+                            if (event != null) {
+                                Text(event.name, style = MaterialTheme.typography.headlineSmall)
+                                SpacerHeight(14)
+                                Text(
+                                    "Дата проведения",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray600
+                                )
+                                Text(
+                                    text = formatDateRu(event.date),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                SpacerHeight(7)
+                                Text(
+                                    "Место проведения",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray600
+                                )
+                                Text(
+                                    event.place,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                SpacerHeight(16)
+                                val registered = state.registrations.any { it.event == event.id }
+                                if (registered) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        OutlinedButton(
+                                            onClick = { viewModel.showUnregisterConfirm(event.id) }, // было viewModel.unregisterForEvent
+                                            modifier = Modifier.weight(1f).height(ButtonHeight),
+                                            shape = RoundedCornerShape(8.dp),
+                                            enabled = !state.isRegistrationLoading
+                                        ) {
+                                            Text("Отменить", style = MaterialTheme.typography.displaySmall)
+                                        }
+                                        Button(
+                                            onClick = { /* показать QR */ },
+                                            modifier = Modifier.weight(1f).height(ButtonHeight),
+                                            enabled = !state.isRegistrationLoading,
+                                            shape = MaterialTheme.shapes.small,
+                                            colors = ButtonDefaults.buttonColors(containerColor = BrandColor)
+                                        ) {
+                                            Text("Показать QR", color = White, style = MaterialTheme.typography.displaySmall)
+                                        }
+                                    }
+                                } else {
+                                    OutlinedButton(
+                                        modifier = Modifier.fillMaxWidth().height(ButtonHeight),
+                                        enabled = !state.isRegistrationLoading,
+                                        onClick = { viewModel.showRegisterConfirm(event.id) },
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            "Участвовать",
+                                            style = MaterialTheme.typography.displaySmall,
+                                            color = MaterialTheme.colorScheme.onBackground
+                                        )
+                                    }
+                                }
+                                SpacerHeight(10)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                                )
+                                Button(
+                                    onClick = {
+                                       controller.navigate(NavigationRoutes.EVENTS)
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    shape = RoundedCornerShape(0.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            "Посмотреть все мероприятия",
+                                            modifier = Modifier.weight(1f),
+                                            color = BrandColor,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(
+                                            contentDescription = "",
+                                            painter = painterResource(R.drawable.arrow_outward_24dp),
+                                            tint = BrandColor
+                                        )
+                                    }
+                                }
+                            } else {
+                                Text(
+                                    "Пока ничего не запланировано",
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                                SpacerHeight(5)
+                                Text(
+                                    "Следите за новостями — скоро что-то появится",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray600
+                                )
+                                SpacerHeight(16)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                                )
+                                Button(
+                                    onClick = {  controller.navigate(NavigationRoutes.PAST_EVENTS) },
+                                    contentPadding = PaddingValues(0.dp),
+                                    shape = RoundedCornerShape(0.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            "Посмотреть все прошедшие мероприятия",
+                                            modifier = Modifier.weight(1f),
+                                            color = BrandColor,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(
+                                            contentDescription = "",
+                                            painter = painterResource(R.drawable.arrow_outward_24dp),
+                                            tint = BrandColor
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -245,6 +437,25 @@ fun MainView(
                     SpacerHeight(8)
                 }
             }
+        }
+        // Диалог подтверждения
+        if (state.confirmDialog != null) {
+            val isRegister = state.confirmDialog.action == ConfirmAction.REGISTER
+            AlertDialog(
+                onDismissRequest = { viewModel.hideDialog() },
+                title = { Text(if (isRegister) "Подтверждение участия" else "Отмена участия") },
+                text = { Text(if (isRegister) "Вы уверены, что хотите принять участие?" else "Вы уверены, что хотите отменить участие?") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.confirmAction() }) {
+                        Text(if (isRegister) "Принять" else "Отменить")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.hideDialog() }) {
+                        Text("Отмена")
+                    }
+                }
+            )
         }
     }
 }

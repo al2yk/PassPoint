@@ -70,7 +70,7 @@ fun NewsView(
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {
         when {
-            state.isLoading && state.news.isEmpty() && state.category.isEmpty() -> {
+            state.isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
