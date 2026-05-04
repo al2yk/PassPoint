@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.screens.main.events
+package com.example.passpoint.presentation.screens.main.course
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -33,28 +33,23 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.R
-import com.example.passpoint.presentation.components.EventCard
+import com.example.passpoint.presentation.components.CourseCard
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.screens.main.ConfirmAction
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Gray800
-import com.example.passpoint.presentation.viewModel.EventsViewModel
+import com.example.passpoint.presentation.viewModel.CoursesViewModel
 
 @Composable
-fun EventsView(
+fun CoursesView(
     controller: NavHostController? = null,
     innerPadding: PaddingValues,
-    viewModel: EventsViewModel = hiltViewModel()
+    viewModel: CoursesViewModel = hiltViewModel()
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.showUpcoming()
-    }
-
+    LaunchedEffect(Unit) { viewModel.showUpcoming() }
     val state = viewModel.state
-    val events = state.upcomingEvents
+    val courses = state.upcomingCourses
 
     Box(
         modifier = Modifier
@@ -68,9 +63,12 @@ fun EventsView(
                     CircularProgressIndicator()
                 }
             }
+
             state.error != null -> {
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -78,27 +76,37 @@ fun EventsView(
                     SpacerHeight(16)
                     OutlinedButton(
                         onClick = { viewModel.retry() },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(ButtonHeight),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp)
+                            .height(ButtonHeight),
                         shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Повторить")
-                    }
+                    ) { Text("Повторить") }
                 }
             }
+
             else -> {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(events) { event ->
-                        val registered = state.registrations.any { it.event == event.id }
+                    items(courses) { course ->
+                        val isRegistered = state.registrations.any { it.course == course.id }
                         SpacerHeight(8)
-                        EventCard(
-                            event = event,
-                            isRegistered = registered,
-                            isRegistrationLoading = state.isRegistrationLoading,
-                            onRegisterClick = { viewModel.showRegisterConfirm(event.id) },
-                            onUnregisterClick = { viewModel.showUnregisterConfirm(event.id) }
-                        )
+                        ElevatedCard(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                CourseCard(
+                                    course = course,
+                                    isRegistered = isRegistered,
+                                    isRegistrationLoading = state.isRegistrationLoading,
+                                    onRegisterClick = { viewModel.showRegisterConfirm(course.id) },
+                                    onUnregisterClick = { viewModel.showUnregisterConfirm(course.id) },
+                                    showButtons = true,
+                                    showCapacity = true
+                                )
+                            }
+                        }
                     }
-
                     item {
                         SpacerHeight(8)
                         ElevatedCard(
@@ -107,13 +115,13 @@ fun EventsView(
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Button(
-                                    onClick = { controller?.navigate(NavigationRoutes.PAST_EVENTS) },
+                                    onClick = { controller?.navigate(NavigationRoutes.PAST_COURSES) },
                                     contentPadding = PaddingValues(0.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
                                 ) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text(
-                                            "Посмотреть прошедшие мероприятия",
+                                            "Посмотреть прошедшие курсы",
                                             modifier = Modifier.weight(1f),
                                             color = BrandColor,
                                             style = MaterialTheme.typography.titleMedium
@@ -139,17 +147,15 @@ fun EventsView(
         val isRegister = state.confirmDialog.action == ConfirmAction.REGISTER
         AlertDialog(
             onDismissRequest = { viewModel.hideDialog() },
-            title = { Text(if (isRegister) "Подтверждение участия" else "Отмена участия") },
-            text = { Text(if (isRegister) "Вы уверены, что хотите принять участие?" else "Вы уверены, что хотите отменить участие?",color = Gray800) },
+            title = { Text(if (isRegister) "Запись на курс" else "Отмена записи") },
+            text = { Text(if (isRegister) "Вы уверены, что хотите записаться на курс?" else "Вы уверены, что хотите отменить запись?") },
             confirmButton = {
                 TextButton(onClick = { viewModel.confirmAction() }) {
-                    Text(if (isRegister) "Принять" else "Отменить")
+                    Text(if (isRegister) "Записаться" else "Отменить")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { viewModel.hideDialog() }) {
-                    Text("Отмена")
-                }
+                TextButton(onClick = { viewModel.hideDialog() }) { Text("Отмена") }
             }
         )
     }

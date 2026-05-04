@@ -2,6 +2,7 @@ package com.example.passpoint.presentation.screens.main.events
 
 import com.example.passpoint.data.dto.Event
 import com.example.passpoint.data.dto.EventRegistration
+import com.example.passpoint.presentation.screens.main.ConfirmDialogState
 
 data class EventsState(
     val upcomingEvents: List<Event> = listOf(),
@@ -13,12 +14,3 @@ data class EventsState(
     val error: String? = null,
     val confirmDialog: ConfirmDialogState? = null
 )
-
-data class ConfirmDialogState(
-    val eventId: Int,
-    val action: ConfirmAction
-)
-
-enum class ConfirmAction {
-    REGISTER, UNREGISTER
-}

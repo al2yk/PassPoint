@@ -31,6 +31,8 @@ import com.example.passpoint.presentation.screens.authorization.changePassword.s
 import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.main.MineView
 import com.example.passpoint.presentation.screens.main.ProfileView
+import com.example.passpoint.presentation.screens.main.course.CoursesView
+import com.example.passpoint.presentation.screens.main.course.PastCoursesView
 import com.example.passpoint.presentation.screens.main.events.EventsView
 import com.example.passpoint.presentation.screens.main.events.PastEventsView
 import com.example.passpoint.presentation.screens.main.news.NewsDetailView
@@ -58,7 +60,9 @@ fun Navigation(isOnline: Boolean) {
     val screensWithTopBarOnly = setOf(
         NavigationRoutes.NEWS,
         NavigationRoutes.EVENTS,
-        NavigationRoutes.PAST_EVENTS
+        NavigationRoutes.PAST_EVENTS,
+        NavigationRoutes.COURSES,
+        NavigationRoutes.PAST_COURSES
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -176,6 +180,12 @@ fun Navigation(isOnline: Boolean) {
                 composable(NavigationRoutes.PAST_EVENTS) {
                     PastEventsView(controller = controller, innerPadding = innerPadding)
                 }
+                composable(NavigationRoutes.COURSES) {
+                    CoursesView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.PAST_COURSES) {
+                    PastCoursesView(controller = controller, innerPadding = innerPadding)
+                }
             }
         } else {
             NoInternetView()
@@ -191,6 +201,8 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     isNewsDetail -> "Новость"
     route == NavigationRoutes.EVENTS -> "Мероприятия"
     route == NavigationRoutes.PAST_EVENTS -> "Прошедшие мероприятия"
+    route == NavigationRoutes.COURSES -> "Курсы"
+    route == NavigationRoutes.PAST_COURSES -> "Прошедшие курсы"
     else -> "PassPoint"
 }
 

@@ -26,15 +26,19 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
@@ -42,13 +46,14 @@ import coil.request.ImageRequest
 import coil.size.Size
 import com.example.passpoint.R
 import com.example.passpoint.domain.utils.formatDateRu
+import com.example.passpoint.presentation.components.CourseCard
 import com.example.passpoint.presentation.components.CuratorItem
-import com.example.passpoint.presentation.components.OutlinedBrandButton
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.Gray600
+import com.example.passpoint.presentation.theme.Gray800
 import com.example.passpoint.presentation.theme.White
 import com.example.passpoint.presentation.viewModel.MainViewModel
 import java.time.LocalDate
@@ -60,7 +65,18 @@ fun MainView(
     viewModel: MainViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val lifecycleOwner = LocalLifecycleOwner.current
 
+    // Автоматическое обновление регистраций при возврате на экран
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.refreshRegistrations()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     Box(
         modifier = Modifier
             .padding(innerPadding)
@@ -234,6 +250,7 @@ fun MainView(
                         }
                     }
                     SpacerHeight(8)
+                    // EVENTS
                     ElevatedCard {
                         Column(
                             modifier = Modifier
@@ -281,25 +298,38 @@ fun MainView(
                                     ) {
                                         OutlinedButton(
                                             onClick = { viewModel.showUnregisterConfirm(event.id) }, // было viewModel.unregisterForEvent
-                                            modifier = Modifier.weight(1f).height(ButtonHeight),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(ButtonHeight),
                                             shape = RoundedCornerShape(8.dp),
                                             enabled = !state.isRegistrationLoading
                                         ) {
-                                            Text("Отменить", style = MaterialTheme.typography.displaySmall)
+                                            Text(
+                                                "Отменить",
+                                                style = MaterialTheme.typography.displaySmall
+                                            )
                                         }
                                         Button(
                                             onClick = { /* показать QR */ },
-                                            modifier = Modifier.weight(1f).height(ButtonHeight),
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(ButtonHeight),
                                             enabled = !state.isRegistrationLoading,
                                             shape = MaterialTheme.shapes.small,
                                             colors = ButtonDefaults.buttonColors(containerColor = BrandColor)
                                         ) {
-                                            Text("Показать QR", color = White, style = MaterialTheme.typography.displaySmall)
+                                            Text(
+                                                "Показать QR",
+                                                color = White,
+                                                style = MaterialTheme.typography.displaySmall
+                                            )
                                         }
                                     }
                                 } else {
                                     OutlinedButton(
-                                        modifier = Modifier.fillMaxWidth().height(ButtonHeight),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(ButtonHeight),
                                         enabled = !state.isRegistrationLoading,
                                         onClick = { viewModel.showRegisterConfirm(event.id) },
                                         shape = RoundedCornerShape(8.dp)
@@ -319,7 +349,7 @@ fun MainView(
                                 )
                                 Button(
                                     onClick = {
-                                       controller.navigate(NavigationRoutes.EVENTS)
+                                        controller.navigate(NavigationRoutes.EVENTS)
                                     },
                                     contentPadding = PaddingValues(0.dp),
                                     shape = RoundedCornerShape(0.dp),
@@ -359,7 +389,7 @@ fun MainView(
                                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
                                 )
                                 Button(
-                                    onClick = {  controller.navigate(NavigationRoutes.PAST_EVENTS) },
+                                    onClick = { controller.navigate(NavigationRoutes.PAST_EVENTS) },
                                     contentPadding = PaddingValues(0.dp),
                                     shape = RoundedCornerShape(0.dp),
                                     colors = ButtonDefaults.buttonColors(
@@ -384,23 +414,124 @@ fun MainView(
                         }
                     }
                     SpacerHeight(8)
-                    // CURATORS
+                    // COURSES
                     ElevatedCard {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
                         ) {
-                            Text("Наши кураторы", style = MaterialTheme.typography.headlineSmall)
-                            SpacerHeight(16)
+                            val today = LocalDate.now()
+                            val upcomingEvents = state.course.filter {
+                                try {
+                                    LocalDate.parse(it.date) >= today
+                                } catch (e: Exception) {
+                                    false
+                                }
+                            }
+                            val course = upcomingEvents.minByOrNull { LocalDate.parse(it.date) }
 
-                            if (state.curators.isEmpty()) {
+                            if (course != null) {
+
+                                // внутри ElevatedCard курсов
+                                val isRegistered = state.courseRegistrations.any { it.course == course.id }
+
+                                CourseCard(
+                                    course = course,
+                                    isRegistered = isRegistered,
+                                    isRegistrationLoading = state.isRegistrationLoading,
+                                    onRegisterClick = { viewModel.showRegisterCourseConfirm(course.id) },
+                                    onUnregisterClick = { viewModel.showUnregisterCourseConfirm(course.id) },
+                                    showButtons = true
+                                )
+                                SpacerHeight(10)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                                )
+                                Button(
+                                    onClick = {
+                                        controller.navigate(NavigationRoutes.COURSES)
+                                    },
+                                    contentPadding = PaddingValues(0.dp),
+                                    shape = RoundedCornerShape(0.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            "Посмотреть все курсы",
+                                            modifier = Modifier.weight(1f),
+                                            color = BrandColor,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(
+                                            contentDescription = "",
+                                            painter = painterResource(R.drawable.arrow_outward_24dp),
+                                            tint = BrandColor
+                                        )
+                                    }
+                                }
+                            } else {
                                 Text(
-                                    text = "Кураторы не найдены",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    "Ни одного курса не запланированоо",
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                                SpacerHeight(5)
+                                Text(
+                                    "Новые группы появятся здесь, как только будут добавлены",
+                                    style = MaterialTheme.typography.displaySmall,
                                     color = Gray600
                                 )
-                            } else {
+                                SpacerHeight(16)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    thickness = 1.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)
+                                )
+                                Button(
+                                    onClick = {  controller.navigate(NavigationRoutes.PAST_COURSES)  },
+                                    contentPadding = PaddingValues(0.dp),
+                                    shape = RoundedCornerShape(0.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color.Transparent,
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            "Посмотреть прошедшие курсы",
+                                            modifier = Modifier.weight(1f),
+                                            color = BrandColor,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(
+                                            contentDescription = "",
+                                            painter = painterResource(R.drawable.arrow_outward_24dp),
+                                            tint = BrandColor
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    SpacerHeight(8)
+                    if (state.curators.isNotEmpty()) {
+                        // CURATORS
+                        ElevatedCard {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    "Наши кураторы",
+                                    style = MaterialTheme.typography.headlineSmall
+                                )
+                                SpacerHeight(16)
+
+
                                 val rows = state.curators.chunked(2)
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
@@ -444,7 +575,7 @@ fun MainView(
             AlertDialog(
                 onDismissRequest = { viewModel.hideDialog() },
                 title = { Text(if (isRegister) "Подтверждение участия" else "Отмена участия") },
-                text = { Text(if (isRegister) "Вы уверены, что хотите принять участие?" else "Вы уверены, что хотите отменить участие?") },
+                text = { Text(if (isRegister) "Вы уверены, что хотите принять участие?" else "Вы уверены, что хотите отменить участие?",color = Gray800) },
                 confirmButton = {
                     TextButton(onClick = { viewModel.confirmAction() }) {
                         Text(if (isRegister) "Принять" else "Отменить")
@@ -452,6 +583,25 @@ fun MainView(
                 },
                 dismissButton = {
                     TextButton(onClick = { viewModel.hideDialog() }) {
+                        Text("Отмена")
+                    }
+                }
+            )
+        }
+        // Диалог подтверждения для КУРСОВ
+        if (state.courseConfirmDialog != null) {
+            val isRegister = state.courseConfirmDialog.action == ConfirmAction.REGISTER
+            AlertDialog(
+                onDismissRequest = { viewModel.hideCourseDialog() },
+                title = { Text(if (isRegister) "Подтверждение участия" else "Отмена участия на курсе") },
+                text = { Text(if (isRegister) "Вы уверены, что хотите записаться на курс?" else "Вы уверены, что хотите отменить запись на курс?",color = Gray800) },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.confirmCourseAction() }) {
+                        Text(if (isRegister) "Записаться" else "Отменить запись")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.hideCourseDialog() }) {
                         Text("Отмена")
                     }
                 }

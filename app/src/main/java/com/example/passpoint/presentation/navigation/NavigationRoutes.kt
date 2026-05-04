@@ -15,4 +15,6 @@ object NavigationRoutes  {
     const val NEWS_DETAIL = "news_detail"
     const val EVENTS = "events"
     const val PAST_EVENTS = "past_events"
+    const val COURSES = "courses"
+    const val PAST_COURSES = "past_courses"
 }

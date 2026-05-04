@@ -64,6 +64,7 @@ fun EventCard(
                             onClick = { /* показать QR */ },
                             modifier = Modifier.weight(1f).height(ButtonHeight),
                             enabled = !isRegistrationLoading,
+                            shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = BrandColor)
                         ) {
                             Text("Показать QR", color = White, style = MaterialTheme.typography.displaySmall)

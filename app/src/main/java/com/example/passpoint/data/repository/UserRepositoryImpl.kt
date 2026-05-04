@@ -2,6 +2,8 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.CourseRegistration
+import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
 import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
@@ -194,16 +196,54 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun unregisterFromEvent(registrationId: Long?) {
-        try {
-            userApi.deleteEventRegistration("eq.$registrationId")
-        } catch (e: Exception) {
-            throw e
+        val response = userApi.deleteEventRegistration("eq.$registrationId")
+        if (!response.isSuccessful) {
+            throw Exception("Ошибка при удалении регистрации: код ${response.code()}")
         }
     }
 
     override suspend fun getUserRegistrations(userId: String): Result<List<EventRegistration>> {
         return try {
             val response = userApi.getUserEventRegistrations("eq.$userId")
+            Result.Success(response)
+        } catch (e: Exception) {
+            Result.Failure(exception = e)
+        }
+    }
+
+    override suspend fun getCourse(): Result<List<CourseWithEnrollment>> {
+        return try {
+            val response = userApi.getCoursesWithEnrollment()
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getCourse", e.message.toString())
+            Result.Failure(exception = e)
+        }
+    }
+    override suspend fun registerForCourse(courseId: Int, userId: String): Result<CourseRegistration> {
+        return try {
+            val registration = CourseRegistration(user = userId, course = courseId)
+            val response = userApi.createCourseRegistration(registration)
+            if (response.isNotEmpty()) {
+                Result.Success(response.first())
+            } else {
+                Result.Failure(Exception("Сервер вернул пустой ответ"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun unregisterFromCourse(registrationId: Int) {
+        val response = userApi.deleteCourseRegistration("eq.$registrationId")
+        if (!response.isSuccessful) {
+            throw Exception("Ошибка при удалении регистрации на курс: код ${response.code()}")
+        }
+    }
+
+    override suspend fun getUserCourseRegistrations(userId: String): Result<List<CourseRegistration>> {
+        return try {
+            val response = userApi.getUserCourseRegistrations("eq.$userId")
             Result.Success(response)
         } catch (e: Exception) {
             Result.Failure(exception = e)

@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.*
-import com.example.passpoint.presentation.screens.main.events.ConfirmAction
-import com.example.passpoint.presentation.screens.main.events.ConfirmDialogState
+import com.example.passpoint.presentation.screens.main.ConfirmAction
+import com.example.passpoint.presentation.screens.main.ConfirmDialogState
 import com.example.passpoint.presentation.screens.main.events.EventsState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

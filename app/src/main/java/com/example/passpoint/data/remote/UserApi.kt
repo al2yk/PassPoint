@@ -2,6 +2,8 @@ package com.example.passpoint.data.remote
 
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.AuthResponse
+import com.example.passpoint.data.dto.CourseRegistration
+import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
 import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
@@ -11,6 +13,7 @@ import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
 import com.example.passpoint.data.dto.VerifyOTPdto
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -47,7 +50,19 @@ interface UserApi {
     @POST("/rest/v1/event_registrations")
     suspend fun createEventRegistration(@Body registration: EventRegistration): List<EventRegistration>
     @DELETE("/rest/v1/event_registrations")
-    suspend fun deleteEventRegistration(@Query("id") idFilter: String)
+    suspend fun deleteEventRegistration(@Query("id") idFilter: String): Response<Unit>
     @GET("/rest/v1/event_registrations?select=*")
     suspend fun getUserEventRegistrations(@Query("user") userFilter: String): List<EventRegistration>
+
+    @GET("/rest/v1/course_with_enrollment?select=*")
+    suspend fun getCoursesWithEnrollment(): List<CourseWithEnrollment>
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/course_attendance")
+    suspend fun createCourseRegistration(@Body registration: CourseRegistration): List<CourseRegistration>
+
+    @DELETE("/rest/v1/course_attendance")
+    suspend fun deleteCourseRegistration(@Query("id") idFilter: String): Response<Unit>
+
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getUserCourseRegistrations(@Query("user") userFilter: String): List<CourseRegistration>
 }
