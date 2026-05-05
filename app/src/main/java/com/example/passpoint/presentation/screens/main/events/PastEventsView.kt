@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.presentation.components.EventCard
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.theme.ButtonHeight
@@ -86,7 +87,8 @@ fun PastEventsView(
                             isRegistrationLoading = false,
                             onRegisterClick = {},
                             onUnregisterClick = {},
-                            showButtons = false
+                            showButtons = false,
+                            onQrClick = { controller?.navigate("qr/${UserRepository.ID}") }
                         )
                     }
                 }

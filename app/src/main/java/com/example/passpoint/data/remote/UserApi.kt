@@ -2,6 +2,8 @@ package com.example.passpoint.data.remote
 
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.AuthResponse
+import com.example.passpoint.data.dto.Course
+import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
 import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
@@ -18,6 +20,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
@@ -65,4 +68,13 @@ interface UserApi {
 
     @GET("/rest/v1/course_attendance?select=*")
     suspend fun getUserCourseRegistrations(@Query("user") userFilter: String): List<CourseRegistration>
+
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/course")
+    suspend fun createCourse(@Body course: CourseCreateRequest): List<Course>
+    @DELETE("/rest/v1/course")
+    suspend fun deleteCourse(@Query("id") idFilter: String): Response<Unit>
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/course")
+    suspend fun updateCourse(@Query("id") idFilter: String, @Body course: CourseCreateRequest): List<Course>
 }

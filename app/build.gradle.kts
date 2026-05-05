@@ -62,6 +62,7 @@ dependencies {
     implementation (libs.androidx.material3)
     implementation (libs.google.material)
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation("com.google.zxing:core:3.5.1")
     //navigation compose
     implementation(libs.androidx.navigation.compose)
 

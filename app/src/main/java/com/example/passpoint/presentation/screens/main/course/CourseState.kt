@@ -12,5 +12,6 @@ data class CoursesState(
     val isLoading: Boolean = false,
     val isRegistrationLoading: Boolean = false,
     val error: String? = null,
-    val confirmDialog: CourseConfirmDialogState? = null
+    val confirmDialog: CourseConfirmDialogState? = null,
+    val deleteDialog: CourseConfirmDialogState? = null
 )

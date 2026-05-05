@@ -21,6 +21,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.passpoint.R
+import com.example.passpoint.domain.UserRepository
+import com.example.passpoint.presentation.components.AdminBottomMenu
 import com.example.passpoint.presentation.components.BottomMenu
 import com.example.passpoint.presentation.components.MainEnum
 import com.example.passpoint.presentation.screens.authorization.SignInView
@@ -31,6 +33,8 @@ import com.example.passpoint.presentation.screens.authorization.changePassword.s
 import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.main.MineView
 import com.example.passpoint.presentation.screens.main.ProfileView
+import com.example.passpoint.presentation.screens.main.course.CreateCourseView
+import com.example.passpoint.presentation.screens.main.admin.UsersView
 import com.example.passpoint.presentation.screens.main.course.CoursesView
 import com.example.passpoint.presentation.screens.main.course.PastCoursesView
 import com.example.passpoint.presentation.screens.main.events.EventsView
@@ -39,6 +43,7 @@ import com.example.passpoint.presentation.screens.main.news.NewsDetailView
 import com.example.passpoint.presentation.screens.main.news.NewsView
 import com.example.passpoint.presentation.screens.nointernet.NoInternetView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
+import com.example.passpoint.presentation.screens.qr.QrView
 import com.example.passpoint.presentation.screens.splash.SplashView
 import com.example.passpoint.presentation.theme.White
 
@@ -53,7 +58,8 @@ fun Navigation(isOnline: Boolean) {
     val screensWithBottomBar = setOf(
         NavigationRoutes.MAIN,
         NavigationRoutes.PROFILE,
-        NavigationRoutes.MINE
+        NavigationRoutes.MINE,
+        NavigationRoutes.USERS
     )
 
     // Экраны только с верхним баром (без нижнего) — точное совпадение
@@ -62,7 +68,12 @@ fun Navigation(isOnline: Boolean) {
         NavigationRoutes.EVENTS,
         NavigationRoutes.PAST_EVENTS,
         NavigationRoutes.COURSES,
-        NavigationRoutes.PAST_COURSES
+        NavigationRoutes.PAST_COURSES,
+        NavigationRoutes.QR,
+        NavigationRoutes.CREATE_NEWS,
+        NavigationRoutes.CREATE_EVENT,
+        NavigationRoutes.CREATE_COURSE,
+        NavigationRoutes.EDIT_COURSE,
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -74,7 +85,7 @@ fun Navigation(isOnline: Boolean) {
                     currentRoute in screensWithTopBarOnly ||
                     isNewsDetail
             )
-
+    val isAdmin = UserRepository.role == 3
     Scaffold(
         topBar = {
             if (showTopBar) {
@@ -111,19 +122,35 @@ fun Navigation(isOnline: Boolean) {
         },
         bottomBar = {
             if (showBottomBar) {
-                BottomMenu(
-                    selectedScreen = mapRouteToMainEnum(currentRoute),
-                    onItemSelected = { selectedEnum ->
-                        val route = mapMainEnumToRoute(selectedEnum)
-                        controller.navigate(route) {
-                            popUpTo(controller.graph.findStartDestination().id) {
-                                saveState = true
+                if (isAdmin) {
+                    AdminBottomMenu(
+                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin),
+                        onItemSelected = { selectedEnum ->
+                            val route = mapMainEnumToRoute(selectedEnum, isAdmin)
+                            controller.navigate(route) {
+                                popUpTo(controller.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                )
+                    )
+                } else {
+                    BottomMenu(
+                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin),
+                        onItemSelected = { selectedEnum ->
+                            val route = mapMainEnumToRoute(selectedEnum, isAdmin)
+                            controller.navigate(route) {
+                                popUpTo(controller.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
             }
         },
         modifier = Modifier.fillMaxSize()
@@ -186,6 +213,22 @@ fun Navigation(isOnline: Boolean) {
                 composable(NavigationRoutes.PAST_COURSES) {
                     PastCoursesView(controller = controller, innerPadding = innerPadding)
                 }
+                composable(
+                    route = NavigationRoutes.QR,
+                    arguments = listOf(navArgument("qrData") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val qrData = backStackEntry.arguments?.getString("qrData") ?: ""
+                    QrView(qrData = qrData)
+                }
+                composable(NavigationRoutes.USERS) {
+                    UsersView(controller,innerPadding)
+                }
+                composable(NavigationRoutes.CREATE_COURSE) {
+                    CreateCourseView(controller,innerPadding)
+                }
+                composable(NavigationRoutes.EDIT_COURSE) {
+                    CreateCourseView(controller = controller, innerPadding = innerPadding)
+                }
             }
         } else {
             NoInternetView()
@@ -203,18 +246,25 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.PAST_EVENTS -> "Прошедшие мероприятия"
     route == NavigationRoutes.COURSES -> "Курсы"
     route == NavigationRoutes.PAST_COURSES -> "Прошедшие курсы"
+    route == NavigationRoutes.QR -> "QR"
+    route == NavigationRoutes.CREATE_COURSE -> "Создание курса"
+    route == NavigationRoutes.CREATE_EVENT -> "Создание мероприятия"
+    route == NavigationRoutes.CREATE_NEWS -> "Создание новости"
+    route == NavigationRoutes.EDIT_COURSE -> "Редактирование курса"
     else -> "PassPoint"
 }
 
-private fun mapRouteToMainEnum(route: String?): MainEnum = when (route) {
+private fun mapRouteToMainEnum(route: String?, isAdmin: Boolean): MainEnum = when (route) {
     NavigationRoutes.PROFILE -> MainEnum.PROFILE
     NavigationRoutes.MAIN -> MainEnum.HOME
-    NavigationRoutes.MINE -> MainEnum.SETTINGS
+    NavigationRoutes.MINE -> if (isAdmin) MainEnum.USERS else MainEnum.SETTINGS
+    NavigationRoutes.USERS -> MainEnum.USERS
     else -> MainEnum.HOME
 }
 
-private fun mapMainEnumToRoute(enum: MainEnum): String = when (enum) {
+private fun mapMainEnumToRoute(enum: MainEnum, isAdmin: Boolean): String = when (enum) {
     MainEnum.PROFILE -> NavigationRoutes.PROFILE
     MainEnum.HOME -> NavigationRoutes.MAIN
     MainEnum.SETTINGS -> NavigationRoutes.MINE
+    MainEnum.USERS -> NavigationRoutes.USERS
 }

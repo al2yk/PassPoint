@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.passpoint.data.dto.Event
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.formatDateRu
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
@@ -30,7 +31,8 @@ fun EventCard(
     isRegistrationLoading: Boolean,
     onRegisterClick: () -> Unit,
     onUnregisterClick: () -> Unit,
-    showButtons: Boolean = true
+    showButtons: Boolean = true,
+    onQrClick: (() -> Unit)? = null
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -46,7 +48,7 @@ fun EventCard(
             Text(event.place, style = MaterialTheme.typography.bodyLarge)
             SpacerHeight(16)
 
-            if (showButtons) {
+            if (showButtons && UserRepository.role == 1) {
                 if (isRegistered) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -61,7 +63,7 @@ fun EventCard(
                             Text("Отменить", style = MaterialTheme.typography.displaySmall)
                         }
                         Button(
-                            onClick = { /* показать QR */ },
+                            onClick = { onQrClick?.invoke() },
                             modifier = Modifier.weight(1f).height(ButtonHeight),
                             enabled = !isRegistrationLoading,
                             shape = RoundedCornerShape(8.dp),

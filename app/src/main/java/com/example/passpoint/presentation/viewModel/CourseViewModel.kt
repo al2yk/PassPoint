@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
+import com.example.passpoint.domain.useCase.DeleteCourseUseCase
 import com.example.passpoint.domain.useCase.GetCourseUseCase
 import com.example.passpoint.domain.useCase.GetUserCourseRegistrationsUseCase
 import com.example.passpoint.domain.useCase.RegisterForCourseUseCase
@@ -22,7 +23,8 @@ class CoursesViewModel @Inject constructor(
     private val getCourseUseCase: GetCourseUseCase,
     private val getUserCourseRegistrationsUseCase: GetUserCourseRegistrationsUseCase,
     private val registerForCourseUseCase: RegisterForCourseUseCase,
-    private val unregisterFromCourseUseCase: UnregisterFromCourseUseCase
+    private val unregisterFromCourseUseCase: UnregisterFromCourseUseCase,
+    private val deleteCourseUseCase: DeleteCourseUseCase,
 ) : ViewModel() {
 
     private val _state = mutableStateOf(CoursesState())
@@ -98,9 +100,34 @@ class CoursesViewModel @Inject constructor(
         when (dialog.action) {
             ConfirmAction.REGISTER -> register(dialog.courseId)
             ConfirmAction.UNREGISTER -> unregister(dialog.courseId)
+            else -> {}
         }
     }
+    fun showDeleteConfirm(courseId: Int) {
+        _state.value = _state.value.copy(
+            deleteDialog = CourseConfirmDialogState(courseId, ConfirmAction.DELETE)
+        )
+    }
 
+    fun hideDeleteDialog() {
+        _state.value = _state.value.copy(deleteDialog = null)
+    }
+
+    fun confirmDeleteAction() {
+        val dialog = _state.value.deleteDialog ?: return
+        hideDeleteDialog()
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            when (val result = deleteCourseUseCase(dialog.courseId)) {
+                is Result.Success -> {
+                    loadData()   // перезагрузка
+                }
+                is Result.Failure -> {
+                    _state.value = _state.value.copy(error = result.exception.message, isLoading = false)
+                }
+            }
+        }
+    }
     private fun register(courseId: Int) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)

@@ -6,5 +6,5 @@ data class CourseConfirmDialogState(
 )
 
 enum class ConfirmAction {
-    REGISTER, UNREGISTER
+    REGISTER, UNREGISTER,DELETE
 }

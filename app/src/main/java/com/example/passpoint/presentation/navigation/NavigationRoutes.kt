@@ -17,4 +17,10 @@ object NavigationRoutes  {
     const val PAST_EVENTS = "past_events"
     const val COURSES = "courses"
     const val PAST_COURSES = "past_courses"
+    const val QR = "qr/{qrData}"
+    const val USERS = "users"
+    const val CREATE_EVENT = "create_event"
+    const val CREATE_COURSE = "create_course"
+    const val CREATE_NEWS = "create_news"
+    const val EDIT_COURSE = "edit_course/{courseId}"
 }

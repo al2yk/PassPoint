@@ -38,7 +38,8 @@ import com.example.passpoint.R
 enum class MainEnum {
     PROFILE,
     HOME,
-    SETTINGS
+    SETTINGS,
+    USERS
 }
 
 private data class BottomMenuItem(
@@ -157,3 +158,76 @@ private fun RowScope.Section(
         indicatorColor = MaterialTheme.colorScheme.surfaceBright
     )
 )
+
+private val adminDestinations = listOf(
+    BottomMenuItem(
+        icon = R.drawable.person_outline,
+        selectedIcon = R.drawable.person,
+        "Профиль",
+        MainEnum.PROFILE
+    ),
+    BottomMenuItem(
+        icon = R.drawable.home_outlined,
+        selectedIcon = R.drawable.home,
+        "Главная",
+        MainEnum.HOME
+    ),
+    BottomMenuItem(
+        icon = R.drawable.groups_24dp,
+        selectedIcon = R.drawable.arrow_outward_24dp,
+        "Пользователи",
+        MainEnum.USERS
+    )
+)
+
+@Composable
+fun AdminBottomMenu(
+    selectedScreen: MainEnum = MainEnum.HOME,
+    onItemSelected: (MainEnum) -> Unit = {}
+) {
+    NavigationBar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .dropShadow(
+                shape = RectangleShape,
+                shadow = Shadow(
+                    radius = 40.dp,
+                    spread = 0.dp,
+                    color = Color(red = 0f, green = 0f, blue = 0f, alpha = 0.25f),
+                    offset = DpOffset(x = 0.dp, y = (-10).dp)
+                )
+            ),
+        containerColor = MaterialTheme.colorScheme.background
+    ) {
+        var width by remember { mutableIntStateOf(0) }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(
+                8.dp,
+                alignment = Alignment.CenterHorizontally
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .onSizeChanged {
+                    width = it.width
+                }
+        ) {
+            adminDestinations.forEachIndexed { index, item ->
+                val isSelected = index == selectedScreen.ordinal
+
+                val density = LocalDensity.current
+                val fullWidthDp = with(density) { width.toDp() }
+
+                if (fullWidthDp > (120.dp * adminDestinations.size) + (8.dp * (adminDestinations.size - 1))) {
+                    Row(modifier = Modifier.widthIn(min = 64.dp, max = 120.dp)) {
+                        Section(item, isSelected, onItemSelected)
+                    }
+                } else {
+                    Section(item, isSelected, onItemSelected)
+                }
+            }
+        }
+    }
+}

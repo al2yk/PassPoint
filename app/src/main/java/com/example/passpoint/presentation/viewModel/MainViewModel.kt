@@ -107,6 +107,7 @@ class MainViewModel @Inject constructor(
         when (dialog.action) {
             ConfirmAction.REGISTER -> registerForEvent(dialog.eventId)
             ConfirmAction.UNREGISTER -> unregisterForEvent(dialog.eventId)
+            else -> {}
         }
     }
 
@@ -189,6 +190,7 @@ class MainViewModel @Inject constructor(
         when (dialog.action) {
             ConfirmAction.REGISTER -> registerForCourse(dialog.courseId)
             ConfirmAction.UNREGISTER -> unregisterFromCourse(dialog.courseId)
+            else -> {}
         }
     }
     private fun registerForCourse(courseId: Int) {

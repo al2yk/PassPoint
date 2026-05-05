@@ -15,6 +15,11 @@ object UserRepository {
         set(value) {
             actSystem?.edit()?.putInt("act", value)?.apply()
         }
+    var role: Int
+        get() = actSystem?.getInt("role", 0) ?: 0
+        set(value) {
+            actSystem?.edit()?.putInt("role", value)?.apply()
+        }
 
     var ID: String
         get() = actSystem?.getString("id", "") ?: ""

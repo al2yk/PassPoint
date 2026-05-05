@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.passpoint.data.dto.CourseWithEnrollment
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.formatDateRu
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
@@ -28,7 +29,10 @@ fun CourseCard(
     onRegisterClick: () -> Unit,
     onUnregisterClick: () -> Unit,
     showButtons: Boolean = true,
-    showCapacity: Boolean = true
+    showCapacity: Boolean = true,
+    onQrClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null,
+    onEditClick: (() -> Unit)? = null
 ) {
     Text(course.name, style = MaterialTheme.typography.headlineSmall)
     SpacerHeight(14)
@@ -49,10 +53,10 @@ fun CourseCard(
         )
     }
 
-    SpacerHeight(16)
 
-    if (showButtons) {
+    if (showButtons && UserRepository.role == 1) {
         if (isRegistered) {
+            SpacerHeight(16)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -68,7 +72,7 @@ fun CourseCard(
                     Text("Отменить", style = MaterialTheme.typography.displaySmall)
                 }
                 Button(
-                    onClick = { /* показать QR */ },
+                    onClick = { onQrClick?.invoke() },
                     modifier = Modifier
                         .weight(1f)
                         .height(ButtonHeight),
@@ -96,6 +100,39 @@ fun CourseCard(
                     "Участвовать",
                     style = MaterialTheme.typography.displaySmall,
                     color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        }
+    }
+    if (showButtons && UserRepository.role ==3){
+        SpacerHeight(16)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = { onDeleteClick?.invoke() },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(ButtonHeight),
+                shape = RoundedCornerShape(8.dp),
+                enabled = !isRegistrationLoading
+            ) {
+                Text("Удалить", style = MaterialTheme.typography.displaySmall)
+            }
+            Button(
+                onClick = { onEditClick?.invoke() },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(ButtonHeight),
+                enabled = !isRegistrationLoading,
+                colors = ButtonDefaults.buttonColors(containerColor = BrandColor),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    "Редактировать",
+                    color = White,
+                    style = MaterialTheme.typography.displaySmall
                 )
             }
         }

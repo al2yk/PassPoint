@@ -1,5 +1,7 @@
 package com.example.passpoint.domain.repository
 
+import com.example.passpoint.data.dto.Course
+import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
 import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
@@ -30,4 +32,7 @@ interface Repository {
     suspend fun registerForCourse(courseId: Int, userId: String): Result<CourseRegistration>
     suspend fun unregisterFromCourse(registrationId: Int)
     suspend fun getUserCourseRegistrations(userId: String): Result<List<CourseRegistration>>
+    suspend fun createCourse(request: CourseCreateRequest): Result<Course>
+    suspend fun updateCourse(courseId: Int, request: CourseCreateRequest): Result<Course>
+    suspend fun deleteCourse(courseId: Int): Result<Unit>
 }

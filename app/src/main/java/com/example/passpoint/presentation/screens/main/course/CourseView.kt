@@ -33,12 +33,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.R
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.presentation.components.CourseCard
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.screens.main.ConfirmAction
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
+import com.example.passpoint.presentation.theme.Gray800
 import com.example.passpoint.presentation.viewModel.CoursesViewModel
 
 @Composable
@@ -102,7 +104,10 @@ fun CoursesView(
                                     onRegisterClick = { viewModel.showRegisterConfirm(course.id) },
                                     onUnregisterClick = { viewModel.showUnregisterConfirm(course.id) },
                                     showButtons = true,
-                                    showCapacity = true
+                                    showCapacity = true,
+                                    onQrClick = { controller?.navigate("qr/${UserRepository.ID}") },
+                                    onDeleteClick = { viewModel.showDeleteConfirm(course.id) },
+                                    onEditClick = { controller?.navigate("edit_course/${course.id}") }
                                 )
                             }
                         }
@@ -156,6 +161,19 @@ fun CoursesView(
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.hideDialog() }) { Text("Отмена") }
+            }
+        )
+    }
+    if (state.deleteDialog != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.hideDeleteDialog() },
+            title = { Text("Удаление курса") },
+            text = { Text("Вы уверены, что хотите удалить курс?", color = Gray800) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmDeleteAction() }) { Text("Удалить") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.hideDeleteDialog() }) { Text("Отмена") }
             }
         )
     }

@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.AndroidNetworkMonitor
 import com.example.passpoint.presentation.navigation.Navigation
@@ -34,10 +33,10 @@ class MainActivity : ComponentActivity() {
             val isOnline by networkMonitor.isConnected.collectAsState(initial = false)
             val theme by themeManager.themeFlow.collectAsState(initial = AppTheme.SYSTEM)
 
-            PassPointTheme(selectedTheme = theme) {
+            PassPointTheme(selectedTheme = theme, content = {
                 UserRepository.init(this)
                 Navigation(isOnline = isOnline)
-            }
+            })
         }
     }
 

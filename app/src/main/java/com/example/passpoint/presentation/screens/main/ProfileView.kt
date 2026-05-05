@@ -226,30 +226,31 @@ fun ProfileView(
                                 )
                             }
                         }
-
-                        SpacerHeight(15)
-                        Row(modifier = Modifier.padding(start = 16.dp)) {
-                            Icon(
-                                painter = painterResource(R.drawable.article_24dp),
-                                contentDescription = null,
-                                tint = Gray500,
-                                modifier = Modifier.size(20.dp)
-                            )
-
-                            SpacerWidth(12)
-                            Column {
-                                Text(
-                                    "Мои сертификаты",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Gray500
+                        if (role == "Участник") {
+                            SpacerHeight(15)
+                            Row(modifier = Modifier.padding(start = 16.dp)) {
+                                Icon(
+                                    painter = painterResource(R.drawable.article_24dp),
+                                    contentDescription = null,
+                                    tint = Gray500,
+                                    modifier = Modifier.size(20.dp)
                                 )
-                                Text(
-                                    "0",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                )
+
+                                SpacerWidth(12)
+                                Column {
+                                    Text(
+                                        "Мои сертификаты",
+                                        style = MaterialTheme.typography.displaySmall,
+                                        color = Gray500
+                                    )
+                                    Text(
+                                        "0",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
                             }
                         }
-                        SpacerHeight(10)
+                        SpacerHeight(16)
                     }
                     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
                         Text(

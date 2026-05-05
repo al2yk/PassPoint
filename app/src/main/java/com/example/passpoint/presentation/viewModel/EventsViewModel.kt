@@ -83,6 +83,7 @@ class EventsViewModel @Inject constructor(
         when (dialog.action) {
             ConfirmAction.REGISTER -> register(dialog.eventId)
             ConfirmAction.UNREGISTER -> unregister(dialog.eventId)
+            else -> {}
         }
     }
 
