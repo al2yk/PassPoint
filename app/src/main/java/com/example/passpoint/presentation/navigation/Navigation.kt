@@ -1,40 +1,166 @@
 package com.example.passpoint.presentation.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.example.passpoint.R
+import com.example.passpoint.domain.UserRepository
+import com.example.passpoint.presentation.components.AdminBottomMenu
+import com.example.passpoint.presentation.components.BottomMenu
+import com.example.passpoint.presentation.components.MainEnum
 import com.example.passpoint.presentation.screens.authorization.SignInView
 import com.example.passpoint.presentation.screens.authorization.SignUpView
 import com.example.passpoint.presentation.screens.authorization.changePassword.ChangePasswordView
 import com.example.passpoint.presentation.screens.authorization.changePassword.otp.OTPVIew
 import com.example.passpoint.presentation.screens.authorization.changePassword.setpassword.SetPasswordView
 import com.example.passpoint.presentation.screens.main.MainView
+import com.example.passpoint.presentation.screens.main.MineView
+import com.example.passpoint.presentation.screens.main.ProfileView
+import com.example.passpoint.presentation.screens.main.course.CreateCourseView
+import com.example.passpoint.presentation.screens.main.admin.UsersView
+import com.example.passpoint.presentation.screens.main.course.CoursesView
+import com.example.passpoint.presentation.screens.main.course.PastCoursesView
+import com.example.passpoint.presentation.screens.main.events.EventsView
+import com.example.passpoint.presentation.screens.main.events.PastEventsView
+import com.example.passpoint.presentation.screens.main.news.NewsDetailView
+import com.example.passpoint.presentation.screens.main.news.NewsView
+import com.example.passpoint.presentation.screens.nointernet.NoInternetView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
+import com.example.passpoint.presentation.screens.qr.QrView
 import com.example.passpoint.presentation.screens.splash.SplashView
-import com.example.passpoint.presentation.theme.Background
+import com.example.passpoint.presentation.theme.White
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Navigation() {
+fun Navigation(isOnline: Boolean) {
     val controller = rememberNavController()
     val navBackStackEntry by controller.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    // Экраны с верхним и нижним баром
+    val screensWithBottomBar = setOf(
+        NavigationRoutes.MAIN,
+        NavigationRoutes.PROFILE,
+        NavigationRoutes.MINE,
+        NavigationRoutes.USERS
+    )
+
+    // Экраны только с верхним баром (без нижнего) — точное совпадение
+    val screensWithTopBarOnly = setOf(
+        NavigationRoutes.NEWS,
+        NavigationRoutes.EVENTS,
+        NavigationRoutes.PAST_EVENTS,
+        NavigationRoutes.COURSES,
+        NavigationRoutes.PAST_COURSES,
+        NavigationRoutes.QR,
+        NavigationRoutes.CREATE_NEWS,
+        NavigationRoutes.CREATE_EVENT,
+        NavigationRoutes.CREATE_COURSE,
+        NavigationRoutes.EDIT_COURSE,
+    )
+
+    // Проверка, является ли текущий маршрут детальным экраном новости
+    val isNewsDetail = currentRoute?.startsWith(NavigationRoutes.NEWS_DETAIL) == true
+
+    val showBottomBar = isOnline && currentRoute in screensWithBottomBar
+    val showTopBar = isOnline && (
+            currentRoute in screensWithBottomBar ||
+                    currentRoute in screensWithTopBarOnly ||
+                    isNewsDetail
+            )
+    val isAdmin = UserRepository.role == 3
     Scaffold(
         topBar = {
-            if (shouldNotShowTopBar(currentRoute)) {
-
+            if (showTopBar) {
+                TopAppBar(
+                    title = { Text(getTitleForRoute(currentRoute, isNewsDetail), color = White) },
+                    navigationIcon = {
+                        // Показываем кнопку "Назад", если это не главные экраны и не экран входа
+                        if (currentRoute != NavigationRoutes.MAIN &&
+                            currentRoute != NavigationRoutes.PROFILE &&
+                            currentRoute != NavigationRoutes.MINE &&
+                            !isNewsDetail
+                        ) {
+                            // Для NEWS_DETAIL кнопка назад всё равно нужна, поэтому условие исправлено
+                        }
+                        // Нужно показывать кнопку назад на всех экранах, кроме MAIN, PROFILE, MINE
+                        if (currentRoute != NavigationRoutes.MAIN &&
+                            currentRoute != NavigationRoutes.PROFILE &&
+                            currentRoute != NavigationRoutes.MINE
+                        ) {
+                            IconButton(onClick = { controller.navigateUp() }) {
+                                Icon(
+                                    painter = painterResource(R.drawable.arrow_back_24dp),
+                                    contentDescription = "Назад",
+                                    tint = White
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
             }
-        }
+        },
+        bottomBar = {
+            if (showBottomBar) {
+                if (isAdmin) {
+                    AdminBottomMenu(
+                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin),
+                        onItemSelected = { selectedEnum ->
+                            val route = mapMainEnumToRoute(selectedEnum, isAdmin)
+                            controller.navigate(route) {
+                                popUpTo(controller.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                } else {
+                    BottomMenu(
+                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin),
+                        onItemSelected = { selectedEnum ->
+                            val route = mapMainEnumToRoute(selectedEnum, isAdmin)
+                            controller.navigate(route) {
+                                popUpTo(controller.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
+                }
+            }
+        },
+        modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
-        val innerPadding = innerPadding
-        Background(modifier = Modifier.fillMaxSize()) {
-            NavHost(startDestination = NavigationRoutes.SPLASH, navController = controller) {
+        if (isOnline) {
+            NavHost(
+                startDestination = NavigationRoutes.SPLASH,
+                navController = controller,
+                modifier = Modifier.fillMaxSize()
+            ) {
                 composable(NavigationRoutes.SPLASH) {
                     SplashView(controller)
                 }
@@ -57,18 +183,88 @@ fun Navigation() {
                     SetPasswordView(controller)
                 }
                 composable(NavigationRoutes.MAIN) {
-                    MainView(controller)
+                    MainView(controller, innerPadding)
+                }
+                composable(NavigationRoutes.MINE) {
+                    MineView(controller, innerPadding)
+                }
+                composable(NavigationRoutes.PROFILE) {
+                    ProfileView(controller, innerPadding)
+                }
+                composable(NavigationRoutes.NEWS) {
+                    NewsView(controller, innerPadding)
+                }
+                composable(
+                    route = NavigationRoutes.NEWS_DETAIL + "?newsId={newsId}",
+                    arguments = listOf(navArgument("newsId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val newsId = backStackEntry.arguments?.getInt("newsId") ?: -1
+                    NewsDetailView(innerPadding)
+                }
+                composable(NavigationRoutes.EVENTS) {
+                    EventsView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.PAST_EVENTS) {
+                    PastEventsView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.COURSES) {
+                    CoursesView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.PAST_COURSES) {
+                    PastCoursesView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(
+                    route = NavigationRoutes.QR,
+                    arguments = listOf(navArgument("qrData") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val qrData = backStackEntry.arguments?.getString("qrData") ?: ""
+                    QrView(qrData = qrData)
+                }
+                composable(NavigationRoutes.USERS) {
+                    UsersView(controller,innerPadding)
+                }
+                composable(NavigationRoutes.CREATE_COURSE) {
+                    CreateCourseView(controller,innerPadding)
+                }
+                composable(NavigationRoutes.EDIT_COURSE) {
+                    CreateCourseView(controller = controller, innerPadding = innerPadding)
                 }
             }
+        } else {
+            NoInternetView()
         }
     }
 }
 
-private fun shouldNotShowTopBar(currentRoute: String?): Boolean {
-    val hiddenRoutes = listOf(
-        NavigationRoutes.SPLASH,
-        NavigationRoutes.SIGNIN,
-        NavigationRoutes.SIGNUP,
-    )
-    return currentRoute != null && currentRoute !in hiddenRoutes
+private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = when {
+    route == NavigationRoutes.MAIN -> "PassPoint"
+    route == NavigationRoutes.PROFILE -> "Профиль"
+    route == NavigationRoutes.MINE -> "Моё"
+    route == NavigationRoutes.NEWS -> "Новости"
+    isNewsDetail -> "Новость"
+    route == NavigationRoutes.EVENTS -> "Мероприятия"
+    route == NavigationRoutes.PAST_EVENTS -> "Прошедшие мероприятия"
+    route == NavigationRoutes.COURSES -> "Курсы"
+    route == NavigationRoutes.PAST_COURSES -> "Прошедшие курсы"
+    route == NavigationRoutes.QR -> "QR"
+    route == NavigationRoutes.CREATE_COURSE -> "Создание курса"
+    route == NavigationRoutes.CREATE_EVENT -> "Создание мероприятия"
+    route == NavigationRoutes.CREATE_NEWS -> "Создание новости"
+    route == NavigationRoutes.EDIT_COURSE -> "Редактирование курса"
+    else -> "PassPoint"
+}
+
+private fun mapRouteToMainEnum(route: String?, isAdmin: Boolean): MainEnum = when (route) {
+    NavigationRoutes.PROFILE -> MainEnum.PROFILE
+    NavigationRoutes.MAIN -> MainEnum.HOME
+    NavigationRoutes.MINE -> if (isAdmin) MainEnum.USERS else MainEnum.SETTINGS
+    NavigationRoutes.USERS -> MainEnum.USERS
+    else -> MainEnum.HOME
+}
+
+private fun mapMainEnumToRoute(enum: MainEnum, isAdmin: Boolean): String = when (enum) {
+    MainEnum.PROFILE -> NavigationRoutes.PROFILE
+    MainEnum.HOME -> NavigationRoutes.MAIN
+    MainEnum.SETTINGS -> NavigationRoutes.MINE
+    MainEnum.USERS -> NavigationRoutes.USERS
 }

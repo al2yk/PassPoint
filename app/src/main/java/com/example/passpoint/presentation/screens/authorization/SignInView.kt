@@ -46,6 +46,7 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.WarningMessage
 import com.example.passpoint.presentation.navigation.NavigationRoutes
+import com.example.passpoint.presentation.theme.Background
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.BrandTonal200
 import com.example.passpoint.presentation.theme.ButtonHeight
@@ -68,183 +69,198 @@ fun SignInView(controller: NavHostController, viewModel: SingInViewModel = hiltV
 
     val isVisible = remember { mutableStateOf(false) }
 
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp)
-            .imePadding()
-    ) {
-        if (isBusy) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = White)
-            }
-        }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) { focusManager.clearFocus() },
-            contentPadding = PaddingValues(bottom = 50.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                SpacerHeight(60)
-                AuthTitle("Войдите в систему используя реквизиты", !isBusy)
-                SpacerHeight(30)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    OutlinedTextField(
-                        value = state.email,
-                        onValueChange = { viewModel.updatestate(state.copy(email = it, error = null)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(loginFocusRequester),
-                        label = {
-                            Text(
-                                text = "Логин",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = White50
-                            )
-                        },
-                        shape = MaterialTheme.shapes.small,
-                        enabled = !isBusy,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledTextColor = White50,
-                            focusedTextColor = White,
-                            unfocusedTextColor = White,
-                            focusedBorderColor = White,
-                            disabledBorderColor = White50
-                        )
-                    )
-
-                    SpacerHeight(10)
-
-                    // Password field
-                    OutlinedTextField(
-                        value = state.password,
-                        onValueChange = { viewModel.updatestate(state.copy(password = it, error = null)) },
-                        label = {
-                            Text(
-                                text = "Пароль",
-                                color = White50,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(passwordFocusRequester),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                            imeAction = ImeAction.Done
-                        ),
-                        shape = MaterialTheme.shapes.small,
-                        enabled = !isBusy,
-                        visualTransformation = if (isVisible.value)
-                            VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            IconButton(
-                                onClick = { isVisible.value = !isVisible.value },
-                                enabled = !isBusy
-                            ) {
-                                Icon(
-                                    painter = painterResource(
-                                        if (isVisible.value)
-                                            R.drawable.visibility
-                                        else R.drawable.visibility_off
-                                    ),
-                                    contentDescription = if (isVisible.value)
-                                        "" else "",
-                                    tint = if (isBusy) White60 else White
-                                )
-                            }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledTextColor = White50,
-                            focusedTextColor = White,
-                            unfocusedTextColor = White,
-                            focusedBorderColor = White,
-                            disabledBorderColor = White50
-                        )
-                    )
-                    SpacerHeight(10)
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        TextButton(
-                            onClick = {
-                                controller.navigate(NavigationRoutes.CHANGEPASSWORD)
-                            }
-                        ) {
-                            Text("Забыли пароль? ", color = if (isBusy) White50 else White60)
-                        }
-                    }
-                    SpacerHeight(10)
-                    Box(modifier = Modifier.height(56.dp)) {
-                        if (!state.error.isNullOrBlank()) {
-                            SpacerHeight(20)
-                            WarningMessage(state.error)
-                            SpacerHeight(8)
-                        }
-                    }
-                    SpacerHeight(48)
-                }
-
-            }
-        }
+    Background(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = 50.dp)
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .imePadding()
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth()
+            if (isBusy) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = White)
+                }
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { focusManager.clearFocus() },
+                contentPadding = PaddingValues(bottom = 50.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(
-                    onClick = {
-                        controller.navigate(NavigationRoutes.SIGNUP)
-                    },
-                    modifier = Modifier
-                        .height(ButtonHeight)
-                        .weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Text(
-                        "Регистрация",
-                        color = if (!isBusy) White else White50
-                    )
+                item {
+                    SpacerHeight(60)
+                    AuthTitle("Войдите в систему используя реквизиты", !isBusy)
+                    SpacerHeight(30)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = state.email,
+                            onValueChange = {
+                                viewModel.updatestate(
+                                    state.copy(
+                                        email = it,
+                                        error = null
+                                    )
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(loginFocusRequester),
+                            label = {
+                                Text(
+                                    text = "Логин",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = White50
+                                )
+                            },
+                            shape = MaterialTheme.shapes.small,
+                            enabled = !isBusy,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = White50,
+                                focusedTextColor = White,
+                                unfocusedTextColor = White,
+                                focusedBorderColor = White,
+                                disabledBorderColor = White50
+                            )
+                        )
+
+                        SpacerHeight(10)
+
+                        // Password field
+                        OutlinedTextField(
+                            value = state.password,
+                            onValueChange = {
+                                viewModel.updatestate(
+                                    state.copy(
+                                        password = it,
+                                        error = null
+                                    )
+                                )
+                            },
+                            label = {
+                                Text(
+                                    text = "Пароль",
+                                    color = White50,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(passwordFocusRequester),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            ),
+                            shape = MaterialTheme.shapes.small,
+                            enabled = !isBusy,
+                            visualTransformation = if (isVisible.value)
+                                VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = { isVisible.value = !isVisible.value },
+                                    enabled = !isBusy
+                                ) {
+                                    Icon(
+                                        painter = painterResource(
+                                            if (isVisible.value)
+                                                R.drawable.visibility
+                                            else R.drawable.visibility_off
+                                        ),
+                                        contentDescription = if (isVisible.value)
+                                            "" else "",
+                                        tint = if (isBusy) White60 else White
+                                    )
+                                }
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = White50,
+                                focusedTextColor = White,
+                                unfocusedTextColor = White,
+                                focusedBorderColor = White,
+                                disabledBorderColor = White50
+                            )
+                        )
+                        SpacerHeight(10)
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    controller.navigate(NavigationRoutes.CHANGEPASSWORD)
+                                }
+                            ) {
+                                Text("Забыли пароль? ", color = if (isBusy) White50 else White60)
+                            }
+                        }
+                        SpacerHeight(10)
+                        Box(modifier = Modifier.height(56.dp)) {
+                            if (!state.error.isNullOrBlank()) {
+                                SpacerHeight(20)
+                                WarningMessage(state.error)
+                                SpacerHeight(8)
+                            }
+                        }
+                        SpacerHeight(48)
+                    }
+
                 }
-                SpacerWidth(8)
-                PrimaryButton(
-                    onClick = {
-                        viewModel.signIn(controller)
-                        focusManager.clearFocus()
-                    },
-                    enabled = !isBusy && state.email.isNotEmpty() && state.password.isNotEmpty(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .focusRequester(buttonFocusRequester)
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 50.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        "Войти",
-                        color = if (!isBusy) BrandColor else BrandTonal200
-                    )
+                    TextButton(
+                        onClick = {
+                            controller.navigate(NavigationRoutes.SIGNUP)
+                        },
+                        modifier = Modifier
+                            .height(ButtonHeight)
+                            .weight(1f),
+                        shape = MaterialTheme.shapes.small,
+                    ) {
+                        Text(
+                            "Регистрация",
+                            color = if (!isBusy) White else White50
+                        )
+                    }
+                    SpacerWidth(8)
+                    PrimaryButton(
+                        onClick = {
+                            viewModel.signIn(controller)
+                            focusManager.clearFocus()
+                        },
+                        enabled = !isBusy && state.email.isNotEmpty() && state.password.isNotEmpty(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(buttonFocusRequester)
+                    ) {
+                        Text(
+                            "Войти",
+                            color = if (!isBusy) BrandColor else BrandTonal200
+                        )
+                    }
                 }
+
             }
 
         }
 
     }
-
 }

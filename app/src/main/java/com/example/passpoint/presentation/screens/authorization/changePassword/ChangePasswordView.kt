@@ -38,6 +38,7 @@ import com.example.passpoint.presentation.components.PrimaryButton
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
+import com.example.passpoint.presentation.theme.Background
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.White
@@ -45,7 +46,10 @@ import com.example.passpoint.presentation.theme.White50
 import com.example.passpoint.presentation.viewModel.ChangePasswordViewModel
 
 @Composable
-fun ChangePasswordView(controller: NavHostController, viewModel: ChangePasswordViewModel = hiltViewModel()) {
+fun ChangePasswordView(
+    controller: NavHostController,
+    viewModel: ChangePasswordViewModel = hiltViewModel()
+) {
     val state = viewModel.state
 
     val focusManager = LocalFocusManager.current
@@ -61,98 +65,99 @@ fun ChangePasswordView(controller: NavHostController, viewModel: ChangePasswordV
             }
         )
     }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp)
-            .imePadding()
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) { focusManager.clearFocus() },
-            contentPadding = PaddingValues(bottom = 50.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            item {
-                SpacerHeight(280)
-                AuthTitle("Введите свой логин для сброса пароля", true)
-                SpacerHeight(30)
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    OutlinedTextField(
-                        value = state.email,
-                        onValueChange = { viewModel.updatestate(state.copy(email = it)) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(loginFocusRequester),
-                        label = {
-                            Text(
-                                text = "Логин",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = White50
-                            )
-                        },
-                        shape = MaterialTheme.shapes.small,
-                        enabled = true,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Email,
-                            imeAction = ImeAction.Next
-                        ),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            disabledTextColor = White50,
-                            focusedTextColor = White,
-                            unfocusedTextColor = White,
-                            focusedBorderColor = White,
-                            disabledBorderColor = White50
-                        )
-                    )
-                }
-            }
-        }
+    Background(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = 50.dp)
+                .fillMaxSize()
+                .padding(horizontal = 24.dp)
+                .imePadding()
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) { focusManager.clearFocus() },
+                contentPadding = PaddingValues(bottom = 50.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                TextButton(
-                    onClick = {
-                        controller.navigate(NavigationRoutes.SIGNIN)
-                    },
-                    modifier = Modifier
-                        .height(ButtonHeight)
-                        .weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Text(
-                        "Назад",
-                        color = White
-                    )
+                item {
+                    SpacerHeight(280)
+                    AuthTitle("Введите свой логин для сброса пароля", true)
+                    SpacerHeight(30)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedTextField(
+                            value = state.email,
+                            onValueChange = { viewModel.updatestate(state.copy(email = it)) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(loginFocusRequester),
+                            label = {
+                                Text(
+                                    text = "Логин",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = White50
+                                )
+                            },
+                            shape = MaterialTheme.shapes.small,
+                            enabled = true,
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            ),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                disabledTextColor = White50,
+                                focusedTextColor = White,
+                                unfocusedTextColor = White,
+                                focusedBorderColor = White,
+                                disabledBorderColor = White50
+                            )
+                        )
+                    }
                 }
-                SpacerWidth(8)
-                val context = LocalContext.current
-
-                PrimaryButton(
-                    onClick = {
-                        viewModel.forgotPasswordOTP(context)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 50.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(
-                        "Отправить",
-                        color = BrandColor
-                    )
+                    TextButton(
+                        onClick = {
+                            controller.navigate(NavigationRoutes.SIGNIN)
+                        },
+                        modifier = Modifier
+                            .height(ButtonHeight)
+                            .weight(1f),
+                        shape = MaterialTheme.shapes.small,
+                    ) {
+                        Text(
+                            "Назад",
+                            color = White
+                        )
+                    }
+                    SpacerWidth(8)
+                    val context = LocalContext.current
+
+                    PrimaryButton(
+                        onClick = {
+                            viewModel.forgotPasswordOTP(context)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                    ) {
+                        Text(
+                            "Отправить",
+                            color = BrandColor
+                        )
+                    }
                 }
             }
         }

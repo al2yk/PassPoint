@@ -61,6 +61,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     implementation (libs.androidx.material3)
     implementation (libs.google.material)
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    implementation("com.google.zxing:core:3.5.1")
     //navigation compose
     implementation(libs.androidx.navigation.compose)
 
@@ -81,4 +83,5 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }

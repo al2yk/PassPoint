@@ -2,7 +2,15 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.Course
+import com.example.passpoint.data.dto.CourseCreateRequest
+import com.example.passpoint.data.dto.CourseRegistration
+import com.example.passpoint.data.dto.CourseWithEnrollment
+import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
+import com.example.passpoint.data.dto.News
+import com.example.passpoint.data.dto.NewsCategory
 import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
@@ -41,7 +49,8 @@ class UserRepositoryImpl @Inject constructor(
                 user_id = response.user.id,
                 name = name,
                 surname = surname,
-                role = 1
+                role = 1,
+                photo = ""
             )
             Log.d("UserDTO signUp", userDto.toString())
 
@@ -55,21 +64,22 @@ class UserRepositoryImpl @Inject constructor(
     }
 
 
-    override suspend fun signIn(
-        email: String,
-        password: String
-    ): Result<AuthResponseModel> {
+    override suspend fun signIn(email: String, password: String): Result<AuthResponseModel> {
         return try {
             val response = userApi.signIn(AuthRequest(email, password))
-            Log.d("Response signIn", response.toString())
-
             if (response.access_token == null) {
-                return Result.Failure(exception = Exception("Ошибка Авторизации"))
+                return Result.Failure(Exception("Ошибка Авторизации"))
             }
             UserRepository.user_token = response.access_token
+            UserRepository.ID = response.user.id.toString()
+
+            val profileResult = getProfile(UserRepository.ID)
+            if (profileResult is Result.Success && profileResult.data.isNotEmpty()) {
+                UserRepository.role = profileResult.data.first().role
+            }
+
             val authData = Mapper.mapToDomain(response)
             Result.Success(data = authData)
-
         } catch (e: Exception) {
             Log.e("ERROR SignIn", e.message.toString())
             Result.Failure(exception = Exception(e.message))
@@ -115,6 +125,168 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("ERROR newPassword", e.message.toString())
             Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getProfile(userId: String): Result<List<User>> {
+        return try {
+            val response = userApi.getProfile("eq.$userId")
+            Log.d("Response getProfile", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getProfile", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getNews(): Result<List<News>> {
+        return try {
+            val response = userApi.getNews()
+            Log.d("Response getNews", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getNews", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getCategory(): Result<List<NewsCategory>> {
+        return try {
+            val response = userApi.getCategory()
+            Log.d("Response getCategory", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getCategory", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getCurators(): Result<List<User>> {
+        return try {
+            val response = userApi.getCurators("eq.2")
+            Log.d("Response getCurators", response.toString())
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getCurators", e.message.toString())
+            Result.Failure(exception = Exception(e.message))
+        }
+    }
+
+    override suspend fun getEvent(): Result<List<Event>> {
+        return try {
+            val response = userApi.getEvents()
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getEvents", e.message.toString())
+            Result.Failure(exception = e)
+        }
+    }
+
+
+    override suspend fun registerForEvent(eventId: Int, userId: String): Result<EventRegistration> {
+        return try {
+
+            val registration = EventRegistration(user = userId, event = eventId)
+            val response = userApi.createEventRegistration(registration)
+            if (response.isNotEmpty()) {
+                Result.Success(response.first())
+            } else {
+                Result.Failure(Exception("Сервер вернул пустой ответ"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun unregisterFromEvent(registrationId: Long?) {
+        val response = userApi.deleteEventRegistration("eq.$registrationId")
+        if (!response.isSuccessful) {
+            throw Exception("Ошибка при удалении регистрации: код ${response.code()}")
+        }
+    }
+
+    override suspend fun getUserRegistrations(userId: String): Result<List<EventRegistration>> {
+        return try {
+            val response = userApi.getUserEventRegistrations("eq.$userId")
+            Result.Success(response)
+        } catch (e: Exception) {
+            Result.Failure(exception = e)
+        }
+    }
+
+    override suspend fun getCourse(): Result<List<CourseWithEnrollment>> {
+        return try {
+            val response = userApi.getCoursesWithEnrollment()
+            Result.Success(data = response)
+        } catch (e: Exception) {
+            Log.e("ERROR getCourse", e.message.toString())
+            Result.Failure(exception = e)
+        }
+    }
+    override suspend fun registerForCourse(courseId: Int, userId: String): Result<CourseRegistration> {
+        return try {
+            val registration = CourseRegistration(user = userId, course = courseId)
+            val response = userApi.createCourseRegistration(registration)
+            if (response.isNotEmpty()) {
+                Result.Success(response.first())
+            } else {
+                Result.Failure(Exception("Сервер вернул пустой ответ"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun unregisterFromCourse(registrationId: Int) {
+        val response = userApi.deleteCourseRegistration("eq.$registrationId")
+        if (!response.isSuccessful) {
+            throw Exception("Ошибка при удалении регистрации на курс: код ${response.code()}")
+        }
+    }
+
+    override suspend fun getUserCourseRegistrations(userId: String): Result<List<CourseRegistration>> {
+        return try {
+            val response = userApi.getUserCourseRegistrations("eq.$userId")
+            Result.Success(response)
+        } catch (e: Exception) {
+            Result.Failure(exception = e)
+        }
+    }
+    override suspend fun createCourse(request: CourseCreateRequest): Result<Course> {
+        return try {
+            val response = userApi.createCourse(request)
+            if (response.isNotEmpty()) {
+                Result.Success(response.first())
+            } else {
+                Result.Failure(Exception("Сервер вернул пустой ответ"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+    override suspend fun updateCourse(courseId: Int, request: CourseCreateRequest): Result<Course> {
+        return try {
+            val response = userApi.updateCourse("eq.$courseId", request)
+            if (response.isNotEmpty()) {
+                Result.Success(response.first())
+            } else {
+                Result.Failure(Exception("Ошибка обновления курса"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun deleteCourse(courseId: Int): Result<Unit> {
+        return try {
+            val response = userApi.deleteCourse("eq.$courseId")
+            if (response.isSuccessful) {
+                Result.Success(Unit)
+            } else {
+                Result.Failure(Exception("Ошибка удаления курса: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.Failure(e)
         }
     }
 }

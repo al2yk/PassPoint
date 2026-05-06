@@ -66,7 +66,10 @@ val WhiteColorScheme = lightColorScheme(
     inverseSurface = Gray800,
     onTertiaryContainer = White50,
     outline = White70,
-
+    surfaceBright = Brand50,
+    surfaceVariant = BrandColor,
+    onErrorContainer = BrandColor,
+    inversePrimary = Brand50
 )
 val DarkColorScheme = lightColorScheme(
     // Button Color; leading icon in the chips;
@@ -124,9 +127,14 @@ val DarkColorScheme = lightColorScheme(
     //Divider
     surfaceDim = Gray450,
     // arrow right go to action
-    inverseSurface = White,
+    inverseSurface = Gray350,
     onTertiaryContainer = White50,
     outline = White70,
+    surfaceBright = Gray400,
+    surfaceVariant = Black900,
+    onErrorContainer = White,
+    inversePrimary = Brand50
+
 
 )
 val ButtonHeight = 48.dp
@@ -134,13 +142,16 @@ val ButtonHeight = 48.dp
 
 @Composable
 fun PassPointTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    selectedTheme: AppTheme,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> WhiteColorScheme
+    val darkTheme = when (selectedTheme) {
+        AppTheme.LIGHT -> false
+        AppTheme.DARK -> true
+        AppTheme.SYSTEM -> isSystemInDarkTheme()
     }
+
+    val colorScheme = if (darkTheme) DarkColorScheme else WhiteColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

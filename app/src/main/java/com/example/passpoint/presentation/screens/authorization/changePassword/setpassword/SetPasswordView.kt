@@ -43,6 +43,7 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.WarningMessage
 import com.example.passpoint.presentation.navigation.NavigationRoutes
+import com.example.passpoint.presentation.theme.Background
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.White
@@ -62,161 +63,161 @@ fun SetPasswordView(
     val isBusy = state.isLoading
     var isVisible by remember { mutableStateOf(false) }
     var isVisibleSecond by remember { mutableStateOf(false) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .padding(horizontal = 24.dp)
-    ) {
-        if (isBusy) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = White)
-            }
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.weight(1f))
-
-            AuthTitle("Установите новый пароль для входа в систему", true)
-            SpacerHeight(30)
-
-            // Поле Пароль
-            OutlinedTextField(
-                value = state.password,
-                onValueChange = {
-                    viewModel.updateState(state.copy(password = it, errorMessage = null))
-                },
-                label = {
-                    Text(
-                        text = "Пароль",
-                        color = White50,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                shape = MaterialTheme.shapes.small,
-                enabled = !isBusy,
-                visualTransformation = if (isVisible)
-                    VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(
-                        onClick = { isVisible = !isVisible },
-                        enabled = !isBusy
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (isVisible) R.drawable.visibility
-                                else R.drawable.visibility_off
-                            ),
-                            contentDescription = if (isVisible) "" else "",
-                            tint = if (isBusy) White60 else White
-                        )
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = White50,
-                    focusedTextColor = White,
-                    unfocusedTextColor = White,
-                    focusedBorderColor = White,
-                    disabledBorderColor = White50
-                )
-            )
-            SpacerHeight(10)
-
-            // ПАРОЛЬ 2
-            OutlinedTextField(
-                value = state.passwordCheck,
-                onValueChange = {
-                    viewModel.updateState(state.copy(passwordCheck = it, errorMessage = null))
-                },
-                label = {
-                    Text(
-                        text = "Повторите пароль",
-                        color = White50,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                shape = MaterialTheme.shapes.small,
-                enabled = !isBusy,
-                visualTransformation = if (isVisibleSecond)
-                    VisualTransformation.None else PasswordVisualTransformation(),
-                trailingIcon = {
-                    IconButton(
-                        onClick = { isVisibleSecond = !isVisibleSecond },
-                        enabled = !isBusy
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (isVisibleSecond) R.drawable.visibility
-                                else R.drawable.visibility_off
-                            ),
-                            contentDescription = if (isVisibleSecond) "" else "",
-                            tint = if (isBusy) White60 else White
-                        )
-                    }
-                },
-                colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = White50,
-                    focusedTextColor = White,
-                    unfocusedTextColor = White,
-                    focusedBorderColor = White,
-                    disabledBorderColor = White50
-                )
-            )
-            SpacerHeight(16)
-            if (state.errorMessage != null) {
-                WarningMessage(text = state.errorMessage)
-                SpacerHeight(8)
-            }
-
-            SpacerHeight(16)
-            Spacer(modifier = Modifier.weight(1f))
-            SpacerHeight(50)
-        }
+    Background(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(bottom = 50.dp)
+                .fillMaxSize()
+                .imePadding()
+                .padding(horizontal = 24.dp)
         ) {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                TextButton(
-                    onClick = { controller.navigate(NavigationRoutes.CHANGEPASSWORD) },
-                    modifier = Modifier
-                        .height(ButtonHeight)
-                        .weight(1f),
-                    shape = MaterialTheme.shapes.small,
-                ) {
-                    Text("Назад", color = White)
+            if (isBusy) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = White)
                 }
-                SpacerWidth(8)
-                PrimaryButton(
-                    onClick = {
-                        // Вызов валидации и смены пароля
-                        viewModel.validateAndSetPassword(context, controller)
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+
+                AuthTitle("Установите новый пароль для входа в систему", true)
+                SpacerHeight(30)
+
+                // Поле Пароль
+                OutlinedTextField(
+                    value = state.password,
+                    onValueChange = {
+                        viewModel.updateState(state.copy(password = it, errorMessage = null))
                     },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isBusy
-                ) {
-                    Text("Сохранить", color = BrandColor)
+                    label = {
+                        Text(
+                            text = "Пароль",
+                            color = White50,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                    enabled = !isBusy,
+                    visualTransformation = if (isVisible)
+                        VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { isVisible = !isVisible },
+                            enabled = !isBusy
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (isVisible) R.drawable.visibility
+                                    else R.drawable.visibility_off
+                                ),
+                                contentDescription = if (isVisible) "" else "",
+                                tint = if (isBusy) White60 else White
+                            )
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = White50,
+                        focusedTextColor = White,
+                        unfocusedTextColor = White,
+                        focusedBorderColor = White,
+                        disabledBorderColor = White50
+                    )
+                )
+                SpacerHeight(10)
+
+                // ПАРОЛЬ 2
+                OutlinedTextField(
+                    value = state.passwordCheck,
+                    onValueChange = {
+                        viewModel.updateState(state.copy(passwordCheck = it, errorMessage = null))
+                    },
+                    label = {
+                        Text(
+                            text = "Повторите пароль",
+                            color = White50,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                    enabled = !isBusy,
+                    visualTransformation = if (isVisibleSecond)
+                        VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { isVisibleSecond = !isVisibleSecond },
+                            enabled = !isBusy
+                        ) {
+                            Icon(
+                                painter = painterResource(
+                                    if (isVisibleSecond) R.drawable.visibility
+                                    else R.drawable.visibility_off
+                                ),
+                                contentDescription = if (isVisibleSecond) "" else "",
+                                tint = if (isBusy) White60 else White
+                            )
+                        }
+                    },
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = White50,
+                        focusedTextColor = White,
+                        unfocusedTextColor = White,
+                        focusedBorderColor = White,
+                        disabledBorderColor = White50
+                    )
+                )
+                SpacerHeight(16)
+                if (state.errorMessage != null) {
+                    WarningMessage(text = state.errorMessage)
+                    SpacerHeight(8)
+                }
+
+                SpacerHeight(16)
+                Spacer(modifier = Modifier.weight(1f))
+                SpacerHeight(50)
+            }
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .padding(bottom = 50.dp)
+            ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    TextButton(
+                        onClick = { controller.navigate(NavigationRoutes.CHANGEPASSWORD) },
+                        modifier = Modifier
+                            .height(ButtonHeight)
+                            .weight(1f),
+                        shape = MaterialTheme.shapes.small,
+                    ) {
+                        Text("Назад", color = White)
+                    }
+                    SpacerWidth(8)
+                    PrimaryButton(
+                        onClick = {
+                            viewModel.validateAndSetPassword(context, controller)
+                        },
+                        modifier = Modifier.weight(1f),
+                        enabled = !isBusy
+                    ) {
+                        Text("Сохранить", color = BrandColor)
+                    }
                 }
             }
         }

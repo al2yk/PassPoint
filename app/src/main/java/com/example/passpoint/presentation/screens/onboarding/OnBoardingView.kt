@@ -32,6 +32,7 @@ import com.example.passpoint.presentation.components.PrimaryButton
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.isCompactLayoutRequired
 import com.example.passpoint.presentation.navigation.NavigationRoutes
+import com.example.passpoint.presentation.theme.Background
 import com.example.passpoint.presentation.theme.ButtonHeight
 import kotlin.math.absoluteValue
 
@@ -44,7 +45,7 @@ fun OnboardingView(
 
     val onSkipClicked: () -> Unit = {
         UserRepository.act = 1
-        controller.navigate(NavigationRoutes.SIGNIN){
+        controller.navigate(NavigationRoutes.SIGNIN) {
             popUpTo(NavigationRoutes.ONBOARDING) {
                 inclusive = true
             }
@@ -78,80 +79,88 @@ fun OnboardingView(
     )
     BoxWithConstraints {
         val isCompact = isCompactLayoutRequired()
-
-        Box(modifier = Modifier.fillMaxSize()) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 95.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter),
-                contentAlignment = Alignment.Center
-            ) {
-                PagerIndicator(OnBoardingEnum.entries.size, currentScreen.ordinal)
-            }
-            HorizontalPager(
-                state = pagerState,
-                userScrollEnabled = true,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
+        Background(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 Box(
                     modifier = Modifier
-                        .graphicsLayer {
-                            val pageOffset =
-                                ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
-
-                            alpha = lerp(
-                                start = 0f,
-                                stop = 1f,
-                                fraction = (0.5f - pageOffset.absoluteValue.coerceIn(0f, 0.5f)) * 2f
-                            )
-
-                            translationX = size.width * pageOffset * 0.9f
-                        }
-                        .fillMaxSize()
+                        .padding(top = 95.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
+                    contentAlignment = Alignment.Center
                 ) {
-                    when (page) {
-                        0 -> OnBoarding1(isCompact)
-                        1 -> OnBoarding2(isCompact)
-                        2 -> OnBoarding3(isCompact)
-                        3 -> OnBoarding4(isCompact)
+                    PagerIndicator(OnBoardingEnum.entries.size, currentScreen.ordinal)
+                }
+                HorizontalPager(
+                    state = pagerState,
+                    userScrollEnabled = true,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                val pageOffset =
+                                    ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction)
+
+                                alpha = lerp(
+                                    start = 0f,
+                                    stop = 1f,
+                                    fraction = (0.5f - pageOffset.absoluteValue.coerceIn(
+                                        0f,
+                                        0.5f
+                                    )) * 2f
+                                )
+
+                                translationX = size.width * pageOffset * 0.9f
+                            }
+                            .fillMaxSize()
+                    ) {
+                        when (page) {
+                            0 -> OnBoarding1(isCompact)
+                            1 -> OnBoarding2(isCompact)
+                            2 -> OnBoarding3(isCompact)
+                            3 -> OnBoarding4(isCompact)
+                        }
                     }
                 }
-            }
 
-            // Кнопки навигации
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(horizontal = 40.dp)
-                    .padding(bottom = 50.dp)
-            ) {
-                TextButton(
-                    onClick = onSkipClicked,
+                // Кнопки навигации
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .height(ButtonHeight)
-                        .weight(1f),
-                    shape = MaterialTheme.shapes.small,
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(horizontal = 40.dp)
+                        .padding(bottom = 50.dp)
                 ) {
-                    Text("Пропустить",
-                        color = MaterialTheme.colorScheme.onPrimary)
-                }
-                SpacerWidth(8)
-                PrimaryButton(
-                    onClick = {
-                        if (pagerState.currentPage != OnBoardingEnum.ONBOARDING4.ordinal) {
-                            pagesViewModel.clickNextOnBoarding()
-                        } else {
-                            onSkipClicked()
-                        }
+                    TextButton(
+                        onClick = onSkipClicked,
+                        modifier = Modifier
+                            .height(ButtonHeight)
+                            .weight(1f),
+                        shape = MaterialTheme.shapes.small,
+                    ) {
+                        Text(
+                            "Пропустить",
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    SpacerWidth(8)
+                    PrimaryButton(
+                        onClick = {
+                            if (pagerState.currentPage != OnBoardingEnum.ONBOARDING4.ordinal) {
+                                pagesViewModel.clickNextOnBoarding()
+                            } else {
+                                onSkipClicked()
+                            }
 
-                    }, modifier = Modifier.weight(1f)
-                ) {
-                    Text("Далее",
-                        color = MaterialTheme.colorScheme.primary)
+                        }, modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            "Далее",
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
         }
