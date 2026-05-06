@@ -8,5 +8,6 @@ data class NewsState(
     val category: List<NewsCategory> = listOf(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val selectedCategoryId: Int = 0
+    val selectedCategoryId: Int = 0,
+    val deleteDialog: Int? = null
 )

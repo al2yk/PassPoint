@@ -88,6 +88,7 @@ fun CourseCard(
                 }
             }
         } else {
+            SpacerHeight(16)
             OutlinedButton(
                 modifier = Modifier
                     .fillMaxWidth()

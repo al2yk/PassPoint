@@ -33,12 +33,14 @@ import com.example.passpoint.presentation.screens.authorization.changePassword.s
 import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.main.MineView
 import com.example.passpoint.presentation.screens.main.ProfileView
-import com.example.passpoint.presentation.screens.main.course.CreateCourseView
 import com.example.passpoint.presentation.screens.main.admin.UsersView
 import com.example.passpoint.presentation.screens.main.course.CoursesView
+import com.example.passpoint.presentation.screens.main.course.CreateCourseView
 import com.example.passpoint.presentation.screens.main.course.PastCoursesView
+import com.example.passpoint.presentation.screens.main.events.CreateEventView
 import com.example.passpoint.presentation.screens.main.events.EventsView
 import com.example.passpoint.presentation.screens.main.events.PastEventsView
+import com.example.passpoint.presentation.screens.main.news.CreateNewsView
 import com.example.passpoint.presentation.screens.main.news.NewsDetailView
 import com.example.passpoint.presentation.screens.main.news.NewsView
 import com.example.passpoint.presentation.screens.nointernet.NoInternetView
@@ -74,6 +76,8 @@ fun Navigation(isOnline: Boolean) {
         NavigationRoutes.CREATE_EVENT,
         NavigationRoutes.CREATE_COURSE,
         NavigationRoutes.EDIT_COURSE,
+        NavigationRoutes.EDIT_EVENT,
+        NavigationRoutes.EDIT_NEWS
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -221,13 +225,31 @@ fun Navigation(isOnline: Boolean) {
                     QrView(qrData = qrData)
                 }
                 composable(NavigationRoutes.USERS) {
-                    UsersView(controller,innerPadding)
+                    UsersView(controller, innerPadding)
                 }
                 composable(NavigationRoutes.CREATE_COURSE) {
-                    CreateCourseView(controller,innerPadding)
+                    CreateCourseView(controller, innerPadding)
                 }
                 composable(NavigationRoutes.EDIT_COURSE) {
                     CreateCourseView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.CREATE_EVENT) {
+                    CreateEventView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(
+                    route = NavigationRoutes.EDIT_EVENT,
+                    arguments = listOf(navArgument("eventId") { type = NavType.IntType })
+                ) {
+                    CreateEventView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(NavigationRoutes.CREATE_NEWS) {
+                    CreateNewsView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(
+                    route = NavigationRoutes.EDIT_NEWS,
+                    arguments = listOf(navArgument("newsId") { type = NavType.IntType })
+                ) {
+                    CreateNewsView(controller = controller, innerPadding = innerPadding)
                 }
             }
         } else {
@@ -251,6 +273,8 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.CREATE_EVENT -> "Создание мероприятия"
     route == NavigationRoutes.CREATE_NEWS -> "Создание новости"
     route == NavigationRoutes.EDIT_COURSE -> "Редактирование курса"
+    route == NavigationRoutes.EDIT_EVENT -> "Редактирование мероприятия"
+    route == NavigationRoutes.EDIT_NEWS -> "Редактирование новости"
     else -> "PassPoint"
 }
 

@@ -7,10 +7,12 @@ import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
 import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventCreateRequest
 import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.NewsCategory
+import com.example.passpoint.data.dto.NewsCreateRequest
 import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
@@ -21,6 +23,9 @@ import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.AuthResponseModel
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.repository.Repository
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.UUID
 import javax.inject.Inject
 
@@ -285,6 +290,75 @@ class UserRepositoryImpl @Inject constructor(
             } else {
                 Result.Failure(Exception("Ошибка удаления курса: ${response.code()}"))
             }
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+    override suspend fun createEvent(request: EventCreateRequest): Result<Event> {
+        return try {
+            val response = userApi.createEvent(request)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Сервер вернул пустой ответ"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun updateEvent(eventId: Int, request: EventCreateRequest): Result<Event> {
+        return try {
+            val response = userApi.updateEvent("eq.$eventId", request)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Ошибка обновления мероприятия"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun deleteEvent(eventId: Int): Result<Unit> {
+        return try {
+            val response = userApi.deleteEvent("eq.$eventId")
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка удаления мероприятия: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+    override suspend fun createNews(request: NewsCreateRequest): Result<News> {
+        return try {
+            val response = userApi.createNews(request)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Сервер вернул пустой ответ"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun updateNews(newsId: Int, request: NewsCreateRequest): Result<News> {
+        return try {
+            val response = userApi.updateNews("eq.$newsId", request)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Ошибка обновления новости"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun deleteNews(newsId: Int): Result<Unit> {
+        return try {
+            val response = userApi.deleteNews("eq.$newsId")
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка удаления новости: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+    override suspend fun uploadImage(fileName: String, imageBytes: ByteArray): Result<Unit> {
+        return try {
+            val requestBody = imageBytes.toRequestBody("image/*".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("image", fileName, requestBody)
+            val response = userApi.uploadNewsImage(fileName, imagePart)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка загрузки изображения: ${response.code()}"))
         } catch (e: Exception) {
             Result.Failure(e)
         }

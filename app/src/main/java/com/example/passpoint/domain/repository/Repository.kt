@@ -5,10 +5,12 @@ import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
 import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventCreateRequest
 import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.NewsCategory
+import com.example.passpoint.data.dto.NewsCreateRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
 import com.example.passpoint.domain.model.AuthResponseModel
@@ -35,4 +37,11 @@ interface Repository {
     suspend fun createCourse(request: CourseCreateRequest): Result<Course>
     suspend fun updateCourse(courseId: Int, request: CourseCreateRequest): Result<Course>
     suspend fun deleteCourse(courseId: Int): Result<Unit>
+    suspend fun createEvent(request: EventCreateRequest): Result<Event>
+    suspend fun updateEvent(eventId: Int, request: EventCreateRequest): Result<Event>
+    suspend fun deleteEvent(eventId: Int): Result<Unit>
+    suspend fun createNews(request: NewsCreateRequest): Result<News>
+    suspend fun updateNews(newsId: Int, request: NewsCreateRequest): Result<News>
+    suspend fun deleteNews(newsId: Int): Result<Unit>
+    suspend fun uploadImage(fileName: String, imageBytes: ByteArray): Result<Unit>
 }

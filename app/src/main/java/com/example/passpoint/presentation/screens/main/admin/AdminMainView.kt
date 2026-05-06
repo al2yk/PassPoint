@@ -61,7 +61,7 @@ fun AdminMainView(controller: NavHostController) {
                     }
                 }
                 Button(
-                    onClick = {  },
+                    onClick = { controller.navigate(NavigationRoutes.CREATE_EVENT) },
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     shape = RoundedCornerShape(0.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -83,7 +83,7 @@ fun AdminMainView(controller: NavHostController) {
                     }
                 }
                 Button(
-                    onClick = { },
+                    onClick = { controller.navigate(NavigationRoutes.CREATE_NEWS) },
                     contentPadding = PaddingValues(horizontal = 0.dp),
                     shape = RoundedCornerShape(0.dp),
                     colors = ButtonDefaults.buttonColors(

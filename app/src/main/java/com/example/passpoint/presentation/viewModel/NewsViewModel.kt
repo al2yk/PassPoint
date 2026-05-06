@@ -8,6 +8,7 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.domain.model.Result
+import com.example.passpoint.domain.useCase.DeleteNewsUseCase
 import com.example.passpoint.domain.useCase.GetCategoryUseCase
 import com.example.passpoint.domain.useCase.GetNewsUseCase
 import com.example.passpoint.presentation.screens.main.news.NewsState
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class NewsViewModel @Inject constructor(
     private val getNewsUseCase: GetNewsUseCase,
     private val getCategoryUseCase: GetCategoryUseCase,
+    private val deleteNewsUseCase: DeleteNewsUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -67,11 +69,37 @@ class NewsViewModel @Inject constructor(
 
     private fun preloadImages(newsList: List<News>) {
         newsList.forEach { news ->
-            if (news.photo.isNotBlank()) {
+            if (news.photo != null && news.photo.isNotBlank()) {
                 val request = ImageRequest.Builder(context)
                     .data(news.photo)
                     .build()
                 imageLoader.enqueue(request)
+            }
+        }
+    }
+
+    fun showDeleteConfirm(newsId: Int) {
+        _state.value = _state.value.copy(deleteDialog = newsId)
+    }
+
+    fun hideDeleteDialog() {
+        _state.value = _state.value.copy(deleteDialog = null)
+    }
+
+    fun confirmDeleteAction() {
+        val newsId = _state.value.deleteDialog ?: return
+        hideDeleteDialog()
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            when (val result = deleteNewsUseCase(newsId)) {
+                is Result.Success -> {
+                    loadData()   // перезагрузка списка
+                }
+
+                is Result.Failure -> {
+                    _state.value =
+                        _state.value.copy(error = result.exception.message, isLoading = false)
+                }
             }
         }
     }
