@@ -25,4 +25,5 @@ object NavigationRoutes  {
     const val EDIT_COURSE = "edit_course/{courseId}"
     const val EDIT_EVENT = "edit_event/{eventId}"
     const val EDIT_NEWS = "edit_news/{newsId}"
+    const val EDIT_PROFILE = "edit_profile"
 }

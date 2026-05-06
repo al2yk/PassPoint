@@ -32,7 +32,7 @@ import com.example.passpoint.presentation.screens.authorization.changePassword.o
 import com.example.passpoint.presentation.screens.authorization.changePassword.setpassword.SetPasswordView
 import com.example.passpoint.presentation.screens.main.MainView
 import com.example.passpoint.presentation.screens.main.MineView
-import com.example.passpoint.presentation.screens.main.ProfileView
+import com.example.passpoint.presentation.screens.main.profile.ProfileView
 import com.example.passpoint.presentation.screens.main.admin.UsersView
 import com.example.passpoint.presentation.screens.main.course.CoursesView
 import com.example.passpoint.presentation.screens.main.course.CreateCourseView
@@ -43,6 +43,7 @@ import com.example.passpoint.presentation.screens.main.events.PastEventsView
 import com.example.passpoint.presentation.screens.main.news.CreateNewsView
 import com.example.passpoint.presentation.screens.main.news.NewsDetailView
 import com.example.passpoint.presentation.screens.main.news.NewsView
+import com.example.passpoint.presentation.screens.main.profile.EditProfileView
 import com.example.passpoint.presentation.screens.nointernet.NoInternetView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
 import com.example.passpoint.presentation.screens.qr.QrView
@@ -77,7 +78,7 @@ fun Navigation(isOnline: Boolean) {
         NavigationRoutes.CREATE_COURSE,
         NavigationRoutes.EDIT_COURSE,
         NavigationRoutes.EDIT_EVENT,
-        NavigationRoutes.EDIT_NEWS
+        NavigationRoutes.EDIT_PROFILE,
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -251,6 +252,9 @@ fun Navigation(isOnline: Boolean) {
                 ) {
                     CreateNewsView(controller = controller, innerPadding = innerPadding)
                 }
+                composable(NavigationRoutes.EDIT_PROFILE) {
+                    EditProfileView(controller = controller, innerPadding = innerPadding)
+                }
             }
         } else {
             NoInternetView()
@@ -275,6 +279,7 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.EDIT_COURSE -> "Редактирование курса"
     route == NavigationRoutes.EDIT_EVENT -> "Редактирование мероприятия"
     route == NavigationRoutes.EDIT_NEWS -> "Редактирование новости"
+    route == NavigationRoutes.EDIT_PROFILE -> "Редактирование профиля"
     else -> "PassPoint"
 }
 

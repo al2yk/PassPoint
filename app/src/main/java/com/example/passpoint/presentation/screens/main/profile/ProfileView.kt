@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.screens.main
+package com.example.passpoint.presentation.screens.main.profile
 
 import android.util.Log
 import androidx.compose.foundation.Image
@@ -24,6 +24,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
@@ -31,6 +33,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,10 +46,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
@@ -60,6 +66,7 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.AppTheme
+import com.example.passpoint.presentation.theme.Brand50
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.Gray350
@@ -84,7 +91,16 @@ fun ProfileView(
         3 -> "Администратор"
         else -> "Участник"
     }
-
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onScreenResumed()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
     Box(
         modifier = Modifier
             .padding(innerPadding)
@@ -142,35 +158,57 @@ fun ProfileView(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(100.dp)
-                                    .clip(CircleShape)
-                                    .background(Gray350)
+                                    .size(110.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Log.e("photo", state.photo)
-                                // Фото пользователя
-                                val imgState = rememberAsyncImagePainter(
-                                    model = ImageRequest.Builder(LocalContext.current)
-                                        .data(state.photo)
-                                        .size(Size.ORIGINAL).build()
-                                ).state
-                                if (imgState is AsyncImagePainter.State.Error) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
-                                        contentDescription = "",
-                                        modifier = Modifier
-                                            .fillMaxSize(0.85f)
-                                            .align(Alignment.Center),
-                                        tint = Gray800
-                                    )
+                                Box(
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape)
+                                        .background(Gray350)
+                                ) {
+                                    Log.e("photo", state.photo)
+                                    // Фото пользователя
+                                    val imgState = rememberAsyncImagePainter(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(state.photo)
+                                            .size(Size.ORIGINAL).build()
+                                    ).state
+                                    if (imgState is AsyncImagePainter.State.Error) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
+                                            contentDescription = "",
+                                            modifier = Modifier
+                                                .fillMaxSize(0.85f)
+                                                .align(Alignment.Center),
+                                            tint = Gray800
+                                        )
+                                    }
+                                    if (imgState is AsyncImagePainter.State.Success) {
+                                        Image(
+                                            modifier = Modifier
+                                                .fillMaxWidth(1f)
+                                                .clip(RoundedCornerShape(15.dp)),
+                                            painter = imgState.painter,
+                                            contentDescription = "",
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    }
                                 }
-                                if (imgState is AsyncImagePainter.State.Success) {
-                                    Image(
-                                        modifier = Modifier
-                                            .fillMaxWidth(1f)
-                                            .clip(RoundedCornerShape(15.dp)),
-                                        painter = imgState.painter,
-                                        contentDescription = "",
-                                        contentScale = ContentScale.Crop
+                                IconButton(
+                                    onClick = { controller.navigate(NavigationRoutes.EDIT_PROFILE) },
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                        .align(Alignment.TopEnd),
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        containerColor = Brand50
+                                    )
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.edit_24dp),
+                                        contentDescription = null,
+                                        tint = BrandColor,
+                                        modifier = Modifier.size(19.dp)
                                     )
                                 }
                             }

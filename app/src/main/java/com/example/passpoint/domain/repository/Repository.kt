@@ -44,4 +44,6 @@ interface Repository {
     suspend fun updateNews(newsId: Int, request: NewsCreateRequest): Result<News>
     suspend fun deleteNews(newsId: Int): Result<Unit>
     suspend fun uploadImage(fileName: String, imageBytes: ByteArray): Result<Unit>
+    suspend fun updateUser(userId: String, fields: Map<String, String>): Result<User>
+    suspend fun uploadProfileImage(fileName: String, imageBytes: ByteArray): Result<Unit>
 }

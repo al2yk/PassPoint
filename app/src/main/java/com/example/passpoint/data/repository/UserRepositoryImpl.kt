@@ -363,4 +363,25 @@ class UserRepositoryImpl @Inject constructor(
             Result.Failure(e)
         }
     }
+    override suspend fun updateUser(userId: String, fields: Map<String, String>): Result<User> {
+        return try {
+            val response = userApi.updateUser("eq.$userId", fields)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Ошибка обновления пользователя"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun uploadProfileImage(fileName: String, imageBytes: ByteArray): Result<Unit> {
+        return try {
+            val requestBody = imageBytes.toRequestBody("image/*".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("image", fileName, requestBody)
+            val response = userApi.uploadProfileImage(fileName, imagePart)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка загрузки фото профиля: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
 }

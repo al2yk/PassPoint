@@ -109,4 +109,13 @@ interface UserApi {
         @Path("fileName") fileName: String,
         @Part image: MultipartBody.Part
     ): Response<Unit>
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/users")
+    suspend fun updateUser(@Query("id") idFilter: String, @Body user: Map<String, String>): List<User>
+    @Multipart
+    @POST("/storage/v1/object/USER_PHOTO/{fileName}")
+    suspend fun uploadProfileImage(
+        @Path("fileName") fileName: String,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
 }
