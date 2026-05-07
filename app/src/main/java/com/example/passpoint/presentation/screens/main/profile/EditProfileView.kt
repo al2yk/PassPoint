@@ -89,7 +89,9 @@ fun EditProfileView(
         disabledSupportingTextColor = Gray600,
         focusedSupportingTextColor = BrandColor
     )
-    Column (
+    val isFormValid = state.name.isNotBlank() && state.surname.isNotBlank() &&
+            state.phoneError == null
+    Column(
         modifier = Modifier
             .padding(top = innerPadding.calculateTopPadding())
             .fillMaxSize()
@@ -203,10 +205,47 @@ fun EditProfileView(
                     colors = textFieldColors
 
                 )
+                SpacerHeight(12)
+                OutlinedTextField(
+                    value = state.phone,
+                    onValueChange = { viewModel.updatePhone(it) },
+                    label = { Text("Телефон") },
+                    placeholder = { Text("+7 999 888 77 66") },
+                    isError = state.phoneError != null,
+                    supportingText = state.phoneError?.let { { Text(it) } },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Phone,
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = MaterialTheme.shapes.small,
+                    colors = textFieldColors
+                )
+                if (state.role == 1) {
+                    SpacerHeight(12)
+                    OutlinedTextField(
+                        value = state.organization,
+                        onValueChange = { viewModel.updateOrganization(it) },
+                        label = { Text("Организация") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Done
+                        ),
+                        shape = MaterialTheme.shapes.small,
+                        colors = textFieldColors
+                    )
+                }
                 SpacerHeight(24)
 
                 if (state.error != null) {
-                    WarningMessage(text = state.error!!)
+                    WarningMessage(text = state.error)
                     SpacerHeight(8)
                 }
 
@@ -216,7 +255,7 @@ fun EditProfileView(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                         .height(ButtonHeight),
-                    enabled = !state.isSaving,
+                    enabled = !state.isSaving && isFormValid,
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = BrandColor)
                 ) {

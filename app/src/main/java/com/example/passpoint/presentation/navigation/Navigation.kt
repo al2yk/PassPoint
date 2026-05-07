@@ -108,7 +108,8 @@ fun Navigation(isOnline: Boolean) {
                         // Нужно показывать кнопку назад на всех экранах, кроме MAIN, PROFILE, MINE
                         if (currentRoute != NavigationRoutes.MAIN &&
                             currentRoute != NavigationRoutes.PROFILE &&
-                            currentRoute != NavigationRoutes.MINE
+                            currentRoute != NavigationRoutes.MINE &&
+                            currentRoute != NavigationRoutes.USERS
                         ) {
                             IconButton(onClick = { controller.navigateUp() }) {
                                 Icon(
@@ -280,6 +281,7 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.EDIT_EVENT -> "Редактирование мероприятия"
     route == NavigationRoutes.EDIT_NEWS -> "Редактирование новости"
     route == NavigationRoutes.EDIT_PROFILE -> "Редактирование профиля"
+    route == NavigationRoutes.USERS -> "Пользователи"
     else -> "PassPoint"
 }
 

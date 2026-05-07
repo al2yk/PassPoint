@@ -118,4 +118,13 @@ interface UserApi {
         @Path("fileName") fileName: String,
         @Part image: MultipartBody.Part
     ): Response<Unit>
+    @GET("/rest/v1/users?select=*")
+    suspend fun getAllUsers(): List<User>
+
+    @DELETE("/rest/v1/users")
+    suspend fun deleteUser(@Query("id") idFilter: String): Response<Unit>
+
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/users")
+    suspend fun updateUserRole(@Query("id") idFilter: String, @Body fields: Map<String, Int>): List<User>
 }

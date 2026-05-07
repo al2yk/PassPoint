@@ -46,4 +46,7 @@ interface Repository {
     suspend fun uploadImage(fileName: String, imageBytes: ByteArray): Result<Unit>
     suspend fun updateUser(userId: String, fields: Map<String, String>): Result<User>
     suspend fun uploadProfileImage(fileName: String, imageBytes: ByteArray): Result<Unit>
+    suspend fun getAllUsers(): Result<List<User>>
+    suspend fun deleteUser(userId: String): Result<Unit>
+    suspend fun updateUserRole(userId: String, role: Int): Result<User>
 }

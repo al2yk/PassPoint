@@ -384,4 +384,33 @@ class UserRepositoryImpl @Inject constructor(
             Result.Failure(e)
         }
     }
+    override suspend fun getAllUsers(): Result<List<User>> {
+        return try {
+            val response = userApi.getAllUsers()
+            Result.Success(response)
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun deleteUser(userId: String): Result<Unit> {
+        return try {
+            val response = userApi.deleteUser("eq.$userId")
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка удаления: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun updateUserRole(userId: String, role: Int): Result<User> {
+        return try {
+            // поле role – int, но в API передаём строку
+            val response = userApi.updateUser("eq.$userId", mapOf("role" to role.toString()))
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Ошибка обновления роли"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
 }

@@ -64,6 +64,7 @@ import com.example.passpoint.presentation.components.AboutProgramDialog
 import com.example.passpoint.presentation.components.LogOutDialog
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
+import com.example.passpoint.presentation.components.WarningMessage
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.AppTheme
 import com.example.passpoint.presentation.theme.Brand50
@@ -218,6 +219,10 @@ fun ProfileView(
                                 style = MaterialTheme.typography.headlineSmall,
                                 modifier = Modifier.padding(horizontal = 2.dp)
                             )
+                            if (state.phone.isBlank() || (state.organization.isBlank() && role == "Участник")) {
+                                SpacerHeight(12)
+                                WarningMessage(text = "Заполните все поля в профиле")
+                            }
                         }
 
                         Row(modifier = Modifier.padding(start = 16.dp)) {
@@ -283,6 +288,54 @@ fun ProfileView(
                                     )
                                     Text(
                                         "0",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                            }
+                        }
+                        if (state.phone.isNotEmpty()){
+                            SpacerHeight(15)
+                            Row(modifier = Modifier.padding(start = 16.dp)) {
+                                Icon(
+                                    painter = painterResource(R.drawable.contact_phone_24dp),
+                                    contentDescription = null,
+                                    tint = Gray500,
+                                    modifier = Modifier.size(20.dp)
+                                )
+
+                                SpacerWidth(12)
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        "Мобильный телефон",
+                                        style = MaterialTheme.typography.displaySmall,
+                                        color = Gray500
+                                    )
+                                    Text(
+                                        state.phone,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                            }
+                        }
+                        if (state.organization.isNotEmpty() && role == "Участник"){
+                            SpacerHeight(15)
+                            Row(modifier = Modifier.padding(start = 16.dp)) {
+                                Icon(
+                                    painter = painterResource(R.drawable.home_work_24dp),
+                                    contentDescription = null,
+                                    tint = Gray500,
+                                    modifier = Modifier.size(20.dp)
+                                )
+
+                                SpacerWidth(12)
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Text(
+                                        "Организация",
+                                        style = MaterialTheme.typography.displaySmall,
+                                        color = Gray500
+                                    )
+                                    Text(
+                                        state.organization,
                                         style = MaterialTheme.typography.bodyLarge,
                                     )
                                 }
@@ -366,7 +419,7 @@ fun ProfileView(
                                 SpacerWidth(12)
                                 Text(
                                     text = "О программе",
-                                    style = MaterialTheme.typography.displaySmall,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -398,7 +451,7 @@ fun ProfileView(
                                 SpacerWidth(12)
                                 Text(
                                     text = "Выйти",
-                                    style = MaterialTheme.typography.displaySmall,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = BrandColor
                                 )
                             }

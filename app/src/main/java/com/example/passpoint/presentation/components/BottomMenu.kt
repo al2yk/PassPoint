@@ -1,5 +1,6 @@
 package com.example.passpoint.presentation.components
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -42,7 +43,7 @@ enum class MainEnum {
     USERS
 }
 
-private data class BottomMenuItem(
+private data class BottomMenuItem @SuppressLint("SupportAnnotationUsage") constructor(
     @param:DrawableRes val icon: Int,
     @param:DrawableRes val selectedIcon: Int,
     @param:StringRes val label: String,
@@ -105,7 +106,7 @@ fun BottomMenu(
                 }
         ) {
             destinations.forEachIndexed { index, item ->
-                val isSelected = index == selectedScreen.ordinal
+                val isSelected = item.screen == selectedScreen
 
                 val density = LocalDensity.current
 
@@ -174,7 +175,7 @@ private val adminDestinations = listOf(
     ),
     BottomMenuItem(
         icon = R.drawable.groups_24dp,
-        selectedIcon = R.drawable.arrow_outward_24dp,
+        selectedIcon = R.drawable.groups_24dp,
         "Пользователи",
         MainEnum.USERS
     )
@@ -215,7 +216,7 @@ fun AdminBottomMenu(
                 }
         ) {
             adminDestinations.forEachIndexed { index, item ->
-                val isSelected = index == selectedScreen.ordinal
+                val isSelected = item.screen == selectedScreen
 
                 val density = LocalDensity.current
                 val fullWidthDp = with(density) { width.toDp() }

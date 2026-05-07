@@ -6,9 +6,13 @@ data class EditProfileState(
     val userId: String = "",
     val name: String = "",
     val surname: String = "",
+    val phone: String = "",
+    val organization: String = "",
+    val role: Int = 1,
     val photoUrl: String? = null,
     val newPhotoUri: Uri? = null,
     val isUploadingPhoto: Boolean = false,
     val isSaving: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val phoneError: String? = null
 )
