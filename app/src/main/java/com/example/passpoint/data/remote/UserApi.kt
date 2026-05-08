@@ -127,4 +127,23 @@ interface UserApi {
     @Headers("Prefer: return=representation")
     @PATCH("/rest/v1/users")
     suspend fun updateUserRole(@Query("id") idFilter: String, @Body fields: Map<String, Int>): List<User>
+    // Получить курс по ID
+    @GET("/rest/v1/course_with_enrollment?select=*")
+    suspend fun getCourseById(@Query("id") idFilter: String): List<CourseWithEnrollment>
+
+    // Все записи о посещаемости по ID курса
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getAttendancesByCourse(@Query("course") courseFilter: String): List<CourseRegistration>
+
+    // Получить пользователей по списку UUID (таблица users)
+    @GET("/rest/v1/users?select=*")
+    suspend fun getUsersByIds(@Query("user_id") idFilter: String): List<User>
+
+    // Обновить статус посещаемости
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/course_attendance")
+    suspend fun updateCourseAttendance(
+        @Query("id") idFilter: String,
+        @Body fields: Map<String, Int>   // или Map<String, String>
+    ): List<CourseRegistration>
 }

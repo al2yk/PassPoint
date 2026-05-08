@@ -49,4 +49,8 @@ interface Repository {
     suspend fun getAllUsers(): Result<List<User>>
     suspend fun deleteUser(userId: String): Result<Unit>
     suspend fun updateUserRole(userId: String, role: Int): Result<User>
+    suspend fun getCourseById(courseId: Int): Result<CourseWithEnrollment>
+    suspend fun getAttendancesByCourse(courseId: Int): Result<List<CourseRegistration>>
+    suspend fun getUsersByIds(ids: List<String>): Result<List<User>>
+    suspend fun updateCourseAttendance(attendanceId: Int, newStatus: Int): Result<CourseRegistration>
 }

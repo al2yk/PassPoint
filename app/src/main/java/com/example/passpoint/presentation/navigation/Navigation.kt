@@ -37,6 +37,8 @@ import com.example.passpoint.presentation.screens.main.admin.UsersView
 import com.example.passpoint.presentation.screens.main.course.CoursesView
 import com.example.passpoint.presentation.screens.main.course.CreateCourseView
 import com.example.passpoint.presentation.screens.main.course.PastCoursesView
+import com.example.passpoint.presentation.screens.main.curator.CuratorCourseDetailView
+import com.example.passpoint.presentation.screens.main.curator.CuratorPastCoursesView
 import com.example.passpoint.presentation.screens.main.events.CreateEventView
 import com.example.passpoint.presentation.screens.main.events.EventsView
 import com.example.passpoint.presentation.screens.main.events.PastEventsView
@@ -79,6 +81,8 @@ fun Navigation(isOnline: Boolean) {
         NavigationRoutes.EDIT_COURSE,
         NavigationRoutes.EDIT_EVENT,
         NavigationRoutes.EDIT_PROFILE,
+        NavigationRoutes.CURATOR_PAST_COURSES,
+        NavigationRoutes.CURATOR_COURSE_DETAIL
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -91,6 +95,7 @@ fun Navigation(isOnline: Boolean) {
                     isNewsDetail
             )
     val isAdmin = UserRepository.role == 3
+    val isCurator = UserRepository.role == 2
     Scaffold(
         topBar = {
             if (showTopBar) {
@@ -128,9 +133,9 @@ fun Navigation(isOnline: Boolean) {
         },
         bottomBar = {
             if (showBottomBar) {
-                if (isAdmin) {
+                if (isAdmin || isCurator) {
                     AdminBottomMenu(
-                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin),
+                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin,isCurator),
                         onItemSelected = { selectedEnum ->
                             val route = mapMainEnumToRoute(selectedEnum, isAdmin)
                             controller.navigate(route) {
@@ -144,7 +149,7 @@ fun Navigation(isOnline: Boolean) {
                     )
                 } else {
                     BottomMenu(
-                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin),
+                        selectedScreen = mapRouteToMainEnum(currentRoute, isAdmin, isCurator),
                         onItemSelected = { selectedEnum ->
                             val route = mapMainEnumToRoute(selectedEnum, isAdmin)
                             controller.navigate(route) {
@@ -256,6 +261,20 @@ fun Navigation(isOnline: Boolean) {
                 composable(NavigationRoutes.EDIT_PROFILE) {
                     EditProfileView(controller = controller, innerPadding = innerPadding)
                 }
+                composable(NavigationRoutes.CURATOR_PAST_COURSES) {
+                    CuratorPastCoursesView(controller = controller, innerPadding = innerPadding)
+                }
+                composable(
+                    route = NavigationRoutes.CURATOR_COURSE_DETAIL,
+                    arguments = listOf(navArgument("courseId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val courseId = backStackEntry.arguments?.getInt("courseId") ?: 0
+                    CuratorCourseDetailView(
+                        courseId = courseId,
+                        controller = controller,
+                        innerPadding = innerPadding
+                    )
+                }
             }
         } else {
             NoInternetView()
@@ -282,13 +301,15 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.EDIT_NEWS -> "Редактирование новости"
     route == NavigationRoutes.EDIT_PROFILE -> "Редактирование профиля"
     route == NavigationRoutes.USERS -> "Пользователи"
+    route == NavigationRoutes.CURATOR_PAST_COURSES -> "Мои прошедшие курсы"
+    route?.startsWith("curator_course_detail") == true -> "Посещаемость курса"
     else -> "PassPoint"
 }
 
-private fun mapRouteToMainEnum(route: String?, isAdmin: Boolean): MainEnum = when (route) {
+private fun mapRouteToMainEnum(route: String?, isAdmin: Boolean, isCurator: Boolean): MainEnum = when (route) {
     NavigationRoutes.PROFILE -> MainEnum.PROFILE
     NavigationRoutes.MAIN -> MainEnum.HOME
-    NavigationRoutes.MINE -> if (isAdmin) MainEnum.USERS else MainEnum.SETTINGS
+    NavigationRoutes.MINE -> if (isAdmin || isCurator) MainEnum.USERS else MainEnum.SETTINGS
     NavigationRoutes.USERS -> MainEnum.USERS
     else -> MainEnum.HOME
 }

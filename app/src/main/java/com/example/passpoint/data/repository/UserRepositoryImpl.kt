@@ -81,6 +81,7 @@ class UserRepositoryImpl @Inject constructor(
             val profileResult = getProfile(UserRepository.ID)
             if (profileResult is Result.Success && profileResult.data.isNotEmpty()) {
                 UserRepository.role = profileResult.data.first().role
+                UserRepository.dbUserId = profileResult.data.first().id.toString()
             }
 
             val authData = Mapper.mapToDomain(response)
@@ -412,5 +413,38 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.Failure(e)
         }
+    }
+    override suspend fun getCourseById(courseId: Int): Result<CourseWithEnrollment> {
+        return try {
+            val response = userApi.getCourseById("eq.$courseId")
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Курс не найден"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun getAttendancesByCourse(courseId: Int): Result<List<CourseRegistration>> {
+        return try {
+            val response = userApi.getAttendancesByCourse("eq.$courseId")
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun getUsersByIds(ids: List<String>): Result<List<User>> {
+        return try {
+            val filter = "in.(${ids.joinToString(",")})"
+            val response = userApi.getUsersByIds(filter) // теперь фильтр по user_id
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun updateCourseAttendance(attendanceId: Int, newStatus: Int): Result<CourseRegistration> {
+        return try {
+            val response = userApi.updateCourseAttendance(
+                "eq.$attendanceId",
+                mapOf("status" to newStatus)  // Int ok
+            )
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Ошибка обновления"))
+        } catch (e: Exception) { Result.Failure(e) }
     }
 }

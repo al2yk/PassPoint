@@ -86,7 +86,7 @@ fun UsersView(
     )
     Box(
         modifier = Modifier
-            .padding(innerPadding)
+            .padding(top = innerPadding.calculateTopPadding())
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLowest)
     ) {

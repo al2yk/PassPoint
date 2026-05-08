@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
+import com.example.passpoint.domain.useCase.GetCourseUseCase
 import com.example.passpoint.domain.useCase.GetProfileUseCase
 import com.example.passpoint.presentation.screens.main.profile.ProfileState
 import com.example.passpoint.presentation.theme.AppTheme
@@ -16,12 +17,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val themeManager: ThemeManager,
-    private val getProfileUseCase: GetProfileUseCase
+    private val getProfileUseCase: GetProfileUseCase,
+    private val getCourseUseCase: GetCourseUseCase
 ) : ViewModel() {
 
     private val _currentTheme = MutableStateFlow<AppTheme>(AppTheme.SYSTEM)
@@ -63,7 +66,7 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
-                when (val result = getProfileUseCase.invoke(UserRepository.ID)) {
+                when (val result = getProfileUseCase.invoke(UserRepository.ID))     {
                     is Result.Failure -> {
                         val message = result.exception.message ?: "Ошибка загрузки профиля"
                         _state.value = _state.value.copy(isLoading = false, error = message)
@@ -92,6 +95,9 @@ class ProfileViewModel @Inject constructor(
                         }
                     }
                 }
+                if (_state.value.role == 2) {
+                    loadPastCoursesCount()
+                }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Ошибка загрузки профиля", e)
                 _state.value = _state.value.copy(
@@ -99,6 +105,19 @@ class ProfileViewModel @Inject constructor(
                     error = e.message ?: "Неизвестная ошибка"
                 )
             }
+        }
+    }
+    private suspend fun loadPastCoursesCount() {
+        when (val result = getCourseUseCase()) {
+            is Result.Success -> {
+                val today = LocalDate.now()
+                val count = result.data.count {
+                    it.curator == UserRepository.dbUserId &&
+                            runCatching { LocalDate.parse(it.date) }.getOrDefault(LocalDate.MIN) < today
+                }
+                _state.value = _state.value.copy(pastCoursesCount = count)
+            }
+            is Result.Failure -> { /* игнорируем ошибку */ }
         }
     }
 }
