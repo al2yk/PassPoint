@@ -19,7 +19,8 @@ class EventsViewModel @Inject constructor(
     private val getEventsUseCase: GetEventsUseCase,
     private val getUserRegistrationsUseCase: GetUserEventRegistrationsUseCase,
     private val registerForEventUseCase: RegisterForEventUseCase,
-    private val unregisterFromEventUseCase: UnregisterFromEventUseCase
+    private val unregisterFromEventUseCase: UnregisterFromEventUseCase,
+    private val deleteEventUseCase: DeleteEventUseCase
 ) : ViewModel() {
 
     private val _state = mutableStateOf(EventsState())
@@ -133,6 +134,28 @@ class EventsViewModel @Inject constructor(
                     isRegistrationLoading = false,
                     error = "Ошибка отмены регистрации: ${e.message}"
                 )
+            }
+        }
+    }
+    fun showDeleteConfirm(eventId: Int) {
+        _state.value = _state.value.copy(
+            // нужно добавить deleteDialog в EventsState (см. ниже)
+            deleteDialog = ConfirmDialogState(eventId, ConfirmAction.DELETE)
+        )
+    }
+
+    fun hideDeleteDialog() {
+        _state.value = _state.value.copy(deleteDialog = null)
+    }
+
+    fun confirmDeleteAction() {
+        val dialog = _state.value.deleteDialog ?: return
+        hideDeleteDialog()
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            when (val result = deleteEventUseCase(dialog.eventId)) {
+                is Result.Success -> loadEventsAndRegistrations()
+                is Result.Failure -> _state.value = _state.value.copy(error = result.exception.message, isLoading = false)
             }
         }
     }

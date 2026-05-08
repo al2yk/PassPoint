@@ -18,11 +18,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,19 +36,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.passpoint.R
 import com.example.passpoint.data.dto.NewsCategory
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.formatNewsDate
 import com.example.passpoint.presentation.components.CategoryBlock
 import com.example.passpoint.presentation.components.SpacerHeight
+import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
+import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.Gray600
+import com.example.passpoint.presentation.theme.Gray800
+import com.example.passpoint.presentation.theme.White
 import com.example.passpoint.presentation.viewModel.NewsViewModel
 
 @Composable
@@ -158,38 +167,36 @@ fun NewsView(
                                         modifier = Modifier
                                             .height(120.dp)
                                             .fillMaxWidth()
+                                            .padding(top = 8.dp, start = 12.dp, end = 12.dp)
                                     ) {
-                                        val painter = rememberAsyncImagePainter(
-                                            model = ImageRequest.Builder(LocalContext.current)
-                                                .data(news.photo)
-                                                .crossfade(true)
-                                                .build(),
-                                            placeholder = painterResource(R.drawable.nophoto),
-                                            error = painterResource(R.drawable.nophoto)
-                                        )
                                         Box(
                                             modifier = Modifier
                                                 .size(120.dp)
                                                 .clip(RoundedCornerShape(20.dp))
                                         ) {
-                                            Image(
-                                                modifier = Modifier.fillMaxSize(),
-                                                painter = painter,
-                                                contentDescription = "",
-                                                contentScale = ContentScale.Crop
+                                            AsyncImage(
+                                                model = ImageRequest.Builder(LocalContext.current)
+                                                    .data(news.photo)
+                                                    .crossfade(true)
+                                                    .build(),
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(120.dp)
+                                                    .clip(RoundedCornerShape(20.dp)),
+                                                contentScale = ContentScale.Crop,
+                                                placeholder = painterResource(R.drawable.nophoto),
+                                                error = painterResource(R.drawable.nophoto)
                                             )
                                         }
+                                        SpacerWidth(12)
                                         Box(
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .fillMaxHeight()
-                                                .padding(vertical = 8.dp, horizontal = 12.dp)
                                         ) {
                                             Text(
                                                 text = news.title,
-                                                style = MaterialTheme.typography.titleLarge.copy(
-                                                    fontSize = 14.sp
-                                                ),
+                                                style = MaterialTheme.typography.titleLarge,
                                                 maxLines = 3,
                                                 softWrap = true,
                                                 overflow = TextOverflow.Ellipsis
@@ -202,6 +209,46 @@ fun NewsView(
                                             )
                                         }
                                     }
+                                    SpacerHeight(8)
+                                    if (UserRepository.role == 3) {
+                                        SpacerHeight(8)
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 12.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = { viewModel.showDeleteConfirm(news.id) },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(ButtonHeight),
+                                                shape = RoundedCornerShape(8.dp)
+                                            ) {
+                                                Text(
+                                                    "Удалить",
+                                                    style = MaterialTheme.typography.displaySmall
+                                                )
+                                            }
+                                            Button(
+                                                onClick = {
+                                                    controller.navigate("edit_news/${news.id}")
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .height(ButtonHeight),
+                                                colors = ButtonDefaults.buttonColors(containerColor = BrandColor),
+                                                shape = RoundedCornerShape(8.dp)
+                                            ) {
+                                                Text(
+                                                    "Редактировать",
+                                                    color = White,
+                                                    style = MaterialTheme.typography.displaySmall
+                                                )
+                                            }
+                                        }
+                                        SpacerHeight(8)
+                                    }
                                 }
                                 SpacerHeight(8)
                             }
@@ -209,6 +256,19 @@ fun NewsView(
                     }
                 }
             }
+        }
+        if (state.deleteDialog != null) {
+            AlertDialog(
+                onDismissRequest = { viewModel.hideDeleteDialog() },
+                title = { Text("Удаление новости") },
+                text = { Text("Вы уверены, что хотите удалить новость?", color = Gray800) },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.confirmDeleteAction() }) { Text("Удалить") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.hideDeleteDialog() }) { Text("Отмена") }
+                }
+            )
         }
     }
 }

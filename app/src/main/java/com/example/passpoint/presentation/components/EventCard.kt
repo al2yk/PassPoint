@@ -32,7 +32,9 @@ fun EventCard(
     onRegisterClick: () -> Unit,
     onUnregisterClick: () -> Unit,
     showButtons: Boolean = true,
-    onQrClick: (() -> Unit)? = null
+    onQrClick: (() -> Unit)? = null,
+    onDeleteClick: (() -> Unit)? = null,
+    onEditClick: (() -> Unit)? = null
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -81,6 +83,27 @@ fun EventCard(
                     ) {
                         Text("Участвовать", style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.onBackground)
                     }
+                }
+            }
+            if (showButtons && UserRepository.role == 3) {
+                SpacerHeight(16)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { onDeleteClick?.invoke() },
+                        modifier = Modifier.weight(1f).height(ButtonHeight),
+                        shape = RoundedCornerShape(8.dp),
+                        enabled = !isRegistrationLoading
+                    ) { Text("Удалить", style = MaterialTheme.typography.displaySmall) }
+                    Button(
+                        onClick = { onEditClick?.invoke() },
+                        modifier = Modifier.weight(1f).height(ButtonHeight),
+                        enabled = !isRegistrationLoading,
+                        colors = ButtonDefaults.buttonColors(containerColor = BrandColor),
+                        shape = RoundedCornerShape(8.dp)
+                    ) { Text("Редактировать", color = White, style = MaterialTheme.typography.displaySmall) }
                 }
             }
         }

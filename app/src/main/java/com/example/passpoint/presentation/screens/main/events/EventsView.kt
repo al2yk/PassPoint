@@ -97,7 +97,9 @@ fun EventsView(
                             isRegistrationLoading = state.isRegistrationLoading,
                             onRegisterClick = { viewModel.showRegisterConfirm(event.id) },
                             onUnregisterClick = { viewModel.showUnregisterConfirm(event.id) },
-                            onQrClick = { controller?.navigate("qr/${UserRepository.ID}") }
+                            onQrClick = { controller?.navigate("qr/${UserRepository.ID}") },
+                            onDeleteClick = { viewModel.showDeleteConfirm(event.id) },
+                            onEditClick = { controller?.navigate("edit_event/${event.id}") }
                         )
                     }
 
@@ -152,6 +154,19 @@ fun EventsView(
                 TextButton(onClick = { viewModel.hideDialog() }) {
                     Text("Отмена")
                 }
+            }
+        )
+    }
+    if (state.deleteDialog != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.hideDeleteDialog() },
+            title = { Text("Удаление мероприятия") },
+            text = { Text("Вы уверены, что хотите удалить мероприятие?", color = Gray800) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.confirmDeleteAction() }) { Text("Удалить") }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.hideDeleteDialog() }) { Text("Отмена") }
             }
         )
     }

@@ -7,22 +7,28 @@ import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
 import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
+import com.example.passpoint.data.dto.EventCreateRequest
 import com.example.passpoint.data.dto.EventRegistration
 import com.example.passpoint.data.dto.NewPasswordResponse
 import com.example.passpoint.data.dto.News
 import com.example.passpoint.data.dto.NewsCategory
+import com.example.passpoint.data.dto.NewsCreateRequest
 import com.example.passpoint.data.dto.OTPRequest
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.data.dto.VerifyOTPResponse
 import com.example.passpoint.data.dto.VerifyOTPdto
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface UserApi {
@@ -77,4 +83,48 @@ interface UserApi {
     @Headers("Prefer: return=representation")
     @PATCH("/rest/v1/course")
     suspend fun updateCourse(@Query("id") idFilter: String, @Body course: CourseCreateRequest): List<Course>
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/events")
+    suspend fun createEvent(@Body event: EventCreateRequest): List<Event>
+
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/events")
+    suspend fun updateEvent(@Query("id") idFilter: String, @Body event: EventCreateRequest): List<Event>
+
+    @DELETE("/rest/v1/events")
+    suspend fun deleteEvent(@Query("id") idFilter: String): Response<Unit>
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/news")
+    suspend fun createNews(@Body news: NewsCreateRequest): List<News>
+
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/news")
+    suspend fun updateNews(@Query("id") idFilter: String, @Body news: NewsCreateRequest): List<News>
+
+    @DELETE("/rest/v1/news")
+    suspend fun deleteNews(@Query("id") idFilter: String): Response<Unit>
+    @Multipart
+    @POST("/storage/v1/object/NEWS/{fileName}")
+    suspend fun uploadNewsImage(
+        @Path("fileName") fileName: String,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/users")
+    suspend fun updateUser(@Query("id") idFilter: String, @Body user: Map<String, String>): List<User>
+    @Multipart
+    @POST("/storage/v1/object/USER_PHOTO/{fileName}")
+    suspend fun uploadProfileImage(
+        @Path("fileName") fileName: String,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
+    @GET("/rest/v1/users?select=*")
+    suspend fun getAllUsers(): List<User>
+
+    @DELETE("/rest/v1/users")
+    suspend fun deleteUser(@Query("id") idFilter: String): Response<Unit>
+
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/users")
+    suspend fun updateUserRole(@Query("id") idFilter: String, @Body fields: Map<String, Int>): List<User>
 }

@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.screens.main
+package com.example.passpoint.presentation.screens.main.profile
 
 data class ProfileState(
     val name: String = "",
@@ -6,6 +6,8 @@ data class ProfileState(
     val email: String = "",
     val photo: String = "",
     val role: Int = 1,
+    val phone: String = "",
+    val organization: String = "",
     val isLoading: Boolean = false,
     val error: String? = null
 )

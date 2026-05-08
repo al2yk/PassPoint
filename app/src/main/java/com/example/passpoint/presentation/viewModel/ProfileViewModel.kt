@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.passpoint.data.dto.User
 import com.example.passpoint.domain.UserRepository
+import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.GetProfileUseCase
+import com.example.passpoint.presentation.screens.main.profile.ProfileState
 import com.example.passpoint.presentation.theme.AppTheme
 import com.example.passpoint.presentation.theme.ThemeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,8 +17,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.example.passpoint.domain.model.Result
-import com.example.passpoint.presentation.screens.main.ProfileState
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
@@ -29,6 +29,8 @@ class ProfileViewModel @Inject constructor(
 
     private val _state = mutableStateOf(ProfileState())
     val state: ProfileState get() = _state.value
+
+    private var hasResumedOnce = false
 
     init {
         viewModelScope.launch {
@@ -49,7 +51,15 @@ class ProfileViewModel @Inject constructor(
         loadProfile()
     }
 
-    private fun loadProfile() {
+    fun onScreenResumed() {
+        if (hasResumedOnce) {
+            loadProfile()        // обновляем только при возврате
+        } else {
+            hasResumedOnce = true
+        }
+    }
+
+    fun loadProfile() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
             try {
@@ -58,6 +68,7 @@ class ProfileViewModel @Inject constructor(
                         val message = result.exception.message ?: "Ошибка загрузки профиля"
                         _state.value = _state.value.copy(isLoading = false, error = message)
                     }
+
                     is Result.Success<List<User>> -> {
                         val users = result.data
                         if (users.isEmpty()) {
@@ -73,6 +84,8 @@ class ProfileViewModel @Inject constructor(
                                 email = user.email,
                                 photo = user.photo,
                                 role = user.role,
+                                phone = user.phone ?: "",
+                                organization = user.organization ?: "",
                                 isLoading = false,
                                 error = null
                             )

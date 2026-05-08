@@ -107,21 +107,33 @@ fun MineView(
                             Text(
                                 "Мероприятия",
                                 style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, start = 16.dp)
+                                modifier = Modifier.padding(
+                                    top = 16.dp,
+                                    bottom = 16.dp,
+                                    start = 16.dp
+                                )
                             )
                         }
                         items(state.registeredEvents, key = { "event_${it.id}" }) { event ->
-                            ElevatedCard(
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                EventCard(
-                                    event = event,
-                                    isRegistered = true,
-                                    isRegistrationLoading = state.isRegistrationLoading,
-                                    onRegisterClick = {},
-                                    onUnregisterClick = { viewModel.showEventUnregisterConfirm(event.id) },
-                                    showButtons = true, onQrClick = {controller.navigate("qr/${UserRepository.ID}")}
-                                )
+                            Column() {
+                                ElevatedCard(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    EventCard(
+                                        event = event,
+                                        isRegistered = true,
+                                        isRegistrationLoading = state.isRegistrationLoading,
+                                        onRegisterClick = {},
+                                        onUnregisterClick = {
+                                            viewModel.showEventUnregisterConfirm(
+                                                event.id
+                                            )
+                                        },
+                                        showButtons = true,
+                                        onQrClick = { controller.navigate("qr/${UserRepository.ID}") }
+                                    )
+                                }
+                                SpacerHeight(8)
                             }
                         }
                     }
@@ -132,29 +144,36 @@ fun MineView(
                             Text(
                                 "Курсы",
                                 style = MaterialTheme.typography.headlineMedium,
-                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 16.dp)
+                                modifier = Modifier.padding(
+                                    top = 16.dp,
+                                    bottom = 8.dp,
+                                    start = 16.dp
+                                )
                             )
                         }
                         items(state.registeredCourses, key = { "course_${it.id}" }) { course ->
-                            ElevatedCard(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            ) {
-                                Column(modifier = Modifier.padding(16.dp)) {
-                                    CourseCard(
-                                        course = course,
-                                        isRegistered = true,
-                                        isRegistrationLoading = state.isRegistrationLoading,
-                                        onRegisterClick = {},
-                                        onUnregisterClick = {
-                                            viewModel.showCourseUnregisterConfirm(
-                                                course.id
-                                            )
-                                        },
-                                        showButtons = true,
-                                        onQrClick = {controller.navigate("qr/${UserRepository.ID}")}
-                                    )
+                            Column() {
+                                ElevatedCard(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        CourseCard(
+                                            course = course,
+                                            isRegistered = true,
+                                            isRegistrationLoading = state.isRegistrationLoading,
+                                            onRegisterClick = {},
+                                            onUnregisterClick = {
+                                                viewModel.showCourseUnregisterConfirm(
+                                                    course.id
+                                                )
+                                            },
+                                            showButtons = true,
+                                            onQrClick = { controller.navigate("qr/${UserRepository.ID}") }
+                                        )
+                                    }
                                 }
+                                SpacerHeight(8)
                             }
                         }
                     }

@@ -12,5 +12,6 @@ data class EventsState(
     val isLoading: Boolean = false,
     val isRegistrationLoading: Boolean = false,
     val error: String? = null,
-    val confirmDialog: ConfirmDialogState? = null
+    val confirmDialog: ConfirmDialogState? = null,
+    val deleteDialog: ConfirmDialogState? = null
 )
