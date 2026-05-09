@@ -231,7 +231,11 @@ class UserRepositoryImpl @Inject constructor(
     }
     override suspend fun registerForCourse(courseId: Int, userId: String): Result<CourseRegistration> {
         return try {
-            val registration = CourseRegistration(user = userId, course = courseId)
+            val registration = CourseRegistration(
+                user = userId,
+                course = courseId,
+                status = 1
+            )
             val response = userApi.createCourseRegistration(registration)
             if (response.isNotEmpty()) {
                 Result.Success(response.first())
@@ -445,6 +449,19 @@ class UserRepositoryImpl @Inject constructor(
             )
             if (response.isNotEmpty()) Result.Success(response.first())
             else Result.Failure(Exception("Ошибка обновления"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getAttendancesByCourseIds(ids: List<Int>): Result<List<CourseRegistration>> {
+        return try {
+            val filter = "in.(${ids.joinToString(",")})"
+            val response = userApi.getAttendancesByCourses(filter)
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getAllAttendances(): Result<List<CourseRegistration>> {
+        return try {
+            val response = userApi.getAllAttendances()
+            Result.Success(response)
         } catch (e: Exception) { Result.Failure(e) }
     }
 }

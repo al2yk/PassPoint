@@ -89,19 +89,39 @@ fun CourseCard(
             }
         } else {
             SpacerHeight(16)
-            OutlinedButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ButtonHeight),
-                enabled = !isRegistrationLoading,
-                onClick = onRegisterClick,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    "Участвовать",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+            val noPlacesLeft = (course.capacity - course.enrolled_count) <= 0
+            if (noPlacesLeft) {
+                // Кнопка без действия, неактивная
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    enabled = false,                         // нельзя нажать
+                    onClick = {},                            // пустое действие
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "Нет мест",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            } else {
+                // Обычная кнопка записи
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    enabled = !isRegistrationLoading,
+                    onClick = onRegisterClick,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "Участвовать",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
         }
     }

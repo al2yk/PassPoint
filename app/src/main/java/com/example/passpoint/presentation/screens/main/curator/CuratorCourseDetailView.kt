@@ -115,7 +115,7 @@ fun CuratorCourseDetailView(
                                 // Фото
                                 Box(
                                     modifier = Modifier
-                                        .size(60.dp)
+                                        .size(70.dp)
                                         .clip(CircleShape)
                                         .background(Gray350)
                                 ) {
@@ -148,7 +148,7 @@ fun CuratorCourseDetailView(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         "${participant.user.name} ${participant.user.surname}",
-                                        style = MaterialTheme.typography.bodyLarge
+                                        style = MaterialTheme.typography.headlineSmall
                                     )
                                     Text(
                                         participant.user.email,
@@ -286,7 +286,7 @@ fun CuratorCourseDetailView(
             AlertDialog(
                 onDismissRequest = { viewModel.hideConfirm() },
                 title = { Text(if (dialog.newStatus == 2) "Подтверждение присутствия" else "Подтверждение отсутствия") },
-                text = { Text("${dialog.userName} ${if (dialog.newStatus == 2) "присутствовал" else "отсутствовал"} на курсе «${dialog.courseName}»?") },
+                text = { Text("${dialog.userName} ${if (dialog.newStatus == 2) "присутствовал(а)" else "отсутствовал(а)"} на курсе «${dialog.courseName}»?") },
                 confirmButton = { TextButton(onClick = { viewModel.confirmAttendance() }) { Text("Подтвердить") } },
                 dismissButton = { TextButton(onClick = { viewModel.hideConfirm() }) { Text("Отмена") } }
             )

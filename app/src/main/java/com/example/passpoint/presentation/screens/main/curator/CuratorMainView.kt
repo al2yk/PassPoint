@@ -5,9 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,6 +34,12 @@ fun CuratorMainView(
     viewModel: CuratorMainViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
+    val listState = rememberLazyListState()
+
+    // При изменении сортировки или переключении фильтра – плавно наверх
+    LaunchedEffect(state.sortAscending) {
+        listState.animateScrollToItem(0)
+    }
 
     Box(
         modifier = Modifier
@@ -108,40 +116,51 @@ fun CuratorMainView(
                     }
                     SpacerHeight(8)
 
-                    if (state.filteredCourses.isEmpty()) {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Нет курсов для отображения", style = MaterialTheme.typography.bodyLarge, color = Gray600)
+                    when {
+                        // 1. Поиск активен, но ничего не найдено
+                        state.filteredCourses.isEmpty() && state.searchQuery.isNotBlank() -> {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("Ничего не найдено", style = MaterialTheme.typography.bodyLarge, color = Gray600)
+                            }
                         }
-                    } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(state.filteredCourses, key = { it.id }) { course ->
-                                ElevatedCard(
-                                    modifier = Modifier.fillMaxWidth().
-                                    clickable{
-                                        controller.navigate(
-                                            NavigationRoutes.CURATOR_COURSE_DETAIL.replace("{courseId}", course.id.toString())
-                                        )
-                                    }
-                                ) {
-                                    Column(modifier = Modifier.padding(16.dp)) {
-                                        CourseCard(
-                                            course = course,
-                                            isRegistered = false, // куратор не регистрируется
-                                            isRegistrationLoading = false,
-                                            onRegisterClick = {},
-                                            onUnregisterClick = {},
-                                            showButtons = false,
-                                            showCapacity = true
-                                        )
-                                        // Предупреждение, если курс сегодня
-                                        if (course.date == LocalDate.now().toString()) {
-                                            SpacerHeight(8)
-                                            WarningMessage(text = "Не забудь отметить посещаемость")
+                        // 2. Вообще нет курсов (базовый список пуст)
+                        state.filteredCourses.isEmpty() -> {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text("На вас не назначено курсов", style = MaterialTheme.typography.bodyLarge, color = Gray600)
+                            }
+                        }
+                        // 3. Есть отфильтрованные курсы
+                        else -> {
+                            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                                items(state.filteredCourses, key = { it.id }) { course ->
+                                    ElevatedCard(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                controller.navigate(
+                                                    NavigationRoutes.CURATOR_COURSE_DETAIL.replace("{courseId}", course.id.toString())
+                                                )
+                                            }
+                                    ) {
+                                        Column(modifier = Modifier.padding(16.dp)) {
+                                            CourseCard(
+                                                course = course,
+                                                isRegistered = false,
+                                                isRegistrationLoading = false,
+                                                onRegisterClick = {},
+                                                onUnregisterClick = {},
+                                                showButtons = false,
+                                                showCapacity = true
+                                            )
+                                            if (course.date == LocalDate.now().toString()) {
+                                                SpacerHeight(8)
+                                                WarningMessage(text = "Не забудь отметить посещаемость")
+                                            }
                                         }
                                     }
+                                    SpacerHeight(8)
                                 }
                             }
-                            item { SpacerHeight(8) }
                         }
                     }
                 }

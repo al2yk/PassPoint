@@ -16,5 +16,7 @@ data class UsersState(
     val confirmRoleChange: Boolean = false, // второй шаг подтверждения
     val statsTotal: Int = 0,
     val statsByRole: Map<Int, Int> = emptyMap(),
-    val statsNewThisWeek: Int = 0
+    val statsNewThisWeek: Int = 0,
+    val weeklyRegistrations: List<Int> = listOf(0, 0, 0, 0, 0),
+    val monthlyRegistrations: List<Int> = listOf(0, 0, 0, 0, 0)
 )

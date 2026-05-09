@@ -1,21 +1,46 @@
 package com.example.passpoint.presentation.screens.main.admin
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.R
+import com.example.passpoint.presentation.components.AttendancePieChart
 import com.example.passpoint.presentation.components.SpacerHeight
+import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.theme.BrandColor
+import com.example.passpoint.presentation.theme.BrandTonal200
 import com.example.passpoint.presentation.theme.Gray500
+import com.example.passpoint.presentation.theme.Gray800
 import com.example.passpoint.presentation.viewModel.AdminMainViewModel
 
 @Composable
@@ -24,84 +49,224 @@ fun AdminMainView(
     viewModel: AdminMainViewModel = hiltViewModel()
 ) {
     val state = viewModel.state
-
-    Column {
-        SpacerHeight(8)
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Управление", style = MaterialTheme.typography.headlineSmall)
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { controller.navigate(NavigationRoutes.CREATE_COURSE) },
-                    contentPadding = PaddingValues(horizontal = 0.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Создать курс", modifier = Modifier.weight(1f), color = BrandColor, style = MaterialTheme.typography.titleMedium)
-                        Icon(painter = painterResource(R.drawable.arrow_outward_24dp), contentDescription = "", tint = BrandColor)
-                    }
-                }
-                Button(
-                    onClick = { controller.navigate(NavigationRoutes.CREATE_EVENT) },
-                    contentPadding = PaddingValues(horizontal = 0.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Создать мероприятие", modifier = Modifier.weight(1f), color = BrandColor, style = MaterialTheme.typography.titleMedium)
-                        Icon(painter = painterResource(R.drawable.arrow_outward_24dp), contentDescription = "", tint = BrandColor)
-                    }
-                }
-                Button(
-                    onClick = { controller.navigate(NavigationRoutes.CREATE_NEWS) },
-                    contentPadding = PaddingValues(horizontal = 0.dp),
-                    shape = RoundedCornerShape(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Опубликовать новость", modifier = Modifier.weight(1f), color = BrandColor, style = MaterialTheme.typography.titleMedium)
-                        Icon(painter = painterResource(R.drawable.arrow_outward_24dp), contentDescription = "", tint = BrandColor)
-                    }
-                }
-            }
+            CircularProgressIndicator()
         }
+    } else {
+        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            SpacerHeight(8)
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Управление", style = MaterialTheme.typography.headlineSmall)
+                    Spacer(modifier = Modifier.height(16.dp))
 
-        SpacerHeight(8)
-
-        // Сводка
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text("Сводка", style = MaterialTheme.typography.headlineSmall)
-                SpacerHeight(16)
-
-                // Блок курсов
-                Text("Курсы", style = MaterialTheme.typography.titleMedium, color = BrandColor)
-                SpacerHeight(8)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    StatItem(label = "Сегодня", value = state.todayCourses)
-                    StatItem(label = "Будущих", value = state.activeCourses)
-                    StatItem(label = "Всего", value = state.totalCourses)
-                }
-
-                SpacerHeight(16)
-
-                // Блок мероприятий
-                Text("Мероприятия", style = MaterialTheme.typography.titleMedium, color = BrandColor)
-                SpacerHeight(8)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    StatItem(label = "Сегодня", value = state.todayEvents)
-                    StatItem(label = "Будущих", value = state.upcomingEvents)
-                    StatItem(label = "Всего", value = state.totalEvents)
+                    Button(
+                        onClick = { controller.navigate(NavigationRoutes.CREATE_COURSE) },
+                        contentPadding = PaddingValues(horizontal = 0.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Создать курс",
+                                modifier = Modifier.weight(1f),
+                                color = BrandColor,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_outward_24dp),
+                                contentDescription = "",
+                                tint = BrandColor
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = { controller.navigate(NavigationRoutes.CREATE_EVENT) },
+                        contentPadding = PaddingValues(horizontal = 0.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Создать мероприятие",
+                                modifier = Modifier.weight(1f),
+                                color = BrandColor,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_outward_24dp),
+                                contentDescription = "",
+                                tint = BrandColor
+                            )
+                        }
+                    }
+                    Button(
+                        onClick = { controller.navigate(NavigationRoutes.CREATE_NEWS) },
+                        contentPadding = PaddingValues(horizontal = 0.dp),
+                        shape = RoundedCornerShape(0.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                "Опубликовать новость",
+                                modifier = Modifier.weight(1f),
+                                color = BrandColor,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Icon(
+                                painter = painterResource(R.drawable.arrow_outward_24dp),
+                                contentDescription = "",
+                                tint = BrandColor
+                            )
+                        }
+                    }
                 }
             }
+
+            SpacerHeight(8)
+
+            // Сводка
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Сводка", style = MaterialTheme.typography.headlineSmall)
+                    SpacerHeight(16)
+
+                    // Блок курсов
+                    Text("Курсы", style = MaterialTheme.typography.titleMedium)
+                    SpacerHeight(8)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        StatItem(label = "Сегодня", value = state.todayCourses)
+                        StatItem(label = "Будущих", value = state.activeCourses)
+                        StatItem(label = "Всего", value = state.totalCourses)
+                    }
+
+                    SpacerHeight(16)
+
+                    // Блок мероприятий
+                    Text(
+                        "Мероприятия",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    SpacerHeight(8)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        StatItem(label = "Сегодня", value = state.todayEvents)
+                        StatItem(label = "Будущих", value = state.upcomingEvents)
+                        StatItem(label = "Всего", value = state.totalEvents)
+                    }
+                }
+            }
+
+            SpacerHeight(8)
+
+            ElevatedCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Посещаемость курсов", style = MaterialTheme.typography.headlineSmall)
+                    SpacerHeight(16)
+                    Row(verticalAlignment = Alignment.Top) {
+                        Box(
+                            modifier = Modifier.width(240.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AttendancePieChart(
+                                attended = state.attended,
+                                missed = state.missed
+                            )
+                        }
+                        SpacerWidth(8)
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val attendedFraction =
+                                if (state.total > 0) state.attended.toFloat() / state.total else 0f
+                            val missedFraction =
+                                if (state.total > 0) state.missed.toFloat() / state.total else 0f
+                            SpacerHeight(16)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Canvas(modifier = Modifier.size(10.dp)) {
+                                        drawCircle(color = BrandColor)
+                                    }
+                                    SpacerWidth(5)
+                                    Text(
+                                        text = "${state.attended}",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        color = BrandColor
+                                    )
+                                    Text(
+                                        text = "(${(attendedFraction * 100).toInt()}%)",
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = BrandColor
+                                    )
+                                }
+                                Text(
+                                    text = "Присутствовало",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray800
+                                )
+                            }
+                            SpacerHeight(12)
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Canvas(modifier = Modifier.size(10.dp)) {
+                                        drawCircle(color = BrandTonal200)
+                                    }
+                                    SpacerWidth(5)
+                                    Text(
+                                        text = "${state.missed}",
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        color = BrandTonal200
+                                    )
+                                    Text(
+                                        text = "(${(missedFraction * 100).toInt()}%)",
+                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = BrandTonal200
+                                    )
+                                }
+                                Text(
+                                    text = "Отсутствовало",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray800
+                                )
+                            }
+                            SpacerHeight(12)
+
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = "${state.total}",
+                                    style = MaterialTheme.typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                                )
+                                Text(
+                                    text = "Всего записей",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Gray800
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            SpacerHeight(8)
         }
     }
 }

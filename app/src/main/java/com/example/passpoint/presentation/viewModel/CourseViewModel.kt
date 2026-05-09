@@ -62,6 +62,7 @@ class CoursesViewModel @Inject constructor(
 
             _state.value = _state.value.copy(
                 isLoading = false,
+                isRegistrationLoading = false,  // <-- сбрасываем флаг загрузки регистрации
                 error = error,
                 upcomingCourses = upcoming,
                 pastCourses = past,
@@ -133,12 +134,8 @@ class CoursesViewModel @Inject constructor(
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             when (val result = registerForCourseUseCase(courseId, UserRepository.ID)) {
                 is Result.Success -> {
-                    val newReg = result.data
-                    val updated = _state.value.registrations + newReg
-                    _state.value = _state.value.copy(
-                        registrations = updated,
-                        isRegistrationLoading = false
-                    )
+                    // После успешной записи перезагружаем все данные
+                    loadData()
                 }
                 is Result.Failure -> {
                     _state.value = _state.value.copy(
@@ -156,11 +153,8 @@ class CoursesViewModel @Inject constructor(
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             try {
                 unregisterFromCourseUseCase(reg.id!!)
-                val updated = _state.value.registrations.filter { it.course != courseId }
-                _state.value = _state.value.copy(
-                    registrations = updated,
-                    isRegistrationLoading = false
-                )
+                // После успешной отмены перезагружаем все данные
+                loadData()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isRegistrationLoading = false,

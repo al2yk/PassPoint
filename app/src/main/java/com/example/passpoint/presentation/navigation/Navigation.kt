@@ -39,6 +39,7 @@ import com.example.passpoint.presentation.screens.main.course.CreateCourseView
 import com.example.passpoint.presentation.screens.main.course.PastCoursesView
 import com.example.passpoint.presentation.screens.main.curator.CuratorCourseDetailView
 import com.example.passpoint.presentation.screens.main.curator.CuratorPastCoursesView
+import com.example.passpoint.presentation.screens.main.curator.CuratorUsersView
 import com.example.passpoint.presentation.screens.main.events.CreateEventView
 import com.example.passpoint.presentation.screens.main.events.EventsView
 import com.example.passpoint.presentation.screens.main.events.PastEventsView
@@ -232,7 +233,8 @@ fun Navigation(isOnline: Boolean) {
                     QrView(qrData = qrData)
                 }
                 composable(NavigationRoutes.USERS) {
-                    UsersView(controller, innerPadding)
+                    if (isCurator) CuratorUsersView(controller, innerPadding)
+                    else UsersView(controller, innerPadding)
                 }
                 composable(NavigationRoutes.CREATE_COURSE) {
                     CreateCourseView(controller, innerPadding)

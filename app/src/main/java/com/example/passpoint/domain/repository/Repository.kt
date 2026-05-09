@@ -53,4 +53,6 @@ interface Repository {
     suspend fun getAttendancesByCourse(courseId: Int): Result<List<CourseRegistration>>
     suspend fun getUsersByIds(ids: List<String>): Result<List<User>>
     suspend fun updateCourseAttendance(attendanceId: Int, newStatus: Int): Result<CourseRegistration>
+    suspend fun getAttendancesByCourseIds(ids: List<Int>): Result<List<CourseRegistration>>
+    suspend fun getAllAttendances(): Result<List<CourseRegistration>>
 }

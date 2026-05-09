@@ -146,4 +146,8 @@ interface UserApi {
         @Query("id") idFilter: String,
         @Body fields: Map<String, Int>   // или Map<String, String>
     ): List<CourseRegistration>
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getAttendancesByCourses(@Query("course") courseFilter: String): List<CourseRegistration>
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getAllAttendances(): List<CourseRegistration>
 }

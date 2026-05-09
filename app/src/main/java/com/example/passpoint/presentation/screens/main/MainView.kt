@@ -89,11 +89,9 @@ fun MainView(
     ) {
         if (isAdmin) {
             AdminMainView(controller = controller)
-        }
-        if (isCurator){
+        } else if (isCurator) {
             CuratorMainView(controller)
-        }
-        else {
+        } else {
             when {
                 state.isLoading -> {
                     Box(
