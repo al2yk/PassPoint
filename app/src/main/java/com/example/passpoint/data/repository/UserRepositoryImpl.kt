@@ -2,6 +2,8 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.Certificate
+import com.example.passpoint.data.dto.CertificateCreateRequest
 import com.example.passpoint.data.dto.Course
 import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
@@ -461,6 +463,36 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getAllAttendances(): Result<List<CourseRegistration>> {
         return try {
             val response = userApi.getAllAttendances()
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getUserCertificates(userId: String): Result<List<Certificate>> {
+        return try {
+            val response = userApi.getUserCertificates("eq.$userId")
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun createCertificate(request: CertificateCreateRequest): Result<Certificate> {
+        return try {
+            val response = userApi.createCertificate(request)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Сервер вернул пустой ответ"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun uploadCertificateFile(fileName: String, fileBytes: ByteArray): Result<Unit> {
+        return try {
+            val requestBody = fileBytes.toRequestBody("application/pdf".toMediaTypeOrNull())
+            val part = MultipartBody.Part.createFormData("file", fileName, requestBody)
+            val response = userApi.uploadCertificateFile(fileName, part)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка загрузки сертификата: ${response.code()}"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getCertificatesByCourse(courseId: Int): Result<List<Certificate>> {
+        return try {
+            val response = userApi.getCertificatesByCourse("eq.$courseId")
             Result.Success(response)
         } catch (e: Exception) { Result.Failure(e) }
     }

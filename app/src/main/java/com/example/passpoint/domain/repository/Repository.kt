@@ -1,5 +1,7 @@
 package com.example.passpoint.domain.repository
 
+import com.example.passpoint.data.dto.Certificate
+import com.example.passpoint.data.dto.CertificateCreateRequest
 import com.example.passpoint.data.dto.Course
 import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
@@ -55,4 +57,8 @@ interface Repository {
     suspend fun updateCourseAttendance(attendanceId: Int, newStatus: Int): Result<CourseRegistration>
     suspend fun getAttendancesByCourseIds(ids: List<Int>): Result<List<CourseRegistration>>
     suspend fun getAllAttendances(): Result<List<CourseRegistration>>
+    suspend fun getUserCertificates(userId: String): Result<List<Certificate>>
+    suspend fun createCertificate(request: CertificateCreateRequest): Result<Certificate>
+    suspend fun uploadCertificateFile(fileName: String, fileBytes: ByteArray): Result<Unit>
+    suspend fun getCertificatesByCourse(courseId: Int): Result<List<Certificate>>
 }

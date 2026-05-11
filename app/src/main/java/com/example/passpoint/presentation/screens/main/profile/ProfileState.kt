@@ -10,5 +10,6 @@ data class ProfileState(
     val organization: String = "",
     val isLoading: Boolean = false,
     val error: String? = null,
-    val pastCoursesCount: Int = 0
+    val pastCoursesCount: Int = 0,
+    val certificatesCount: Int = 0
 )

@@ -9,6 +9,7 @@ import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.GetCourseUseCase
 import com.example.passpoint.domain.useCase.GetProfileUseCase
+import com.example.passpoint.domain.useCase.GetUserCertificatesUseCase
 import com.example.passpoint.presentation.screens.main.profile.ProfileState
 import com.example.passpoint.presentation.theme.AppTheme
 import com.example.passpoint.presentation.theme.ThemeManager
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val themeManager: ThemeManager,
     private val getProfileUseCase: GetProfileUseCase,
-    private val getCourseUseCase: GetCourseUseCase
+    private val getCourseUseCase: GetCourseUseCase,
+    private val getUserCertificatesUseCase: GetUserCertificatesUseCase
 ) : ViewModel() {
 
     private val _currentTheme = MutableStateFlow<AppTheme>(AppTheme.SYSTEM)
@@ -98,6 +100,9 @@ class ProfileViewModel @Inject constructor(
                 if (_state.value.role == 2) {
                     loadPastCoursesCount()
                 }
+                if (_state.value.role == 1) {
+                    loadCertificatesCount()
+                }
             } catch (e: Exception) {
                 Log.e("ProfileViewModel", "Ошибка загрузки профиля", e)
                 _state.value = _state.value.copy(
@@ -105,6 +110,14 @@ class ProfileViewModel @Inject constructor(
                     error = e.message ?: "Неизвестная ошибка"
                 )
             }
+        }
+    }
+    private suspend fun loadCertificatesCount() {
+        when (val result = getUserCertificatesUseCase(UserRepository.ID)) {
+            is Result.Success -> {
+                _state.value = _state.value.copy(certificatesCount = result.data.size)
+            }
+            is Result.Failure -> { /* игнорируем */ }
         }
     }
     private suspend fun loadPastCoursesCount() {

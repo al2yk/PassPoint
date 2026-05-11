@@ -98,12 +98,18 @@ fun CuratorCourseDetailView(
                     ) { Text("Повторить") }
                 }
             }
-            state.value.participants.isEmpty() ->{
+
+            state.value.participants.isEmpty() -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Пока что никто не записан на данный курс", style = MaterialTheme.typography.bodyLarge, color = Gray600,
-                        modifier = Modifier.padding(horizontal = 40.dp))
+                    Text(
+                        "Пока что никто не записан на данный курс",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Gray600,
+                        modifier = Modifier.padding(horizontal = 40.dp)
+                    )
                 }
             }
+
             else -> LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.value.participants) { participant ->
                     SpacerHeight(8)
@@ -259,11 +265,64 @@ fun CuratorCourseDetailView(
                             } else {
                                 // Если курс не сегодня или статус уже изменён, показываем статус текстом
                                 when (participant.status) {
-                                    2 -> Text(
-                                        "Присутствовал",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = BrandColor
-                                    )
+                                    2 -> {
+                                        if (state.value.certificateMessage != null) {
+                                            SpacerHeight(4)
+                                            Text(
+                                                text = state.value.certificateMessage!!,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = if (state.value.certificateMessage!!.contains(
+                                                        "успешно"
+                                                    )
+                                                ) BrandColor else MaterialTheme.colorScheme.error
+                                            )
+                                        }
+                                        Column() {
+                                            Text(
+                                                "Присутствовал",
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = BrandColor
+                                            )
+                                            SpacerHeight(5)
+                                            if (participant.certificateIssued) {
+                                                Text(
+                                                    "Сертификат выдан",
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = BrandColor
+                                                )
+                                            } else {
+                                                Button(
+                                                    onClick = {
+                                                        viewModel.issueCertificate(
+                                                            participant.attendanceId
+                                                        )
+                                                    },
+                                                    enabled = !participant.isIssuing,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(ButtonHeight),
+                                                    shape = RoundedCornerShape(8.dp),
+                                                    colors = ButtonDefaults.buttonColors(
+                                                        containerColor = BrandColor
+                                                    )
+                                                ) {
+                                                    if (participant.isIssuing) {
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(16.dp),
+                                                            color = White,
+                                                            strokeWidth = 2.dp
+                                                        )
+                                                    } else {
+                                                        Text(
+                                                            "Выдать сертификат",
+                                                            color = White,
+                                                            style = MaterialTheme.typography.displaySmall
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
 
                                     3 -> Text(
                                         "Отсутствовал",

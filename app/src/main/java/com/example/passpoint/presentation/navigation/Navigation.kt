@@ -47,6 +47,7 @@ import com.example.passpoint.presentation.screens.main.news.CreateNewsView
 import com.example.passpoint.presentation.screens.main.news.NewsDetailView
 import com.example.passpoint.presentation.screens.main.news.NewsView
 import com.example.passpoint.presentation.screens.main.profile.EditProfileView
+import com.example.passpoint.presentation.screens.main.profile.certificates.CertificatesView
 import com.example.passpoint.presentation.screens.nointernet.NoInternetView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
 import com.example.passpoint.presentation.screens.qr.QrView
@@ -83,7 +84,8 @@ fun Navigation(isOnline: Boolean) {
         NavigationRoutes.EDIT_EVENT,
         NavigationRoutes.EDIT_PROFILE,
         NavigationRoutes.CURATOR_PAST_COURSES,
-        NavigationRoutes.CURATOR_COURSE_DETAIL
+        NavigationRoutes.CURATOR_COURSE_DETAIL,
+        NavigationRoutes.CERTIFICATES
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
@@ -277,6 +279,9 @@ fun Navigation(isOnline: Boolean) {
                         innerPadding = innerPadding
                     )
                 }
+                composable(NavigationRoutes.CERTIFICATES) {
+                    CertificatesView(controller = controller, innerPadding = innerPadding)
+                }
             }
         } else {
             NoInternetView()
@@ -304,6 +309,7 @@ private fun getTitleForRoute(route: String?, isNewsDetail: Boolean): String = wh
     route == NavigationRoutes.EDIT_PROFILE -> "Редактирование профиля"
     route == NavigationRoutes.USERS -> "Пользователи"
     route == NavigationRoutes.CURATOR_PAST_COURSES -> "Мои прошедшие курсы"
+    route == NavigationRoutes.CERTIFICATES -> "Мои сертификаты"
     route?.startsWith("curator_course_detail") == true -> "Посещаемость курса"
     else -> "PassPoint"
 }

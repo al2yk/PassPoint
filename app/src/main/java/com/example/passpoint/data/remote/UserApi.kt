@@ -2,6 +2,8 @@ package com.example.passpoint.data.remote
 
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.AuthResponse
+import com.example.passpoint.data.dto.Certificate
+import com.example.passpoint.data.dto.CertificateCreateRequest
 import com.example.passpoint.data.dto.Course
 import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
@@ -150,4 +152,22 @@ interface UserApi {
     suspend fun getAttendancesByCourses(@Query("course") courseFilter: String): List<CourseRegistration>
     @GET("/rest/v1/course_attendance?select=*")
     suspend fun getAllAttendances(): List<CourseRegistration>
+    // Получить сертификаты пользователя
+    @GET("/rest/v1/certificates?select=*")
+    suspend fun getUserCertificates(@Query("user") userId: String): List<Certificate>
+
+    // Создать сертификат
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/certificates")
+    suspend fun createCertificate(@Body certificate: CertificateCreateRequest): List<Certificate>
+
+    // Загрузить файл сертификата в Storage
+    @Multipart
+    @POST("/storage/v1/object/CERTIFICATES/{fileName}")
+    suspend fun uploadCertificateFile(
+        @Path("fileName") fileName: String,
+        @Part file: MultipartBody.Part
+    ): Response<Unit>
+    @GET("/rest/v1/certificates?select=*")
+    suspend fun getCertificatesByCourse(@Query("course_id") courseId: String): List<Certificate>
 }

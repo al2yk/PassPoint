@@ -273,26 +273,38 @@ fun ProfileView(
                         }
                         if (role == "Участник") {
                             SpacerHeight(15)
-                            Row(modifier = Modifier.padding(start = 16.dp)) {
-                                Icon(
-                                    painter = painterResource(R.drawable.article_24dp),
-                                    contentDescription = null,
-                                    tint = Gray500,
-                                    modifier = Modifier.size(20.dp)
-                                )
-
-                                SpacerWidth(12)
-                                Column {
-                                    Text(
-                                        "Мои сертификаты",
-                                        style = MaterialTheme.typography.displaySmall,
-                                        color = Gray500
+                            Row(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .clickable { controller.navigate(NavigationRoutes.CERTIFICATES) },
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Row(modifier = Modifier.weight(1f)) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.article_24dp),
+                                        contentDescription = null,
+                                        tint = Gray500,
+                                        modifier = Modifier.size(20.dp)
                                     )
-                                    Text(
-                                        "0",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                    )
+                                    SpacerWidth(12)
+                                    Column {
+                                        Text(
+                                            "Мои сертификаты",
+                                            style = MaterialTheme.typography.displaySmall,
+                                            color = Gray500
+                                        )
+                                        Text(
+                                            "${state.certificatesCount}",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
+                                    }
                                 }
+                                Icon(
+                                    painter = painterResource(R.drawable.arrow_right_24dp),
+                                    contentDescription = "",
+                                    tint = Gray600,
+                                    modifier = Modifier.size(30.dp)
+                                )
                             }
                         }
                         if (role == "Куратор") {
