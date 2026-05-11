@@ -40,7 +40,7 @@ fun MonthlyRegistrationsBarChart(
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-
+        SpacerHeight(12)
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()

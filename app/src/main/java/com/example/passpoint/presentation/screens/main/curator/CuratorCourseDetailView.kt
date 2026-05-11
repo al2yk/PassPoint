@@ -98,7 +98,12 @@ fun CuratorCourseDetailView(
                     ) { Text("Повторить") }
                 }
             }
-
+            state.value.participants.isEmpty() ->{
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Пока что никто не записан на данный курс", style = MaterialTheme.typography.bodyLarge, color = Gray600,
+                        modifier = Modifier.padding(horizontal = 40.dp))
+                }
+            }
             else -> LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(state.value.participants) { participant ->
                     SpacerHeight(8)

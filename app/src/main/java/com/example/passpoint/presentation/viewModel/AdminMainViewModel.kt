@@ -59,6 +59,7 @@ class AdminMainViewModel @Inject constructor(
             val totalAtt = attendances.size
             val att = attendances.count { it.status == 2 }
             val miss = attendances.count { it.status == 3 }
+            val part = totalAtt - att - miss   // оставшиеся – "Участвует"
 
             val users = (usersResult as? Result.Success)?.data ?: emptyList()
             val participants = users.count { it.role == 1 }
@@ -80,7 +81,8 @@ class AdminMainViewModel @Inject constructor(
                 participants = participants,
                 curators = curators,
                 admins = admins,
-                isLoading = false
+                isLoading = false,
+                participating = part
             )
         }
     }

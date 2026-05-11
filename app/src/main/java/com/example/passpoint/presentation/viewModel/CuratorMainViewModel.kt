@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.GetCourseUseCase
+import com.example.passpoint.domain.useCase.GetCuratorsUseCase
 import com.example.passpoint.presentation.screens.main.curator.CuratorMainState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -33,7 +34,7 @@ class CuratorMainViewModel @Inject constructor(
                     val today = LocalDate.now()
                     val myCourses = allCourses
                         // только курсы, где куратор — текущий пользователь (dbUserId)
-                        .filter { it.curator == UserRepository.dbUserId }
+                        .filter { it.curator == UserRepository.dbUserId && it.curator != null }
                         // оставляем только будущие (включая сегодняшние)
                         .filter {
                             runCatching { LocalDate.parse(it.date) }

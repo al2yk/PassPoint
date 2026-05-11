@@ -15,5 +15,6 @@ data class AdminMainState(
     val participants: Int = 0,
     val curators: Int = 0,
     val admins: Int = 0,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val participating: Int = 0
 )

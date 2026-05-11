@@ -32,7 +32,8 @@ fun CourseCard(
     showCapacity: Boolean = true,
     onQrClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
-    onEditClick: (() -> Unit)? = null
+    onEditClick: (() -> Unit)? = null,
+    curatorName: String = ""
 ) {
     Text(course.name, style = MaterialTheme.typography.headlineSmall)
     SpacerHeight(14)
@@ -52,8 +53,14 @@ fun CourseCard(
             style = MaterialTheme.typography.bodyLarge
         )
     }
-
-
+    if (curatorName.isNotEmpty()) {
+        SpacerHeight(7)
+        Text("Куратор", style = MaterialTheme.typography.displaySmall, color = Gray600)
+        Text(
+            text = curatorName,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
     if (showButtons && UserRepository.role == 1) {
         if (isRegistered) {
             SpacerHeight(16)
@@ -125,7 +132,7 @@ fun CourseCard(
             }
         }
     }
-    if (showButtons && UserRepository.role ==3){
+    if (showButtons && UserRepository.role == 3) {
         SpacerHeight(16)
         Row(
             modifier = Modifier.fillMaxWidth(),

@@ -85,7 +85,7 @@ class ProfileViewModel @Inject constructor(
                                 name = user.name,
                                 surname = user.surname,
                                 email = user.email,
-                                photo = user.photo,
+                                photo = user.photo.toString(),
                                 role = user.role,
                                 phone = user.phone ?: "",
                                 organization = user.organization ?: "",

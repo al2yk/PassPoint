@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.R
 import com.example.passpoint.presentation.components.AttendancePieChart
+import com.example.passpoint.presentation.components.LegendItem
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
@@ -41,6 +43,8 @@ import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.BrandTonal200
 import com.example.passpoint.presentation.theme.Gray500
 import com.example.passpoint.presentation.theme.Gray800
+import com.example.passpoint.presentation.theme.Green500
+import com.example.passpoint.presentation.theme.Yellow500
 import com.example.passpoint.presentation.viewModel.AdminMainViewModel
 
 @Composable
@@ -188,71 +192,53 @@ fun AdminMainView(
                         ) {
                             AttendancePieChart(
                                 attended = state.attended,
-                                missed = state.missed
+                                missed = state.missed,
+                                participating = state.participating  // новое поле
                             )
                         }
                         SpacerWidth(8)
                         Column(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().offset(y= (-20).dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            val attendedFraction =
-                                if (state.total > 0) state.attended.toFloat() / state.total else 0f
-                            val missedFraction =
-                                if (state.total > 0) state.missed.toFloat() / state.total else 0f
+                            val total = state.attended + state.missed + state.participating
+                            val attendedFraction = if (total > 0) state.attended.toFloat() / total else 0f
+                            val missedFraction = if (total > 0) state.missed.toFloat() / total else 0f
+                            val participatingFraction = if (total > 0) state.participating.toFloat() / total else 0f
+
                             SpacerHeight(16)
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Canvas(modifier = Modifier.size(10.dp)) {
-                                        drawCircle(color = BrandColor)
-                                    }
-                                    SpacerWidth(5)
-                                    Text(
-                                        text = "${state.attended}",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = BrandColor
-                                    )
-                                    Text(
-                                        text = "(${(attendedFraction * 100).toInt()}%)",
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = BrandColor
-                                    )
-                                }
-                                Text(
-                                    text = "Присутствовало",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Gray800
-                                )
-                            }
-                            SpacerHeight(12)
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Canvas(modifier = Modifier.size(10.dp)) {
-                                        drawCircle(color = BrandTonal200)
-                                    }
-                                    SpacerWidth(5)
-                                    Text(
-                                        text = "${state.missed}",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = BrandTonal200
-                                    )
-                                    Text(
-                                        text = "(${(missedFraction * 100).toInt()}%)",
-                                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = BrandTonal200
-                                    )
-                                }
-                                Text(
-                                    text = "Отсутствовало",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Gray800
-                                )
-                            }
+
+                            // Присутствовало
+                            LegendItem(
+                                color = Yellow500,
+                                value = state.attended,
+                                fraction = attendedFraction,
+                                label = "Присутствовало"
+                            )
                             SpacerHeight(12)
 
+                            // Отсутствовало
+                            LegendItem(
+                                color = Green500,
+                                value = state.missed,
+                                fraction = missedFraction,
+                                label = "Отсутствовало"
+                            )
+                            SpacerHeight(12)
+
+                            // Участвует
+                            LegendItem(
+                                color = BrandColor,
+                                value = state.participating,
+                                fraction = participatingFraction,
+                                label = "Участвует"
+                            )
+                            SpacerHeight(12)
+
+                            // Всего записей
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = "${state.total}",
+                                    text = "$total",
                                     style = MaterialTheme.typography.headlineMedium,
                                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                                 )

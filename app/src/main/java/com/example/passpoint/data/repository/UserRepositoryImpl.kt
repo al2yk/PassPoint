@@ -55,7 +55,7 @@ class UserRepositoryImpl @Inject constructor(
                 name = name,
                 surname = surname,
                 role = 1,
-                photo = ""
+                photo = null
             )
             Log.d("UserDTO signUp", userDto.toString())
 

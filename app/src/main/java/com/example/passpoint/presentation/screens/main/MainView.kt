@@ -145,7 +145,9 @@ fun MainView(
                             .verticalScroll(rememberScrollState())
                     ) {
                         SpacerHeight(8)
-                        val new = state.news.lastOrNull()
+                        val new = state.news
+                            .filter { it.create.isNotBlank() }
+                            .maxByOrNull { runCatching { LocalDate.parse(it.create) }.getOrDefault(LocalDate.MIN) }
                         // NEWS
                         ElevatedCard {
                             Column(
@@ -446,7 +448,7 @@ fun MainView(
                                     // внутри ElevatedCard курсов
                                     val isRegistered =
                                         state.courseRegistrations.any { it.course == course.id }
-
+                                    val curatorName = state.curators.find { it.id.toString() == course.curator }?.let { "${it.name} ${it.surname}" } ?: "—"
                                     CourseCard(
                                         course = course,
                                         isRegistered = isRegistered,
@@ -462,7 +464,8 @@ fun MainView(
                                             )
                                         },
                                         showButtons = true,
-                                        onQrClick = { controller.navigate("qr/${UserRepository.ID}") }
+                                        onQrClick = { controller.navigate("qr/${UserRepository.ID}") },
+                                        curatorName = curatorName
                                     )
                                     SpacerHeight(10)
                                     HorizontalDivider(

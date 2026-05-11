@@ -210,7 +210,6 @@ fun EditProfileView(
                     value = state.phone,
                     onValueChange = { viewModel.updatePhone(it) },
                     label = { Text("Телефон") },
-                    placeholder = { Text("+7 999 888 77 66") },
                     isError = state.phoneError != null,
                     supportingText = state.phoneError?.let { { Text(it) } },
                     modifier = Modifier
@@ -245,8 +244,10 @@ fun EditProfileView(
                 SpacerHeight(24)
 
                 if (state.error != null) {
-                    WarningMessage(text = state.error)
-                    SpacerHeight(8)
+                    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                        WarningMessage(text = state.error)
+                    }
+                    SpacerHeight (8)
                 }
 
                 Button(

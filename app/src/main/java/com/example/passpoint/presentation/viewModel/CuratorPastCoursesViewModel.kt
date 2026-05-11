@@ -31,7 +31,7 @@ class CuratorPastCoursesViewModel @Inject constructor(
                     val allCourses = result.data
                     val today = LocalDate.now()
                     val pastCourses = allCourses
-                        .filter { it.curator == UserRepository.dbUserId }
+                        .filter { it.curator == UserRepository.dbUserId && it.curator != null }
                         .filter {
                             runCatching { LocalDate.parse(it.date) }
                                 .getOrDefault(LocalDate.MIN) < today
