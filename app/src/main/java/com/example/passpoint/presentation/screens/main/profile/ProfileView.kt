@@ -3,6 +3,7 @@ package com.example.passpoint.presentation.screens.main.profile
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,6 +74,7 @@ import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.Gray350
 import com.example.passpoint.presentation.theme.Gray400
 import com.example.passpoint.presentation.theme.Gray500
+import com.example.passpoint.presentation.theme.Gray600
 import com.example.passpoint.presentation.theme.Gray800
 import com.example.passpoint.presentation.viewModel.ProfileViewModel
 
@@ -271,29 +273,77 @@ fun ProfileView(
                         }
                         if (role == "Участник") {
                             SpacerHeight(15)
-                            Row(modifier = Modifier.padding(start = 16.dp)) {
-                                Icon(
-                                    painter = painterResource(R.drawable.article_24dp),
-                                    contentDescription = null,
-                                    tint = Gray500,
-                                    modifier = Modifier.size(20.dp)
-                                )
-
-                                SpacerWidth(12)
-                                Column {
-                                    Text(
-                                        "Мои сертификаты",
-                                        style = MaterialTheme.typography.displaySmall,
-                                        color = Gray500
+                            Row(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .clickable { controller.navigate(NavigationRoutes.CERTIFICATES) },
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Row(modifier = Modifier.weight(1f)) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.article_24dp),
+                                        contentDescription = null,
+                                        tint = Gray500,
+                                        modifier = Modifier.size(20.dp)
                                     )
-                                    Text(
-                                        "0",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                    )
+                                    SpacerWidth(12)
+                                    Column {
+                                        Text(
+                                            "Мои сертификаты",
+                                            style = MaterialTheme.typography.displaySmall,
+                                            color = Gray500
+                                        )
+                                        Text(
+                                            "${state.certificatesCount}",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
+                                    }
                                 }
+                                Icon(
+                                    painter = painterResource(R.drawable.arrow_right_24dp),
+                                    contentDescription = "",
+                                    tint = Gray600,
+                                    modifier = Modifier.size(30.dp)
+                                )
                             }
                         }
-                        if (state.phone.isNotEmpty()){
+                        if (role == "Куратор") {
+                            SpacerHeight(15)
+                            Row(
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .clickable { controller.navigate(NavigationRoutes.CURATOR_PAST_COURSES) },
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Row(modifier = Modifier.weight(1f)) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.person_book_24dp),
+                                        contentDescription = null,
+                                        tint = Gray500,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    SpacerWidth(12)
+                                    Column {
+                                        Text(
+                                            "Мои прошедшие курсы",
+                                            style = MaterialTheme.typography.displaySmall,
+                                            color = Gray500
+                                        )
+                                        Text(
+                                            state.pastCoursesCount.toString(),
+                                            style = MaterialTheme.typography.bodyLarge,
+                                        )
+                                    }
+                                }
+                                Icon(
+                                    painter = painterResource(R.drawable.arrow_right_24dp),
+                                    contentDescription = "",
+                                    tint = Gray600,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        }
+                        if (state.phone.isNotEmpty()) {
                             SpacerHeight(15)
                             Row(modifier = Modifier.padding(start = 16.dp)) {
                                 Icon(
@@ -317,7 +367,7 @@ fun ProfileView(
                                 }
                             }
                         }
-                        if (state.organization.isNotEmpty() && role == "Участник"){
+                        if (state.organization.isNotEmpty() && role == "Участник") {
                             SpacerHeight(15)
                             Row(modifier = Modifier.padding(start = 16.dp)) {
                                 Icon(

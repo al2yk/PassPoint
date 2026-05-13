@@ -86,15 +86,21 @@ fun PastCoursesView(
             }
 
             else -> {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 8.dp)) {
                     items(courses) { course ->
-                        SpacerHeight(8)
                         ElevatedCard(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Column(modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp)) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp)
+                            ) {
+                                val curatorName =
+                                    state.curators.find { it.id.toString() == course.curator }
+                                        ?.let { "${it.name} ${it.surname}" } ?: "—"
                                 CourseCard(
                                     course = course,
                                     isRegistered = false,
@@ -103,10 +109,12 @@ fun PastCoursesView(
                                     onUnregisterClick = {},
                                     showButtons = false,
                                     showCapacity = false,
-                                    onQrClick = { controller?.navigate("qr/${UserRepository.ID}") }
+                                    onQrClick = { controller?.navigate("qr/${UserRepository.ID}") },
+                                    curatorName = curatorName
                                 )
                             }
                         }
+                        SpacerHeight(8)
                     }
                 }
             }

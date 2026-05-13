@@ -38,4 +38,9 @@ object UserRepository {
         set(value) {
             actSystem?.edit()?.putString("email", value)?.apply()
         }
+    var dbUserId: String
+        get() = actSystem?.getString("dbUserId", "") ?: ""
+        set(value) {
+            actSystem?.edit()?.putString("dbUserId", value)?.apply()
+        }
 }

@@ -52,6 +52,7 @@ import com.example.passpoint.presentation.components.CuratorItem
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.screens.main.admin.AdminMainView
+import com.example.passpoint.presentation.screens.main.curator.CuratorMainView
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
 import com.example.passpoint.presentation.theme.Gray600
@@ -69,6 +70,7 @@ fun MainView(
     val state = viewModel.state
     val lifecycleOwner = LocalLifecycleOwner.current
     val isAdmin = UserRepository.role == 3
+    val isCurator = UserRepository.role == 2
     // Автоматическое обновление регистраций при возврате на экран
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -87,6 +89,8 @@ fun MainView(
     ) {
         if (isAdmin) {
             AdminMainView(controller = controller)
+        } else if (isCurator) {
+            CuratorMainView(controller)
         } else {
             when {
                 state.isLoading -> {
@@ -141,7 +145,9 @@ fun MainView(
                             .verticalScroll(rememberScrollState())
                     ) {
                         SpacerHeight(8)
-                        val new = state.news.lastOrNull()
+                        val new = state.news
+                            .filter { it.create.isNotBlank() }
+                            .maxByOrNull { runCatching { LocalDate.parse(it.create) }.getOrDefault(LocalDate.MIN) }
                         // NEWS
                         ElevatedCard {
                             Column(
@@ -442,7 +448,7 @@ fun MainView(
                                     // внутри ElevatedCard курсов
                                     val isRegistered =
                                         state.courseRegistrations.any { it.course == course.id }
-
+                                    val curatorName = state.curators.find { it.id.toString() == course.curator }?.let { "${it.name} ${it.surname}" } ?: "—"
                                     CourseCard(
                                         course = course,
                                         isRegistered = isRegistered,
@@ -458,7 +464,8 @@ fun MainView(
                                             )
                                         },
                                         showButtons = true,
-                                        onQrClick = { controller.navigate("qr/${UserRepository.ID}") }
+                                        onQrClick = { controller.navigate("qr/${UserRepository.ID}") },
+                                        curatorName = curatorName
                                     )
                                     SpacerHeight(10)
                                     HorizontalDivider(

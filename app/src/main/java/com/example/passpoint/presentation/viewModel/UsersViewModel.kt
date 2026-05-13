@@ -11,6 +11,7 @@ import com.example.passpoint.domain.useCase.UpdateUserRoleUseCase
 import com.example.passpoint.presentation.screens.main.admin.UsersState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +32,43 @@ class UsersViewModel @Inject constructor(
         loadUsers()
     }
 
+    private fun calculateWeeklyRegistrations(users: List<User>): List<Int> {
+        val today = LocalDate.now()
+        val startOfWeek = today.with(java.time.DayOfWeek.MONDAY)
+        val weeks = mutableListOf<Int>()
+        for (i in 4 downTo 0) {
+            val weekStart = startOfWeek.minusWeeks(i.toLong())
+            val weekEnd = weekStart.plusDays(6)
+            val count = users.count { user ->
+                user.created_at?.let {
+                    try {
+                        val date = LocalDate.parse(it.substringBefore("T"))
+                        date in weekStart..weekEnd
+                    } catch (e: Exception) { false }
+                } ?: false
+            }
+            weeks.add(count)
+        }
+        return weeks
+    }
+
+    private fun calculateMonthlyRegistrations(users: List<User>): List<Int> {
+        val today = LocalDate.now()
+        val months = (4 downTo 0).map { i ->
+            val target = today.minusMonths(i.toLong())
+            val monthStart = LocalDate.of(target.year, target.month, 1)
+            val monthEnd = monthStart.plusMonths(1).minusDays(1)
+            users.count { user ->
+                user.created_at?.let {
+                    try {
+                        val date = LocalDate.parse(it.substringBefore("T"))
+                        date in monthStart..monthEnd
+                    } catch (e: Exception) { false }
+                } ?: false
+            }
+        }
+        return months
+    }
     private fun loadUsers() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -39,6 +77,8 @@ class UsersViewModel @Inject constructor(
                     val all = result.data
                     _state.value = _state.value.copy(
                         users = all,
+                        weeklyRegistrations = calculateWeeklyRegistrations(all),
+                        monthlyRegistrations = calculateMonthlyRegistrations(all),
                         isLoading = false,
                         statsTotal = all.size,
                         statsByRole = all.groupBy { it.role }.mapValues { it.value.size },

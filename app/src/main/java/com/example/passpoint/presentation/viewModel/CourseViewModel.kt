@@ -7,6 +7,7 @@ import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.DeleteCourseUseCase
 import com.example.passpoint.domain.useCase.GetCourseUseCase
+import com.example.passpoint.domain.useCase.GetCuratorsUseCase
 import com.example.passpoint.domain.useCase.GetUserCourseRegistrationsUseCase
 import com.example.passpoint.domain.useCase.RegisterForCourseUseCase
 import com.example.passpoint.domain.useCase.UnregisterFromCourseUseCase
@@ -25,6 +26,7 @@ class CoursesViewModel @Inject constructor(
     private val registerForCourseUseCase: RegisterForCourseUseCase,
     private val unregisterFromCourseUseCase: UnregisterFromCourseUseCase,
     private val deleteCourseUseCase: DeleteCourseUseCase,
+    private val getCuratorsUseCase: GetCuratorsUseCase,
 ) : ViewModel() {
 
     private val _state = mutableStateOf(CoursesState())
@@ -43,15 +45,18 @@ class CoursesViewModel @Inject constructor(
             _state.value = _state.value.copy(isLoading = true, error = null)
             val courseResult = getCourseUseCase()
             val regResult = getUserCourseRegistrationsUseCase(UserRepository.ID)
+            val curatorResult = getCuratorsUseCase()
 
             val error = when {
                 courseResult is Result.Failure -> "Ошибка загрузки курсов"
                 regResult is Result.Failure -> "Ошибка загрузки регистраций"
+                curatorResult is Result.Failure -> "Ошибка загрузки кураторов"
                 else -> null
             }
 
             val courses = (courseResult as? Result.Success)?.data ?: emptyList()
             val registrations = (regResult as? Result.Success)?.data ?: emptyList()
+            val curators = (curatorResult as? Result.Success)?.data ?: emptyList()
             val today = LocalDate.now()
             val upcoming = courses.filter {
                 runCatching { LocalDate.parse(it.date) >= today }.getOrDefault(false)
@@ -62,10 +67,12 @@ class CoursesViewModel @Inject constructor(
 
             _state.value = _state.value.copy(
                 isLoading = false,
+                isRegistrationLoading = false,
                 error = error,
                 upcomingCourses = upcoming,
                 pastCourses = past,
-                registrations = registrations
+                registrations = registrations,
+                curators = curators
             )
         }
     }
@@ -133,12 +140,8 @@ class CoursesViewModel @Inject constructor(
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             when (val result = registerForCourseUseCase(courseId, UserRepository.ID)) {
                 is Result.Success -> {
-                    val newReg = result.data
-                    val updated = _state.value.registrations + newReg
-                    _state.value = _state.value.copy(
-                        registrations = updated,
-                        isRegistrationLoading = false
-                    )
+                    // После успешной записи перезагружаем все данные
+                    loadData()
                 }
                 is Result.Failure -> {
                     _state.value = _state.value.copy(
@@ -156,11 +159,8 @@ class CoursesViewModel @Inject constructor(
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             try {
                 unregisterFromCourseUseCase(reg.id!!)
-                val updated = _state.value.registrations.filter { it.course != courseId }
-                _state.value = _state.value.copy(
-                    registrations = updated,
-                    isRegistrationLoading = false
-                )
+                // После успешной отмены перезагружаем все данные
+                loadData()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
                     isRegistrationLoading = false,

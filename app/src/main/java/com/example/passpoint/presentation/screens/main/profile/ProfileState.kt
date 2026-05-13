@@ -9,5 +9,7 @@ data class ProfileState(
     val phone: String = "",
     val organization: String = "",
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val pastCoursesCount: Int = 0,
+    val certificatesCount: Int = 0
 )

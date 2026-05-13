@@ -97,6 +97,7 @@ fun CoursesView(
                             shape = RoundedCornerShape(16.dp)
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
+                                val curatorName = state.curators.find { it.id.toString() == course.curator }?.let { "${it.name} ${it.surname}" } ?: "—"
                                 CourseCard(
                                     course = course,
                                     isRegistered = isRegistered,
@@ -107,7 +108,8 @@ fun CoursesView(
                                     showCapacity = true,
                                     onQrClick = { controller?.navigate("qr/${UserRepository.ID}") },
                                     onDeleteClick = { viewModel.showDeleteConfirm(course.id) },
-                                    onEditClick = { controller?.navigate("edit_course/${course.id}") }
+                                    onEditClick = { controller?.navigate("edit_course/${course.id}") },
+                                    curatorName = curatorName
                                 )
                             }
                         }

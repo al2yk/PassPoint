@@ -2,6 +2,8 @@ package com.example.passpoint.data.remote
 
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.AuthResponse
+import com.example.passpoint.data.dto.Certificate
+import com.example.passpoint.data.dto.CertificateCreateRequest
 import com.example.passpoint.data.dto.Course
 import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
@@ -127,4 +129,45 @@ interface UserApi {
     @Headers("Prefer: return=representation")
     @PATCH("/rest/v1/users")
     suspend fun updateUserRole(@Query("id") idFilter: String, @Body fields: Map<String, Int>): List<User>
+    // Получить курс по ID
+    @GET("/rest/v1/course_with_enrollment?select=*")
+    suspend fun getCourseById(@Query("id") idFilter: String): List<CourseWithEnrollment>
+
+    // Все записи о посещаемости по ID курса
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getAttendancesByCourse(@Query("course") courseFilter: String): List<CourseRegistration>
+
+    // Получить пользователей по списку UUID (таблица users)
+    @GET("/rest/v1/users?select=*")
+    suspend fun getUsersByIds(@Query("user_id") idFilter: String): List<User>
+
+    // Обновить статус посещаемости
+    @Headers("Prefer: return=representation")
+    @PATCH("/rest/v1/course_attendance")
+    suspend fun updateCourseAttendance(
+        @Query("id") idFilter: String,
+        @Body fields: Map<String, Int>   // или Map<String, String>
+    ): List<CourseRegistration>
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getAttendancesByCourses(@Query("course") courseFilter: String): List<CourseRegistration>
+    @GET("/rest/v1/course_attendance?select=*")
+    suspend fun getAllAttendances(): List<CourseRegistration>
+    // Получить сертификаты пользователя
+    @GET("/rest/v1/certificates?select=*")
+    suspend fun getUserCertificates(@Query("user") userId: String): List<Certificate>
+
+    // Создать сертификат
+    @Headers("Prefer: return=representation")
+    @POST("/rest/v1/certificates")
+    suspend fun createCertificate(@Body certificate: CertificateCreateRequest): List<Certificate>
+
+    // Загрузить файл сертификата в Storage
+    @Multipart
+    @POST("/storage/v1/object/CERTIFICATES/{fileName}")
+    suspend fun uploadCertificateFile(
+        @Path("fileName") fileName: String,
+        @Part file: MultipartBody.Part
+    ): Response<Unit>
+    @GET("/rest/v1/certificates?select=*")
+    suspend fun getCertificatesByCourse(@Query("course_id") courseId: String): List<Certificate>
 }

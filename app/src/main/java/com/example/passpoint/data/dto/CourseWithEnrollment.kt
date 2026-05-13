@@ -8,7 +8,7 @@ data class CourseWithEnrollment (
     val description: String,
     val date: String,
     val place: String,
-    val curator: String,
+    val curator: String?,
     val capacity: Int,
     val enrolled_count: Int
 )

@@ -2,6 +2,8 @@ package com.example.passpoint.data.repository
 
 import android.util.Log
 import com.example.passpoint.data.dto.AuthRequest
+import com.example.passpoint.data.dto.Certificate
+import com.example.passpoint.data.dto.CertificateCreateRequest
 import com.example.passpoint.data.dto.Course
 import com.example.passpoint.data.dto.CourseCreateRequest
 import com.example.passpoint.data.dto.CourseRegistration
@@ -55,7 +57,7 @@ class UserRepositoryImpl @Inject constructor(
                 name = name,
                 surname = surname,
                 role = 1,
-                photo = ""
+                photo = null
             )
             Log.d("UserDTO signUp", userDto.toString())
 
@@ -81,6 +83,7 @@ class UserRepositoryImpl @Inject constructor(
             val profileResult = getProfile(UserRepository.ID)
             if (profileResult is Result.Success && profileResult.data.isNotEmpty()) {
                 UserRepository.role = profileResult.data.first().role
+                UserRepository.dbUserId = profileResult.data.first().id.toString()
             }
 
             val authData = Mapper.mapToDomain(response)
@@ -230,7 +233,11 @@ class UserRepositoryImpl @Inject constructor(
     }
     override suspend fun registerForCourse(courseId: Int, userId: String): Result<CourseRegistration> {
         return try {
-            val registration = CourseRegistration(user = userId, course = courseId)
+            val registration = CourseRegistration(
+                user = userId,
+                course = courseId,
+                status = 1
+            )
             val response = userApi.createCourseRegistration(registration)
             if (response.isNotEmpty()) {
                 Result.Success(response.first())
@@ -412,5 +419,81 @@ class UserRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.Failure(e)
         }
+    }
+    override suspend fun getCourseById(courseId: Int): Result<CourseWithEnrollment> {
+        return try {
+            val response = userApi.getCourseById("eq.$courseId")
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Курс не найден"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun getAttendancesByCourse(courseId: Int): Result<List<CourseRegistration>> {
+        return try {
+            val response = userApi.getAttendancesByCourse("eq.$courseId")
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun getUsersByIds(ids: List<String>): Result<List<User>> {
+        return try {
+            val filter = "in.(${ids.joinToString(",")})"
+            val response = userApi.getUsersByIds(filter) // теперь фильтр по user_id
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun updateCourseAttendance(attendanceId: Int, newStatus: Int): Result<CourseRegistration> {
+        return try {
+            val response = userApi.updateCourseAttendance(
+                "eq.$attendanceId",
+                mapOf("status" to newStatus)  // Int ok
+            )
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Ошибка обновления"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getAttendancesByCourseIds(ids: List<Int>): Result<List<CourseRegistration>> {
+        return try {
+            val filter = "in.(${ids.joinToString(",")})"
+            val response = userApi.getAttendancesByCourses(filter)
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getAllAttendances(): Result<List<CourseRegistration>> {
+        return try {
+            val response = userApi.getAllAttendances()
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getUserCertificates(userId: String): Result<List<Certificate>> {
+        return try {
+            val response = userApi.getUserCertificates("eq.$userId")
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun createCertificate(request: CertificateCreateRequest): Result<Certificate> {
+        return try {
+            val response = userApi.createCertificate(request)
+            if (response.isNotEmpty()) Result.Success(response.first())
+            else Result.Failure(Exception("Сервер вернул пустой ответ"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+
+    override suspend fun uploadCertificateFile(fileName: String, fileBytes: ByteArray): Result<Unit> {
+        return try {
+            val requestBody = fileBytes.toRequestBody("application/pdf".toMediaTypeOrNull())
+            val part = MultipartBody.Part.createFormData("file", fileName, requestBody)
+            val response = userApi.uploadCertificateFile(fileName, part)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка загрузки сертификата: ${response.code()}"))
+        } catch (e: Exception) { Result.Failure(e) }
+    }
+    override suspend fun getCertificatesByCourse(courseId: Int): Result<List<Certificate>> {
+        return try {
+            val response = userApi.getCertificatesByCourse("eq.$courseId")
+            Result.Success(response)
+        } catch (e: Exception) { Result.Failure(e) }
     }
 }

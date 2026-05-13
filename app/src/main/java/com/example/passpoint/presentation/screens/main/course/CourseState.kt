@@ -2,6 +2,7 @@ package com.example.passpoint.presentation.screens.main.course
 
 import com.example.passpoint.data.dto.CourseRegistration
 import com.example.passpoint.data.dto.CourseWithEnrollment
+import com.example.passpoint.data.dto.User
 import com.example.passpoint.presentation.screens.main.CourseConfirmDialogState
 
 data class CoursesState(
@@ -13,5 +14,6 @@ data class CoursesState(
     val isRegistrationLoading: Boolean = false,
     val error: String? = null,
     val confirmDialog: CourseConfirmDialogState? = null,
-    val deleteDialog: CourseConfirmDialogState? = null
+    val deleteDialog: CourseConfirmDialogState? = null,
+    val curators: List<User> = listOf()
 )

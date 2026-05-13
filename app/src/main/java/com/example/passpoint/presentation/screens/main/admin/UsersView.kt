@@ -16,8 +16,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -42,21 +45,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import coil.size.Size
 import com.example.passpoint.R
+import com.example.passpoint.presentation.components.MonthlyRegistrationsBarChart
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
+import com.example.passpoint.presentation.components.UsersPieChart
+import com.example.passpoint.presentation.components.WeeklyRegistrationsBarChart
 import com.example.passpoint.presentation.theme.Brand50
 import com.example.passpoint.presentation.theme.BrandColor
 import com.example.passpoint.presentation.theme.ButtonHeight
+import com.example.passpoint.presentation.theme.Gray350
 import com.example.passpoint.presentation.theme.Gray500
 import com.example.passpoint.presentation.theme.Gray600
 import com.example.passpoint.presentation.theme.White
@@ -72,7 +86,7 @@ fun UsersView(
     val state = viewModel.state
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-    var showBottomSheet by remember { mutableStateOf(false) }
+    var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val textFieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = MaterialTheme.colorScheme.onBackground,
         unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
@@ -98,7 +112,7 @@ fun UsersView(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Все пользователи системы", style = MaterialTheme.typography.headlineSmall)
-                    SpacerHeight(16)
+                    SpacerHeight(10)
                     Button(
                         onClick = { showBottomSheet = true },
                         contentPadding = PaddingValues(horizontal = 0.dp),
@@ -121,7 +135,7 @@ fun UsersView(
                             )
                         }
                     }
-                    SpacerHeight(12)
+                    SpacerHeight(10)
 
                     // Фильтр роли
                     LazyRow(
@@ -172,7 +186,7 @@ fun UsersView(
                             )
                         }
                     }
-                    SpacerHeight(12)
+                    SpacerHeight(10)
                     Row(verticalAlignment = Alignment.Bottom) {
                         // Поиск
                         OutlinedTextField(
@@ -181,7 +195,7 @@ fun UsersView(
                             label = { Text("Поиск") },
                             trailingIcon = {
                                 if (state.searchQuery.isNotEmpty()) {
-                                    IconButton (onClick = { viewModel.updateSearchQuery("") }) {
+                                    IconButton(onClick = { viewModel.updateSearchQuery("") }) {
                                         Icon(
                                             painter = painterResource(R.drawable.close_24dp),
                                             contentDescription = "Очистить поиск"
@@ -197,7 +211,9 @@ fun UsersView(
                         SpacerWidth(12)
                         OutlinedButton(
                             onClick = { viewModel.toggleSort() },
-                            modifier = Modifier.width(100.dp).height(56.dp),
+                            modifier = Modifier
+                                .width(100.dp)
+                                .height(56.dp),
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
@@ -222,25 +238,53 @@ fun UsersView(
                     ) {
                         val dateOnly = user.created_at?.substringBefore("T")
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Row {
-                                Text(
-                                    "${user.name} ${user.surname}",
-                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 18.sp),
-                                    modifier = Modifier.weight(1f)
-                                )
-                                dateOnly?.let {
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Фото
+                                Box(
+                                    modifier = Modifier
+                                        .size(70.dp)
+                                        .clip(CircleShape)
+                                        .background(Gray350)
+                                ) {
+                                    val imgState = rememberAsyncImagePainter(
+                                        model = ImageRequest.Builder(LocalContext.current)
+                                            .data(user.photo)
+                                            .size(Size.ORIGINAL).build()
+                                    ).state
+                                    if (imgState is AsyncImagePainter.State.Error) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.person_24dp),
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .fillMaxSize(0.6f)
+                                                .align(Alignment.Center),
+                                            tint = Gray600
+                                        )
+                                    } else if (imgState is AsyncImagePainter.State.Success) {
+                                        androidx.compose.foundation.Image(
+                                            painter = imgState.painter,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .clip(CircleShape),
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    }
+                                }
+                                SpacerWidth(12)
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        it,
-                                        style = MaterialTheme.typography.headlineSmall.copy(fontSize = 14.sp),
+                                        "${user.name} ${user.surname}",
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
+                                    Text(
+                                        user.email,
+                                        style = MaterialTheme.typography.displaySmall,
                                         color = Gray600
                                     )
                                 }
                             }
-                            Text(
-                                user.email,
-                                style = MaterialTheme.typography.headlineSmall.copy(fontSize = 14.sp),
-                                color = Gray600
-                            )
                             SpacerHeight(8)
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Text(
@@ -392,19 +436,35 @@ fun StatsSheetContent(state: UsersState) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text("Общая статистика", style = MaterialTheme.typography.headlineSmall)
         SpacerHeight(16)
-        Text("Всего пользователей: ${state.statsTotal}")
+        Text(
+            text = "Все пользователи",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        SpacerHeight(10)
+        UsersPieChart(
+            participants = state.statsByRole[1] ?: 0,
+            curators = state.statsByRole[2] ?: 0,
+            admins = state.statsByRole[3] ?: 0
+        )
+        SpacerHeight(16)
+        WeeklyRegistrationsBarChart(weeklyCounts = state.weeklyRegistrations)
+        SpacerHeight(24)
+        MonthlyRegistrationsBarChart(monthlyCounts = state.monthlyRegistrations)
+        /*Text(
+            "Всего пользователей: ${state.statsTotal}",
+            style = MaterialTheme.typography.bodyLarge
+        )
         SpacerHeight(8)
-        Text("Участников: ${state.statsByRole[1] ?: 0}")
-        SpacerHeight(8)
-        Text("Кураторов: ${state.statsByRole[2] ?: 0}")
-        SpacerHeight(8)
-        Text("Администраторов: ${state.statsByRole[3] ?: 0}")
-        SpacerHeight(12)
-        Text("Новых за последнюю неделю: ${state.statsNewThisWeek}")
+        Text(
+            "Новых за последнюю неделю: ${state.statsNewThisWeek}",
+            style = MaterialTheme.typography.bodyLarge
+        )*/
         SpacerHeight(24)
     }
 }

@@ -32,7 +32,8 @@ fun CourseCard(
     showCapacity: Boolean = true,
     onQrClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
-    onEditClick: (() -> Unit)? = null
+    onEditClick: (() -> Unit)? = null,
+    curatorName: String = ""
 ) {
     Text(course.name, style = MaterialTheme.typography.headlineSmall)
     SpacerHeight(14)
@@ -52,8 +53,14 @@ fun CourseCard(
             style = MaterialTheme.typography.bodyLarge
         )
     }
-
-
+    if (curatorName.isNotEmpty()) {
+        SpacerHeight(7)
+        Text("Куратор", style = MaterialTheme.typography.displaySmall, color = Gray600)
+        Text(
+            text = curatorName,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
     if (showButtons && UserRepository.role == 1) {
         if (isRegistered) {
             SpacerHeight(16)
@@ -89,23 +96,43 @@ fun CourseCard(
             }
         } else {
             SpacerHeight(16)
-            OutlinedButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ButtonHeight),
-                enabled = !isRegistrationLoading,
-                onClick = onRegisterClick,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    "Участвовать",
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+            val noPlacesLeft = (course.capacity - course.enrolled_count) <= 0
+            if (noPlacesLeft) {
+                // Кнопка без действия, неактивная
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    enabled = false,                         // нельзя нажать
+                    onClick = {},                            // пустое действие
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "Нет мест",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            } else {
+                // Обычная кнопка записи
+                OutlinedButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ButtonHeight),
+                    enabled = !isRegistrationLoading,
+                    onClick = onRegisterClick,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        "Участвовать",
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
             }
         }
     }
-    if (showButtons && UserRepository.role ==3){
+    if (showButtons && UserRepository.role == 3) {
         SpacerHeight(16)
         Row(
             modifier = Modifier.fillMaxWidth(),
