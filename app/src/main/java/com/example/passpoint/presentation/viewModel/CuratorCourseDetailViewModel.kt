@@ -1,6 +1,10 @@
 package com.example.passpoint.presentation.viewModel
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +18,9 @@ import com.example.passpoint.domain.useCase.GetUsersByIdsUseCase
 import com.example.passpoint.domain.useCase.UpdateCourseAttendanceUseCase
 import com.example.passpoint.domain.useCase.UploadCertificateFileUseCase
 import com.example.passpoint.domain.utils.CertificatePdfGenerator
+import com.example.passpoint.domain.utils.notification.NotificationChannels.CERTIFICATE
+import com.example.passpoint.domain.utils.notification.NotificationHelper
+import com.example.passpoint.presentation.MainActivity
 import com.example.passpoint.presentation.screens.main.curator.AttendanceConfirmDialog
 import com.example.passpoint.presentation.screens.main.curator.CuratorCourseDetailState
 import com.example.passpoint.presentation.screens.main.curator.ParticipantInfo
@@ -124,9 +131,10 @@ class CuratorCourseDetailViewModel @Inject constructor(
             }
         }
     }
+    @SuppressLint("MissingPermission")
     fun issueCertificate(attendanceId: Int) {
         val participant = _state.value.participants.find { it.attendanceId == attendanceId } ?: return
-        viewModelScope.launch {
+        viewModelScope.launch @androidx.annotation.RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS) {
             // Устанавливаем флаг isIssuing только для этого участника
             val updatedBefore = _state.value.participants.map {
                 if (it.attendanceId == attendanceId) it.copy(isIssuing = true) else it
@@ -157,6 +165,12 @@ class CuratorCourseDetailViewModel @Inject constructor(
                                 else it
                             }
                             _state.value = _state.value.copy(participants = updatedAfter)
+                            val intent = Intent(context, MainActivity::class.java).apply {
+                                putExtra("open_certificates", true)
+                            }
+                            val pending = PendingIntent.getActivity(context, 0, intent, FLAG_IMMUTABLE)
+                            NotificationHelper.show(context, CERTIFICATE, "Сертификат готов!",
+                                "Вы получили сертификат за курс «${course}».", pending)
                         }
                         is Result.Failure -> {
                             val updatedAfter = _state.value.participants.map {

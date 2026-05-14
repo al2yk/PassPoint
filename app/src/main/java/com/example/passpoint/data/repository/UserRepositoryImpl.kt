@@ -1,6 +1,13 @@
 package com.example.passpoint.data.repository
 
+import android.Manifest
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import androidx.annotation.RequiresPermission
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.example.passpoint.data.dto.AuthRequest
 import com.example.passpoint.data.dto.Certificate
 import com.example.passpoint.data.dto.CertificateCreateRequest
@@ -25,6 +32,12 @@ import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.AuthResponseModel
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.repository.Repository
+import com.example.passpoint.domain.utils.notification.NotificationChannels
+import com.example.passpoint.domain.utils.notification.NotificationHelper
+import com.example.passpoint.domain.utils.widget.WidgetUpdateWorker
+import com.example.passpoint.domain.worker.ReminderScheduler
+import com.example.passpoint.presentation.MainActivity
+import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -32,7 +45,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
-    private val userApi: UserApi
+    private val userApi: UserApi,
+    @ApplicationContext private val context: Context
 ) : Repository {
     override suspend fun signUp(
         name: String,
@@ -80,6 +94,8 @@ class UserRepositoryImpl @Inject constructor(
             UserRepository.user_token = response.access_token
             UserRepository.ID = response.user.id.toString()
 
+            val workRequest = OneTimeWorkRequestBuilder<WidgetUpdateWorker>().build()
+            WorkManager.getInstance(context).enqueue(workRequest)
             val profileResult = getProfile(UserRepository.ID)
             if (profileResult is Result.Success && profileResult.data.isNotEmpty()) {
                 UserRepository.role = profileResult.data.first().role
@@ -193,11 +209,16 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun registerForEvent(eventId: Int, userId: String): Result<EventRegistration> {
         return try {
-
             val registration = EventRegistration(user = userId, event = eventId)
             val response = userApi.createEventRegistration(registration)
             if (response.isNotEmpty()) {
-                Result.Success(response.first())
+                val reg = response.first()
+                val events = userApi.getEvents()
+                val event = events.find { it.id == eventId }
+                if (event != null) {
+                    ReminderScheduler.scheduleReminder(context, event.name, event.date, "events")
+                }
+                Result.Success(reg)
             } else {
                 Result.Failure(Exception("Сервер вернул пустой ответ"))
             }
@@ -240,7 +261,20 @@ class UserRepositoryImpl @Inject constructor(
             )
             val response = userApi.createCourseRegistration(registration)
             if (response.isNotEmpty()) {
-                Result.Success(response.first())
+                val reg = response.first()
+                val coursesResult = getCourse()
+                if (coursesResult is Result.Success) {
+                    val course = coursesResult.data.find { it.id == courseId }
+                    if (course != null) {
+                        ReminderScheduler.scheduleReminder(
+                            context,
+                            course.name,
+                            course.date,
+                            "courses"
+                        )
+                    }
+                }
+                Result.Success(reg)
             } else {
                 Result.Failure(Exception("Сервер вернул пустой ответ"))
             }
@@ -330,11 +364,31 @@ class UserRepositoryImpl @Inject constructor(
             Result.Failure(e)
         }
     }
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override suspend fun createNews(request: NewsCreateRequest): Result<News> {
         return try {
             val response = userApi.createNews(request)
-            if (response.isNotEmpty()) Result.Success(response.first())
-            else Result.Failure(Exception("Сервер вернул пустой ответ"))
+            if (response.isNotEmpty()) {
+                val createdNews = response.first()
+                val intent = Intent(context, MainActivity::class.java).apply {
+                    putExtra("open_news", true)
+                    putExtra("news_id", createdNews.id)
+                }
+                val pending = PendingIntent.getActivity(
+                    context, 0, intent, PendingIntent.FLAG_IMMUTABLE
+                )
+                NotificationHelper.show(
+                    context,
+                    NotificationChannels.NEWS,
+                    "Опубликована новость",
+                    createdNews.title,
+                    pending
+                )
+
+                Result.Success(createdNews)
+            } else {
+                Result.Failure(Exception("Сервер вернул пустой ответ"))
+            }
         } catch (e: Exception) {
             Result.Failure(e)
         }

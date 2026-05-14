@@ -406,14 +406,14 @@ fun ProfileView(
                                 AppTheme.DARK -> "Тёмная"
                             }
                             val interactionSource = remember { MutableInteractionSource() }
-
+                            val context = LocalContext.current
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(ButtonHeight)
                                     .selectable(
                                         selected = (currentTheme == themeOption),
-                                        onClick = { viewModel.onThemeSelected(themeOption) },
+                                        onClick = { viewModel.onThemeSelected(themeOption,context) },
                                         role = Role.RadioButton,
                                         interactionSource = interactionSource,
                                         indication = ripple(color = MaterialTheme.colorScheme.primary)

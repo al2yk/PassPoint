@@ -1,5 +1,6 @@
 package com.example.passpoint.presentation.viewModel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -46,9 +47,10 @@ class ProfileViewModel @Inject constructor(
         loadProfile()
     }
 
-    fun onThemeSelected(theme: AppTheme) {
+    fun onThemeSelected(theme: AppTheme, context: Context) {
         viewModelScope.launch {
             themeManager.saveTheme(theme)
+            themeManager.refreshWidgets(context)
         }
     }
 
