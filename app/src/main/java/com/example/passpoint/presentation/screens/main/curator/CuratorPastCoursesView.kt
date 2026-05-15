@@ -14,8 +14,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.presentation.components.CourseCard
 import com.example.passpoint.presentation.components.SpacerHeight
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray600
 import com.example.passpoint.presentation.viewModel.CuratorPastCoursesViewModel
 
 @Composable

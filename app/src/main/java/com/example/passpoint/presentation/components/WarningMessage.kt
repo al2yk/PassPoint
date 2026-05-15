@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.passpoint.presentation.theme.Red100
-import com.example.passpoint.presentation.theme.Red800
+import com.example.passpoint.presentation.ui.theme.Red100
+import com.example.passpoint.presentation.ui.theme.Red800
 
 @Composable
 fun WarningMessage(text: String){

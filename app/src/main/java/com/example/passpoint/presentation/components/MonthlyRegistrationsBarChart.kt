@@ -11,8 +11,8 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.Gray800
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale

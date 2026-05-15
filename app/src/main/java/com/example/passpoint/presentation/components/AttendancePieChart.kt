@@ -17,11 +17,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.BrandTonal200
-import com.example.passpoint.presentation.theme.Gray800
-import com.example.passpoint.presentation.theme.Green500
-import com.example.passpoint.presentation.theme.Yellow500
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.Green500
+import com.example.passpoint.presentation.ui.theme.Yellow500
 
 @Composable
 fun AttendancePieChart(
@@ -62,7 +61,7 @@ fun AttendancePieChart(
 
                 // Присутствовало (BrandColor)
                 drawArc(
-                    color = Yellow500,
+                    color = Green500,
                     startAngle = -90f,
                     sweepAngle = attendedAngle,
                     useCenter = false,
@@ -73,7 +72,7 @@ fun AttendancePieChart(
 
                 // Отсутствовало (BrandTonal200)
                 drawArc(
-                    color = Green500,
+                    color = BrandColor,
                     startAngle = -90f + attendedAngle,
                     sweepAngle = missedAngle,
                     useCenter = false,
@@ -84,7 +83,7 @@ fun AttendancePieChart(
 
                 // Участвует (серый)
                 drawArc(
-                    color = BrandColor,
+                    color = Yellow500,
                     startAngle = -90f + attendedAngle + missedAngle,
                     sweepAngle = participatingAngle,
                     useCenter = false,

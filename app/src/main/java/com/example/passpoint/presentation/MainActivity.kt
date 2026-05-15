@@ -9,9 +9,9 @@ import androidx.compose.runtime.getValue
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.AndroidNetworkMonitor
 import com.example.passpoint.presentation.navigation.Navigation
-import com.example.passpoint.presentation.theme.AppTheme
-import com.example.passpoint.presentation.theme.PassPointTheme
-import com.example.passpoint.presentation.theme.ThemeManager
+import com.example.passpoint.presentation.ui.theme.AppTheme
+import com.example.passpoint.presentation.ui.theme.PassPointTheme
+import com.example.passpoint.presentation.ui.theme.ThemeManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -37,6 +37,20 @@ class MainActivity : ComponentActivity() {
                 UserRepository.init(this)
                 Navigation(isOnline = isOnline)
             })
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 100)
+        }
+        intent?.let {
+            val openScreen = it.getStringExtra("open_screen")
+            when (openScreen) {
+                "login" -> {
+                    // Перенаправьте пользователя на экран авторизации
+                }
+                "events" -> { /* переход к событиям */ }
+                "courses" -> { /* переход к курсам */ }
+            }
         }
     }
 

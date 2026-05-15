@@ -1,5 +1,6 @@
 package com.example.passpoint.presentation.viewModel
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -11,8 +12,8 @@ import com.example.passpoint.domain.useCase.GetCourseUseCase
 import com.example.passpoint.domain.useCase.GetProfileUseCase
 import com.example.passpoint.domain.useCase.GetUserCertificatesUseCase
 import com.example.passpoint.presentation.screens.main.profile.ProfileState
-import com.example.passpoint.presentation.theme.AppTheme
-import com.example.passpoint.presentation.theme.ThemeManager
+import com.example.passpoint.presentation.ui.theme.AppTheme
+import com.example.passpoint.presentation.ui.theme.ThemeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,9 +47,10 @@ class ProfileViewModel @Inject constructor(
         loadProfile()
     }
 
-    fun onThemeSelected(theme: AppTheme) {
+    fun onThemeSelected(theme: AppTheme, context: Context) {
         viewModelScope.launch {
             themeManager.saveTheme(theme)
+            themeManager.refreshWidgets(context)
         }
     }
 

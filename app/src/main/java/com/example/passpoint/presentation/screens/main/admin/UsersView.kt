@@ -43,7 +43,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -67,13 +66,13 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.UsersPieChart
 import com.example.passpoint.presentation.components.WeeklyRegistrationsBarChart
-import com.example.passpoint.presentation.theme.Brand50
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray350
-import com.example.passpoint.presentation.theme.Gray500
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.Brand50
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray350
+import com.example.passpoint.presentation.ui.theme.Gray500
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.White
 import com.example.passpoint.presentation.viewModel.UsersViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -22,9 +22,9 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.WarningMessage
 import com.example.passpoint.presentation.navigation.NavigationRoutes
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray600
 import com.example.passpoint.presentation.viewModel.CuratorMainViewModel
 import java.time.LocalDate
 

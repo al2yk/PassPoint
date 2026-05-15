@@ -52,7 +52,7 @@ import com.example.passpoint.presentation.screens.nointernet.NoInternetView
 import com.example.passpoint.presentation.screens.onboarding.OnboardingView
 import com.example.passpoint.presentation.screens.qr.QrView
 import com.example.passpoint.presentation.screens.splash.SplashView
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

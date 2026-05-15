@@ -1,6 +1,5 @@
 package com.example.passpoint.presentation.screens.main.news
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,10 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.passpoint.R
 import com.example.passpoint.data.dto.NewsCategory
@@ -49,11 +48,11 @@ import com.example.passpoint.presentation.components.CategoryBlock
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Gray800
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.White
 import com.example.passpoint.presentation.viewModel.NewsViewModel
 
 @Composable
@@ -133,7 +132,7 @@ fun NewsView(
                                 .padding(16.dp)
                         ) {
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                items(displayCategories) { category ->
+                                items(displayCategories,key = { it.id }) { category ->
                                     val isSelected = category.id == state.selectedCategoryId
                                     CategoryBlock(
                                         isSelected = isSelected,
@@ -146,23 +145,24 @@ fun NewsView(
                         }
                     }
                     SpacerHeight(8)
-                    LazyColumn {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    )  {
                         if (filteredNews.isEmpty()) {
-                            item {
-                                Text(
-                                    text = "Новостей в этой категории пока нет",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Gray600,
-                                    modifier = Modifier.padding(start = 16.dp)
-                                )
-                            }
+                            Text(
+                                text = "Новостей в этой категории пока нет",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Gray600,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
                         } else {
-                            items(filteredNews) { news ->
+                            filteredNews.forEach { news ->
                                 ElevatedCard(
                                     shape = RoundedCornerShape(20.dp),
                                     modifier = Modifier.clickable {
                                         controller.navigate("${NavigationRoutes.NEWS_DETAIL}?newsId=${news.id}")
-                                    }) {
+                                    }
+                                ) {
                                     Row(
                                         modifier = Modifier
                                             .height(120.dp)

@@ -45,13 +45,13 @@ import com.example.passpoint.R
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.screens.main.admin.roleToString
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray350
-import com.example.passpoint.presentation.theme.Gray500
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Red800
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray350
+import com.example.passpoint.presentation.ui.theme.Gray500
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Red800
+import com.example.passpoint.presentation.ui.theme.White
 import com.example.passpoint.presentation.viewModel.CuratorCourseDetailViewModel
 
 @Composable

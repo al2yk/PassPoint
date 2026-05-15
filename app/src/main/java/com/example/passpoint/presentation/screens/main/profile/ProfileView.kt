@@ -67,15 +67,15 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.WarningMessage
 import com.example.passpoint.presentation.navigation.NavigationRoutes
-import com.example.passpoint.presentation.theme.AppTheme
-import com.example.passpoint.presentation.theme.Brand50
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray350
-import com.example.passpoint.presentation.theme.Gray400
-import com.example.passpoint.presentation.theme.Gray500
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.AppTheme
+import com.example.passpoint.presentation.ui.theme.Brand50
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray350
+import com.example.passpoint.presentation.ui.theme.Gray400
+import com.example.passpoint.presentation.ui.theme.Gray500
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Gray800
 import com.example.passpoint.presentation.viewModel.ProfileViewModel
 
 @Composable
@@ -406,14 +406,14 @@ fun ProfileView(
                                 AppTheme.DARK -> "Тёмная"
                             }
                             val interactionSource = remember { MutableInteractionSource() }
-
+                            val context = LocalContext.current
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(ButtonHeight)
                                     .selectable(
                                         selected = (currentTheme == themeOption),
-                                        onClick = { viewModel.onThemeSelected(themeOption) },
+                                        onClick = { viewModel.onThemeSelected(themeOption,context) },
                                         role = Role.RadioButton,
                                         interactionSource = interactionSource,
                                         indication = ripple(color = MaterialTheme.colorScheme.primary)

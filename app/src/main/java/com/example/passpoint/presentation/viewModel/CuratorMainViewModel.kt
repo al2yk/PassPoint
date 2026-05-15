@@ -1,21 +1,24 @@
 package com.example.passpoint.presentation.viewModel
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.GetCourseUseCase
-import com.example.passpoint.domain.useCase.GetCuratorsUseCase
+import com.example.passpoint.domain.worker.ReminderScheduler
 import com.example.passpoint.presentation.screens.main.curator.CuratorMainState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class CuratorMainViewModel @Inject constructor(
-    private val getCourseUseCase: GetCourseUseCase
+    private val getCourseUseCase: GetCourseUseCase,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = mutableStateOf(CuratorMainState())
@@ -47,6 +50,12 @@ class CuratorMainViewModel @Inject constructor(
                         myCourses = myCourses,
                         isLoading = false
                     )
+                    val todayCourses = myCourses.filter { it.date == LocalDate.now().toString() }
+                    if (todayCourses.isNotEmpty()) {
+                        todayCourses.forEach {
+                            ReminderScheduler.scheduleAttendanceReminder(context, it.date)
+                        }
+                    }
                     applyFilters()
                 }
                 is Result.Failure -> _state.value = _state.value.copy(

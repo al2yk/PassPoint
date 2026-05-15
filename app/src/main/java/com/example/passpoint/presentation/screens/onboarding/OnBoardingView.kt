@@ -32,8 +32,8 @@ import com.example.passpoint.presentation.components.PrimaryButton
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.isCompactLayoutRequired
 import com.example.passpoint.presentation.navigation.NavigationRoutes
-import com.example.passpoint.presentation.theme.Background
-import com.example.passpoint.presentation.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Background
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
 import kotlin.math.absoluteValue
 
 @Composable
