@@ -51,15 +51,15 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.components.WarningMessage
 import com.example.passpoint.presentation.navigation.NavigationRoutes
-import com.example.passpoint.presentation.theme.Background
-import com.example.passpoint.presentation.theme.Brand50
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.BrandTonal200
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.White
-import com.example.passpoint.presentation.theme.White50
-import com.example.passpoint.presentation.theme.White60
-import com.example.passpoint.presentation.theme.White90
+import com.example.passpoint.presentation.ui.theme.Background
+import com.example.passpoint.presentation.ui.theme.Brand50
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.BrandTonal200
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.White
+import com.example.passpoint.presentation.ui.theme.White50
+import com.example.passpoint.presentation.ui.theme.White60
+import com.example.passpoint.presentation.ui.theme.White90
 import com.example.passpoint.presentation.viewModel.SignUpViewModel
 
 @Composable

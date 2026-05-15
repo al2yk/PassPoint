@@ -12,8 +12,8 @@ import com.example.passpoint.domain.useCase.GetCourseUseCase
 import com.example.passpoint.domain.useCase.GetProfileUseCase
 import com.example.passpoint.domain.useCase.GetUserCertificatesUseCase
 import com.example.passpoint.presentation.screens.main.profile.ProfileState
-import com.example.passpoint.presentation.theme.AppTheme
-import com.example.passpoint.presentation.theme.ThemeManager
+import com.example.passpoint.presentation.ui.theme.AppTheme
+import com.example.passpoint.presentation.ui.theme.ThemeManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.theme
+package com.example.passpoint.presentation.ui.theme
 
 import android.graphics.SweepGradient
 import android.os.Build

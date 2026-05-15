@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.passpoint.data.dto.CertificateCreateRequest
+import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.CreateCertificateUseCase
 import com.example.passpoint.domain.useCase.GetAttendancesByCourseUseCase
@@ -170,7 +171,7 @@ class CuratorCourseDetailViewModel @Inject constructor(
                             }
                             val pending = PendingIntent.getActivity(context, 0, intent, FLAG_IMMUTABLE)
                             NotificationHelper.show(context, CERTIFICATE, "Сертификат готов!",
-                                "Вы получили сертификат за курс «${course}».", pending)
+                                "Был отправлен сертификат за курс «${course}».", pending)
                         }
                         is Result.Failure -> {
                             val updatedAfter = _state.value.participants.map {

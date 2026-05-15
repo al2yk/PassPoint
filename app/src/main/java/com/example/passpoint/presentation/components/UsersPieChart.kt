@@ -21,11 +21,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.BrandTonal200
-import com.example.passpoint.presentation.theme.Gray800
-import com.example.passpoint.presentation.theme.Green500
-import com.example.passpoint.presentation.theme.Yellow500
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.Green500
+import com.example.passpoint.presentation.ui.theme.Yellow500
 
 @Composable
 fun UsersPieChart(

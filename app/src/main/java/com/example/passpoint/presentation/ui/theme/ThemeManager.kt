@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.theme
+package com.example.passpoint.presentation.ui.theme
 
 import android.content.Context
 import androidx.datastore.core.DataStore

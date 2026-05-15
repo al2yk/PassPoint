@@ -9,18 +9,16 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 object CertificatePdfGenerator {
-    // Предположим, что BrandColor — это синий цвет, например #1A73E8
-    private val brandColor = Color.rgb(255, 90, 0)   // синий
-    private val lightBrand = Color.rgb(255, 242, 235)  // светлый фон
-    private val textColor = Color.rgb(255, 90, 0)
-    private val white = Color.WHITE
-    private val darkBlue = Color.rgb(255, 90, 0)
+    // BrandColor – оранжевый
+    private val brandColor = 0xFFFF5A00.toInt()
+    private val lightBrand = 0xFFFFF2EB.toInt()
+    private val textColor  = 0xFFFF5A00.toInt()
+    private val white      = 0xFFFFFFFF.toInt()
+    private val darkBlue   = 0xFFFF5A00.toInt()
 
     fun generate(context: Context, fullName: String, courseName: String, date: String): File {
         val pdf = PdfDocument()
-
-        // A4 landscape: 1169 x 827 points
-        val pageInfo = PdfDocument.PageInfo.Builder(1169, 827, 1).create()
+        val pageInfo = PdfDocument.PageInfo.Builder(1169, 827, 1).create() // A4 landscape
         val page = pdf.startPage(pageInfo)
         val canvas = page.canvas
 
@@ -85,7 +83,6 @@ object CertificatePdfGenerator {
             isAntiAlias = true
         }
         canvas.drawCircle(1169f / 2f, cardTop + 180f, 12f, iconPaint)
-        // ещё можно нарисовать звёздочку или логотип
 
         // === Имя участника ===
         val namePaint = Paint().apply {
@@ -96,7 +93,6 @@ object CertificatePdfGenerator {
             isAntiAlias = true
             typeface = Typeface.DEFAULT_BOLD
         }
-        // Динамически уменьшим размер, если имя длинное
         val maxNameWidth = cardRight - cardLeft - 160f
         var nameTextSize = 42f
         namePaint.textSize = nameTextSize
@@ -132,7 +128,6 @@ object CertificatePdfGenerator {
             isAntiAlias = true
             typeface = Typeface.DEFAULT_BOLD
         }
-        // Перенос строк, если курс длинный
         val courseLines = wrapText(courseName, coursePaint, maxNameWidth)
         var yOffset = cardTop + 355f
         for (line in courseLines) {
@@ -159,7 +154,6 @@ object CertificatePdfGenerator {
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
         }
-        canvas.drawText("Куратор: ${fullName.split(" ").firstOrNull() ?: ""}", 1169f / 2f, cardBottom - 40f, footerPaint)
         canvas.drawText("PassPoint © ${java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)}", 1169f / 2f, cardBottom - 15f, footerPaint)
 
         pdf.finishPage(page)

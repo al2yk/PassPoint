@@ -8,8 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.passpoint.presentation.theme.White
-import com.example.passpoint.presentation.theme.White60
+import com.example.passpoint.presentation.ui.theme.White
+import com.example.passpoint.presentation.ui.theme.White60
 
 @Composable
 fun AuthTitle(title: String, isEnabled:Boolean = true) {

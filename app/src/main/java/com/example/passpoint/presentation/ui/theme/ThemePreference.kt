@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.theme
+package com.example.passpoint.presentation.ui.theme
 
 enum class AppTheme(val ordinalValue: Int) {
     SYSTEM(0),

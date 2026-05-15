@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.passpoint.presentation.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

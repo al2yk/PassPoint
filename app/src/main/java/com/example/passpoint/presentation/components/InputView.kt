@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -22,11 +21,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.passpoint.presentation.theme.Black900
-import com.example.passpoint.presentation.theme.Gray450
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Red300
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.Black900
+import com.example.passpoint.presentation.ui.theme.Gray450
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Red300
+import com.example.passpoint.presentation.ui.theme.White
 
 @Composable
 fun InputView(

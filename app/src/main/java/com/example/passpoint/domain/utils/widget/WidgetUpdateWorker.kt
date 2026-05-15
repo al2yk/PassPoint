@@ -16,8 +16,8 @@ import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.data.dto.Event
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.repository.Repository
-import com.example.passpoint.presentation.theme.AppTheme
-import com.example.passpoint.presentation.theme.ThemeManager
+import com.example.passpoint.presentation.ui.theme.AppTheme
+import com.example.passpoint.presentation.ui.theme.ThemeManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers

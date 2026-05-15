@@ -1,6 +1,5 @@
 package com.example.passpoint.presentation.screens.main.admin
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -39,12 +36,11 @@ import com.example.passpoint.presentation.components.LegendItem
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
 import com.example.passpoint.presentation.navigation.NavigationRoutes
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.BrandTonal200
-import com.example.passpoint.presentation.theme.Gray500
-import com.example.passpoint.presentation.theme.Gray800
-import com.example.passpoint.presentation.theme.Green500
-import com.example.passpoint.presentation.theme.Yellow500
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.Gray500
+import com.example.passpoint.presentation.ui.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.Green500
+import com.example.passpoint.presentation.ui.theme.Yellow500
 import com.example.passpoint.presentation.viewModel.AdminMainViewModel
 
 @Composable
@@ -210,7 +206,7 @@ fun AdminMainView(
 
                             // Присутствовало
                             LegendItem(
-                                color = Yellow500,
+                                color = Green500,
                                 value = state.attended,
                                 fraction = attendedFraction,
                                 label = "Присутствовало"
@@ -219,7 +215,7 @@ fun AdminMainView(
 
                             // Отсутствовало
                             LegendItem(
-                                color = Green500,
+                                color = BrandColor,
                                 value = state.missed,
                                 fraction = missedFraction,
                                 label = "Отсутствовало"
@@ -228,7 +224,7 @@ fun AdminMainView(
 
                             // Участвует
                             LegendItem(
-                                color = BrandColor,
+                                color = Yellow500,
                                 value = state.participating,
                                 fraction = participatingFraction,
                                 label = "Участвует"

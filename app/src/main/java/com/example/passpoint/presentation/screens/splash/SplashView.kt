@@ -15,7 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.passpoint.R
 import com.example.passpoint.presentation.components.SpacerWidth
-import com.example.passpoint.presentation.theme.Background
+import com.example.passpoint.presentation.ui.theme.Background
 import com.example.passpoint.presentation.viewModel.SplashViewModel
 
 @Composable

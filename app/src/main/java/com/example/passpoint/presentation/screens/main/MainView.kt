@@ -53,11 +53,11 @@ import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.navigation.NavigationRoutes
 import com.example.passpoint.presentation.screens.main.admin.AdminMainView
 import com.example.passpoint.presentation.screens.main.curator.CuratorMainView
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Gray800
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.White
 import com.example.passpoint.presentation.viewModel.MainViewModel
 import java.time.LocalDate
 

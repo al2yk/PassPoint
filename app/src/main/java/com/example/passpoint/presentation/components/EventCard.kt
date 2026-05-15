@@ -19,10 +19,10 @@ import androidx.compose.ui.unit.dp
 import com.example.passpoint.data.dto.Event
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.formatDateRu
-import com.example.passpoint.presentation.theme.BrandColor
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.BrandColor
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.White
 
 @Composable
 fun EventCard(

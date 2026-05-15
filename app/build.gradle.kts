@@ -89,4 +89,19 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.11.2")
     implementation("androidx.hilt:hilt-work:1.2.0")
     kapt("androidx.hilt:hilt-compiler:1.2.0")
+
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:4.6.1")
+    testImplementation("org.mockito:mockito-inline:4.6.1")
+
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    testImplementation("app.cash.turbine:turbine:0.8.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
+    testImplementation("androidx.test:core-ktx:1.4.0")
+    testImplementation("org.assertj:assertj-core:3.24.2")
+    testImplementation("org.mockito:mockito-core:5.14.1")
+    testImplementation("org.mockito:mockito-inline:5.2.0")
+    testImplementation("net.bytebuddy:byte-buddy:1.15.0")
+    testImplementation("net.bytebuddy:byte-buddy-agent:1.15.0")
+    testImplementation("org.robolectric:robolectric:4.12.2")
 }

@@ -43,4 +43,14 @@ object UserRepository {
         set(value) {
             actSystem?.edit()?.putString("dbUserId", value)?.apply()
         }
+    var name: String
+        get() = actSystem?.getString("name", "") ?: "Иван"
+        set(value) {
+            actSystem?.edit()?.putString("name", value)?.apply()
+        }
+    var surname: String
+        get() = actSystem?.getString("surname", "") ?: "Иванов"
+        set(value) {
+            actSystem?.edit()?.putString("surname", value)?.apply()
+        }
 }

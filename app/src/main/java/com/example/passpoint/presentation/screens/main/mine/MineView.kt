@@ -33,9 +33,9 @@ import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.presentation.components.CourseCard
 import com.example.passpoint.presentation.components.EventCard
 import com.example.passpoint.presentation.components.SpacerHeight
-import com.example.passpoint.presentation.theme.ButtonHeight
-import com.example.passpoint.presentation.theme.Gray600
-import com.example.passpoint.presentation.theme.Gray800
+import com.example.passpoint.presentation.ui.theme.ButtonHeight
+import com.example.passpoint.presentation.ui.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Gray800
 import com.example.passpoint.presentation.viewModel.MineViewModel
 
 @Composable

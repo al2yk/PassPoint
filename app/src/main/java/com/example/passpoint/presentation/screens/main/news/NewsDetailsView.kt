@@ -1,6 +1,5 @@
 package com.example.passpoint.presentation.screens.main.news
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,12 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.example.passpoint.R
 import com.example.passpoint.domain.utils.formatNewsDate
 import com.example.passpoint.presentation.components.SpacerHeight
-import com.example.passpoint.presentation.theme.Gray600
+import com.example.passpoint.presentation.ui.theme.Gray600
 import com.example.passpoint.presentation.viewModel.NewsDetailViewModel
 
 @Composable

@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.passpoint.presentation.theme.White
+import com.example.passpoint.presentation.ui.theme.White
 import com.example.passpoint.presentation.viewModel.ChangePasswordViewModel
 import kotlinx.coroutines.delay
 

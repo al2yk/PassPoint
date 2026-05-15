@@ -1,4 +1,4 @@
-package com.example.passpoint.presentation.theme
+package com.example.passpoint.presentation.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
