@@ -8,6 +8,7 @@ import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.GetCourseUseCase
 import com.example.passpoint.domain.worker.ReminderScheduler
+import com.example.passpoint.presentation.screens.main.curator.CuratorCourseSortType
 import com.example.passpoint.presentation.screens.main.curator.CuratorMainState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,39 @@ class CuratorMainViewModel @Inject constructor(
 
     fun retry() { loadMyCourses() }
 
+    fun updateSearchQuery(query: String) {
+        _state.value = _state.value.copy(searchQuery = query)
+        applyFilters()
+    }
+
+    fun setSortType(type: CuratorCourseSortType) {
+        _state.value = _state.value.copy(sortType = type)
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        val courses = _state.value.myCourses
+        var filtered = courses
+
+        val query = _state.value.searchQuery
+        if (query.isNotBlank()) {
+            filtered = filtered.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                        it.description.contains(query, ignoreCase = true) ||
+                        it.place.contains(query, ignoreCase = true)
+            }
+        }
+
+        val sorted = when (_state.value.sortType) {
+            CuratorCourseSortType.NAME_ASC -> filtered.sortedBy { it.name.lowercase() }
+            CuratorCourseSortType.NAME_DESC -> filtered.sortedByDescending { it.name.lowercase() }
+            CuratorCourseSortType.DATE_ASC -> filtered.sortedBy { it.date }          // старые сначала
+            CuratorCourseSortType.DATE_DESC -> filtered.sortedByDescending { it.date } // новые сначала
+        }
+
+        _state.value = _state.value.copy(filteredCourses = sorted)
+    }
+
     private fun loadMyCourses() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
@@ -36,15 +70,11 @@ class CuratorMainViewModel @Inject constructor(
                     val allCourses = result.data
                     val today = LocalDate.now()
                     val myCourses = allCourses
-                        // только курсы, где куратор — текущий пользователь (dbUserId)
                         .filter { it.curator == UserRepository.dbUserId && it.curator != null }
-                        // оставляем только будущие (включая сегодняшние)
                         .filter {
                             runCatching { LocalDate.parse(it.date) }
                                 .getOrDefault(LocalDate.MIN) >= today
                         }
-                        // сортируем по дате: сначала ближайшие
-                        .sortedBy { LocalDate.parse(it.date) }
 
                     _state.value = _state.value.copy(
                         myCourses = myCourses,
@@ -63,38 +93,5 @@ class CuratorMainViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    fun updateSearchQuery(query: String) {
-        _state.value = _state.value.copy(searchQuery = query)
-        applyFilters()
-    }
-
-    fun toggleSort() {
-        // Toggle between А-Я and Я-А
-        _state.value = _state.value.copy(sortAscending = !_state.value.sortAscending)
-        applyFilters()
-    }
-
-    private fun applyFilters() {
-        val courses = _state.value.myCourses
-        var filtered = courses
-
-        val query = _state.value.searchQuery
-        if (query.isNotBlank()) {
-            filtered = filtered.filter {
-                it.name.contains(query, ignoreCase = true) ||
-                        it.description.contains(query, ignoreCase = true) ||
-                        it.place.contains(query, ignoreCase = true)
-            }
-        }
-
-        if (_state.value.sortAscending) {
-            filtered = filtered.sortedBy { it.name.lowercase() }
-        } else {
-            filtered = filtered.sortedByDescending { it.name.lowercase() }
-        }
-
-        _state.value = _state.value.copy(filteredCourses = filtered)
     }
 }

@@ -15,6 +15,7 @@ import com.example.passpoint.presentation.screens.main.ConfirmAction
 import com.example.passpoint.presentation.screens.main.ConfirmDialogState
 import com.example.passpoint.presentation.screens.main.CourseConfirmDialogState
 import com.example.passpoint.presentation.screens.main.mine.MineState
+import com.example.passpoint.presentation.screens.main.mine.RegisteredSortType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -41,7 +42,7 @@ class MineViewModel @Inject constructor(
         loadData()
     }
 
-     fun loadData() {
+    fun loadData() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, error = null)
 
@@ -78,9 +79,66 @@ class MineViewModel @Inject constructor(
                 registeredEvents = registeredEvents,
                 registeredCourses = registeredCourses
             )
+            applyFilters()
         }
     }
+    fun updateSearchQuery(query: String) {
+        _state.value = _state.value.copy(searchQuery = query)
+        applyFilters()
+    }
 
+    fun setSortType(type: RegisteredSortType) {
+        _state.value = _state.value.copy(sortType = type)
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        val currentState = _state.value
+        val events = currentState.registeredEvents
+        val courses = currentState.registeredCourses
+
+        // Фильтрация мероприятий
+        val filteredEvents = if (currentState.searchQuery.isNotBlank()) {
+            events.filter { event ->
+                event.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                        event.place.contains(currentState.searchQuery, ignoreCase = true)
+            }
+        } else {
+            events
+        }
+
+        // Фильтрация курсов
+        val filteredCourses = if (currentState.searchQuery.isNotBlank()) {
+            courses.filter { course ->
+                course.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                        course.description.contains(currentState.searchQuery, ignoreCase = true) ||
+                        course.place.contains(currentState.searchQuery, ignoreCase = true)
+            }
+        } else {
+            courses
+        }
+
+        // Сортировка мероприятий
+        val sortedEvents = when (currentState.sortType) {
+            RegisteredSortType.NAME_ASC -> filteredEvents.sortedBy { it.name.lowercase() }
+            RegisteredSortType.NAME_DESC -> filteredEvents.sortedByDescending { it.name.lowercase() }
+            RegisteredSortType.DATE_ASC -> filteredEvents.sortedBy { it.date }
+            RegisteredSortType.DATE_DESC -> filteredEvents.sortedByDescending { it.date }
+        }
+
+        // Сортировка курсов
+        val sortedCourses = when (currentState.sortType) {
+            RegisteredSortType.NAME_ASC -> filteredCourses.sortedBy { it.name.lowercase() }
+            RegisteredSortType.NAME_DESC -> filteredCourses.sortedByDescending { it.name.lowercase() }
+            RegisteredSortType.DATE_ASC -> filteredCourses.sortedBy { it.date }
+            RegisteredSortType.DATE_DESC -> filteredCourses.sortedByDescending { it.date }
+        }
+
+        _state.value = currentState.copy(
+            filteredEvents = sortedEvents,
+            filteredCourses = sortedCourses
+        )
+    }
     fun showEventUnregisterConfirm(eventId: Int) {
         _state.value = _state.value.copy(
             eventConfirmDialog = ConfirmDialogState(eventId, ConfirmAction.UNREGISTER)
@@ -101,7 +159,6 @@ class MineViewModel @Inject constructor(
         _state.value = _state.value.copy(courseConfirmDialog = null)
     }
 
-    // Подтверждение отмены
     fun confirmEventAction() {
         val dialog = _state.value.eventConfirmDialog ?: return
         hideEventDialog()
@@ -115,10 +172,6 @@ class MineViewModel @Inject constructor(
     }
 
     private fun unregisterEvent(eventId: Int) {
-        val reg = _state.value.registeredEvents.find { it.id == eventId } ?: return
-        // нам нужен registrationId, но EventRegistration хранит id записи.
-        // Нужно загрузить регистрации и найти id. Загрузим повторно или хранить в состоянии регистрации.
-        // Проще: загрузим регистрации событий, найдём нужный id и вызовем unregister.
         viewModelScope.launch {
             _state.value = _state.value.copy(isRegistrationLoading = true)
             when (val result = getUserRegistrationsUseCase(UserRepository.ID)) {
@@ -127,10 +180,7 @@ class MineViewModel @Inject constructor(
                     if (eventReg != null) {
                         try {
                             unregisterFromEventUseCase(eventReg.id)
-                            _state.value = _state.value.copy(
-                                registeredEvents = _state.value.registeredEvents.filter { it.id != eventId },
-                                isRegistrationLoading = false
-                            )
+                            loadData() // перезагружаем данные после отмены
                         } catch (e: Exception) {
                             _state.value = _state.value.copy(isRegistrationLoading = false, error = e.message)
                         }
@@ -152,10 +202,7 @@ class MineViewModel @Inject constructor(
                     if (courseReg != null) {
                         try {
                             unregisterFromCourseUseCase(courseReg.id!!)
-                            _state.value = _state.value.copy(
-                                registeredCourses = _state.value.registeredCourses.filter { it.id != courseId },
-                                isRegistrationLoading = false
-                            )
+                            loadData() // перезагружаем данные после отмены
                         } catch (e: Exception) {
                             _state.value = _state.value.copy(isRegistrationLoading = false, error = e.message)
                         }

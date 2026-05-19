@@ -12,6 +12,8 @@ import com.example.passpoint.data.dto.CertificateCreateRequest
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.model.Result
 import com.example.passpoint.domain.useCase.CreateCertificateUseCase
+import com.example.passpoint.domain.useCase.DeleteCertificateFileUseCase
+import com.example.passpoint.domain.useCase.DeleteCertificateUseCase
 import com.example.passpoint.domain.useCase.GetAttendancesByCourseUseCase
 import com.example.passpoint.domain.useCase.GetCertificatesByCourseUseCase
 import com.example.passpoint.domain.useCase.GetCourseByIdUseCase
@@ -25,6 +27,7 @@ import com.example.passpoint.presentation.MainActivity
 import com.example.passpoint.presentation.screens.main.curator.AttendanceConfirmDialog
 import com.example.passpoint.presentation.screens.main.curator.CuratorCourseDetailState
 import com.example.passpoint.presentation.screens.main.curator.ParticipantInfo
+import com.example.passpoint.presentation.screens.main.curator.RevokeConfirmDialog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
@@ -40,6 +43,8 @@ class CuratorCourseDetailViewModel @Inject constructor(
     private val uploadCertificateFileUseCase: UploadCertificateFileUseCase,
     private val createCertificateUseCase: CreateCertificateUseCase,
     private val getCertificatesByCourseUseCase: GetCertificatesByCourseUseCase,
+    private val deleteCertificateUseCase: DeleteCertificateUseCase,
+    private val deleteCertificateFileUseCase: DeleteCertificateFileUseCase,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -129,6 +134,95 @@ class CuratorCourseDetailViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 _state.value = _state.value.copy(isLoading = false, error = e.message)
+            }
+        }
+    }
+    fun showRevokeConfirm(attendanceId: Int, userId: String, userName: String) {
+        // Найдём URL сертификата (если есть)
+        val participant = _state.value.participants.find { it.attendanceId == attendanceId }
+        val certificateUrl = if (participant?.certificateIssued == true) {
+            // Можно получить из отдельного списка или сохранить в ParticipantInfo, но проще запросить из БД
+            // Сделаем запрос прямо в confirmRevoke? Но для диалога нужно только имя и attendanceId.
+            // Оставим certificateUrl = null, а при confirm получим из БД.
+            null
+        } else null
+
+        _state.value = _state.value.copy(
+            revokeConfirmDialog = RevokeConfirmDialog(
+                attendanceId = attendanceId,
+                userId = userId,
+                userName = userName,
+                courseId = _state.value.courseId ?: return,
+                certificateUrl = certificateUrl
+            )
+        )
+    }
+
+    fun hideRevokeConfirm() {
+        _state.value = _state.value.copy(revokeConfirmDialog = null)
+    }
+
+    fun confirmRevoke() {
+        val dialog = _state.value.revokeConfirmDialog ?: return
+        hideRevokeConfirm()
+        revokeCertificate(dialog.attendanceId, dialog.userId, dialog.courseId)
+    }
+
+    private fun revokeCertificate(attendanceId: Int, userId: String, courseId: Int) {
+        viewModelScope.launch {
+            // Установить флаг isRevoking для этого участника
+            val updatedBefore = _state.value.participants.map {
+                if (it.attendanceId == attendanceId) it.copy(isRevoking = true) else it
+            }
+            _state.value = _state.value.copy(participants = updatedBefore)
+
+            // Получаем информацию о сертификате из БД
+            when (val certsResult = getCertificatesByCourseUseCase(courseId)) {
+                is Result.Success -> {
+                    val certificate = certsResult.data.find { it.user == userId }
+                    if (certificate != null) {
+                        // Извлекаем имя файла из URL
+                        val fileName = certificate.certificate_url.substringAfterLast("/")
+                        // Удаляем файл из Storage
+                        deleteCertificateFileUseCase(fileName)
+                        // Удаляем запись из таблицы certificates
+                        when (val delResult = deleteCertificateUseCase(userId, courseId)) {
+                            is Result.Success -> {
+                                // Обновляем список участников
+                                val updatedAfter = _state.value.participants.map {
+                                    if (it.attendanceId == attendanceId)
+                                        it.copy(certificateIssued = false, isRevoking = false)
+                                    else it
+                                }
+                                _state.value = _state.value.copy(participants = updatedAfter)
+                            }
+                            is Result.Failure -> {
+                                val updatedAfter = _state.value.participants.map {
+                                    if (it.attendanceId == attendanceId) it.copy(isRevoking = false) else it
+                                }
+                                _state.value = _state.value.copy(
+                                    participants = updatedAfter,
+                                    certificateMessage = "Ошибка отмены: ${delResult.exception.message}"
+                                )
+                            }
+                        }
+                    } else {
+                        // Сертификат не найден – просто сбрасываем флаг
+                        val updatedAfter = _state.value.participants.map {
+                            if (it.attendanceId == attendanceId) it.copy(isRevoking = false) else it
+                        }
+                        _state.value = _state.value.copy(participants = updatedAfter)
+                    }
+                }
+                is Result.Failure -> {
+                    val updatedAfter = _state.value.participants.map {
+                        if (it.attendanceId == attendanceId) it.copy(isRevoking = false) else it
+                    }
+                    _state.value = _state.value.copy(
+                        participants = updatedAfter,
+                        certificateMessage = "Не удалось найти сертификат: ${certsResult.exception.message}"
+                    )
+                }
             }
         }
     }

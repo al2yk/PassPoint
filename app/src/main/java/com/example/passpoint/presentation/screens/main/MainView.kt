@@ -149,7 +149,7 @@ fun MainView(
                             .filter { it.create.isNotBlank() }
                             .maxByOrNull { runCatching { LocalDate.parse(it.create) }.getOrDefault(LocalDate.MIN) }
                         // NEWS
-                        ElevatedCard {
+                        ElevatedCard(modifier = Modifier.padding(horizontal = 4.dp)) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -265,7 +265,7 @@ fun MainView(
                         ElevatedCard {
                             Column(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth().padding(horizontal = 4.dp)
                                     .padding(16.dp)
                             ) {
                                 val today = LocalDate.now()
@@ -427,7 +427,7 @@ fun MainView(
                         }
                         SpacerHeight(8)
                         // COURSES
-                        ElevatedCard {
+                        ElevatedCard(modifier = Modifier.padding(horizontal = 4.dp)) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -542,7 +542,7 @@ fun MainView(
                         SpacerHeight(8)
                         if (state.curators.isNotEmpty()) {
                             // CURATORS
-                            ElevatedCard {
+                            ElevatedCard(modifier = Modifier.padding(horizontal = 4.dp)) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()

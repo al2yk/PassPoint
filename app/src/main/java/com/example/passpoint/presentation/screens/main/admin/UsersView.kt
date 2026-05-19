@@ -24,6 +24,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -43,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -57,13 +59,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
 import coil.size.Size
 import com.example.passpoint.R
 import com.example.passpoint.presentation.components.MonthlyRegistrationsBarChart
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.SpacerWidth
+import com.example.passpoint.presentation.components.UserCard
 import com.example.passpoint.presentation.components.UsersPieChart
 import com.example.passpoint.presentation.components.WeeklyRegistrationsBarChart
 import com.example.passpoint.presentation.ui.theme.Brand50
@@ -106,7 +110,7 @@ fun UsersView(
         Column(modifier = Modifier.fillMaxSize()) {
             SpacerHeight(8)
             ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -228,136 +232,17 @@ fun UsersView(
                 listState.animateScrollToItem(0)
             }
             SpacerHeight(4)
-            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-                items(state.filteredUsers, key = { it.id.toString() }) { user ->
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                    ) {
-                        val dateOnly = user.created_at?.substringBefore("T")
-                        Column(modifier = Modifier.padding(12.dp)) {
-
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                // Фото
-                                Box(
-                                    modifier = Modifier
-                                        .size(70.dp)
-                                        .clip(CircleShape)
-                                        .background(Gray350)
-                                ) {
-                                    val imgState = rememberAsyncImagePainter(
-                                        model = ImageRequest.Builder(LocalContext.current)
-                                            .data(user.photo)
-                                            .size(Size.ORIGINAL).build()
-                                    ).state
-                                    if (imgState is AsyncImagePainter.State.Error) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.person_24dp),
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .fillMaxSize(0.6f)
-                                                .align(Alignment.Center),
-                                            tint = Gray600
-                                        )
-                                    } else if (imgState is AsyncImagePainter.State.Success) {
-                                        androidx.compose.foundation.Image(
-                                            painter = imgState.painter,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .clip(CircleShape),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    }
-                                }
-                                SpacerWidth(12)
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        "${user.name} ${user.surname}",
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                    Text(
-                                        user.email,
-                                        style = MaterialTheme.typography.displaySmall,
-                                        color = Gray600
-                                    )
-                                }
-                            }
-                            SpacerHeight(8)
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                Text(
-                                    "Роль",
-                                    style = MaterialTheme.typography.displaySmall,
-                                    color = Gray500
-                                )
-                                Text(
-                                    roleToString(user.role),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            if (!user.phone.isNullOrBlank()) {
-                                SpacerHeight(4)
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    Text(
-                                        "Мобильный телефон",
-                                        style = MaterialTheme.typography.displaySmall,
-                                        color = Gray500
-                                    )
-                                    Text(
-                                        user.phone,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-                            if (user.role == 1 && !user.organization.isNullOrBlank()) {
-                                SpacerHeight(4)
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    Text(
-                                        "Организация",
-                                        style = MaterialTheme.typography.displaySmall,
-                                        color = Gray500
-                                    )
-                                    Text(
-                                        user.organization,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            }
-                            SpacerHeight(16)
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = { viewModel.showDeleteDialog(user.id.toString()) },
-                                    modifier = Modifier
-                                        .width(120.dp)
-                                        .height(ButtonHeight),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text("Удалить", style = MaterialTheme.typography.displaySmall)
-                                }
-                                Button(
-                                    onClick = { viewModel.showRoleDialog(user.id.toString()) },
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(ButtonHeight),
-                                    colors = ButtonDefaults.buttonColors(containerColor = BrandColor),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text(
-                                        "Сменить роль",
-                                        color = White,
-                                        style = MaterialTheme.typography.displaySmall
-                                    )
-                                }
-                            }
-                        }
-                    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                state.filteredUsers.forEach { user ->
+                    UserCard(
+                        user = user,
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
                 }
             }
         }
@@ -372,7 +257,7 @@ fun UsersView(
             }
         }
 
-        // Диалоги удаления и смены роли (без изменений)
+        // Диалоги удаления и смены роли
         if (state.deleteDialogUserId != null) {
             AlertDialog(
                 onDismissRequest = { viewModel.hideDeleteDialog() },
@@ -399,7 +284,8 @@ fun UsersView(
                                     selected = state.selectedRoleForDialog == role,
                                     onClick = { viewModel.selectRoleForDialog(role) }
                                 ),
-                                verticalAlignment = Alignment.CenterVertically) {
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
                                 RadioButton(
                                     selected = state.selectedRoleForDialog == role,
                                     onClick = null,
@@ -455,15 +341,6 @@ fun StatsSheetContent(state: UsersState) {
         WeeklyRegistrationsBarChart(weeklyCounts = state.weeklyRegistrations)
         SpacerHeight(24)
         MonthlyRegistrationsBarChart(monthlyCounts = state.monthlyRegistrations)
-        /*Text(
-            "Всего пользователей: ${state.statsTotal}",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        SpacerHeight(8)
-        Text(
-            "Новых за последнюю неделю: ${state.statsNewThisWeek}",
-            style = MaterialTheme.typography.bodyLarge
-        )*/
         SpacerHeight(24)
     }
 }

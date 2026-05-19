@@ -170,4 +170,26 @@ interface UserApi {
     ): Response<Unit>
     @GET("/rest/v1/certificates?select=*")
     suspend fun getCertificatesByCourse(@Query("course_id") courseId: String): List<Certificate>
+    // Загрузка фото для курса
+    @Multipart
+    @POST("/storage/v1/object/COURSES/{fileName}")
+    suspend fun uploadCourseImage(
+        @Path("fileName") fileName: String,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
+
+    // Загрузка фото для мероприятия
+    @Multipart
+    @POST("/storage/v1/object/EVENTS/{fileName}")
+    suspend fun uploadEventImage(
+        @Path("fileName") fileName: String,
+        @Part image: MultipartBody.Part
+    ): Response<Unit>
+
+
+    @DELETE("/rest/v1/certificates")
+    suspend fun deleteCertificate(@Query("user") userFilter: String, @Query("course_id") courseFilter: String): Response<Unit>
+
+    @DELETE("/storage/v1/object/CERTIFICATES/{fileName}")
+    suspend fun deleteCertificateFile(@Path("fileName") fileName: String): Response<Unit>
 }

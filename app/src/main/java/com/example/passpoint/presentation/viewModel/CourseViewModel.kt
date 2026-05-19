@@ -13,6 +13,7 @@ import com.example.passpoint.domain.useCase.RegisterForCourseUseCase
 import com.example.passpoint.domain.useCase.UnregisterFromCourseUseCase
 import com.example.passpoint.presentation.screens.main.ConfirmAction
 import com.example.passpoint.presentation.screens.main.CourseConfirmDialogState
+import com.example.passpoint.presentation.screens.main.course.CourseSortType
 import com.example.passpoint.presentation.screens.main.course.CoursesState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -38,6 +39,63 @@ class CoursesViewModel @Inject constructor(
 
     fun retry() {
         loadData()
+    }
+
+    fun updateSearchQuery(query: String) {
+        _state.value = _state.value.copy(searchQuery = query)
+        applyFilters()
+    }
+
+    fun setSortType(type: CourseSortType) {
+        _state.value = _state.value.copy(sortType = type)
+        applyFilters()
+    }
+
+    private fun applyFilters() {
+        val currentState = _state.value
+        val upcoming = currentState.upcomingCourses
+        val past = currentState.pastCourses
+
+        // Фильтрация
+        val filteredUpcoming = if (currentState.searchQuery.isNotBlank()) {
+            upcoming.filter { course ->
+                course.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                        course.description.contains(currentState.searchQuery, ignoreCase = true) ||
+                        course.place.contains(currentState.searchQuery, ignoreCase = true)
+            }
+        } else {
+            upcoming
+        }
+
+        val filteredPast = if (currentState.searchQuery.isNotBlank()) {
+            past.filter { course ->
+                course.name.contains(currentState.searchQuery, ignoreCase = true) ||
+                        course.description.contains(currentState.searchQuery, ignoreCase = true) ||
+                        course.place.contains(currentState.searchQuery, ignoreCase = true)
+            }
+        } else {
+            past
+        }
+
+        // Сортировка в зависимости от sortType
+        val sortedUpcoming = when (currentState.sortType) {
+            CourseSortType.NAME_ASC -> filteredUpcoming.sortedBy { it.name.lowercase() }
+            CourseSortType.NAME_DESC -> filteredUpcoming.sortedByDescending { it.name.lowercase() }
+            CourseSortType.DATE_ASC -> filteredUpcoming.sortedBy { it.date }          // старые сначала
+            CourseSortType.DATE_DESC -> filteredUpcoming.sortedByDescending { it.date } // новые сначала
+        }
+
+        val sortedPast = when (currentState.sortType) {
+            CourseSortType.NAME_ASC -> filteredPast.sortedBy { it.name.lowercase() }
+            CourseSortType.NAME_DESC -> filteredPast.sortedByDescending { it.name.lowercase() }
+            CourseSortType.DATE_ASC -> filteredPast.sortedBy { it.date }
+            CourseSortType.DATE_DESC -> filteredPast.sortedByDescending { it.date }
+        }
+
+        _state.value = currentState.copy(
+            filteredUpcomingCourses = sortedUpcoming,
+            filteredPastCourses = sortedPast
+        )
     }
 
     private fun loadData() {
@@ -74,6 +132,7 @@ class CoursesViewModel @Inject constructor(
                 registrations = registrations,
                 curators = curators
             )
+            applyFilters()
         }
     }
 
@@ -110,6 +169,7 @@ class CoursesViewModel @Inject constructor(
             else -> {}
         }
     }
+
     fun showDeleteConfirm(courseId: Int) {
         _state.value = _state.value.copy(
             deleteDialog = CourseConfirmDialogState(courseId, ConfirmAction.DELETE)
@@ -126,23 +186,17 @@ class CoursesViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true)
             when (val result = deleteCourseUseCase(dialog.courseId)) {
-                is Result.Success -> {
-                    loadData()   // перезагрузка
-                }
-                is Result.Failure -> {
-                    _state.value = _state.value.copy(error = result.exception.message, isLoading = false)
-                }
+                is Result.Success -> loadData()
+                is Result.Failure -> _state.value = _state.value.copy(error = result.exception.message, isLoading = false)
             }
         }
     }
+
     private fun register(courseId: Int) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             when (val result = registerForCourseUseCase(courseId, UserRepository.ID)) {
-                is Result.Success -> {
-                    // После успешной записи перезагружаем все данные
-                    loadData()
-                }
+                is Result.Success -> loadData()
                 is Result.Failure -> {
                     _state.value = _state.value.copy(
                         isRegistrationLoading = false,
@@ -159,7 +213,6 @@ class CoursesViewModel @Inject constructor(
             _state.value = _state.value.copy(isRegistrationLoading = true, error = null)
             try {
                 unregisterFromCourseUseCase(reg.id!!)
-                // После успешной отмены перезагружаем все данные
                 loadData()
             } catch (e: Exception) {
                 _state.value = _state.value.copy(
@@ -169,5 +222,4 @@ class CoursesViewModel @Inject constructor(
             }
         }
     }
-
 }

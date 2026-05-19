@@ -56,6 +56,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
@@ -151,7 +153,7 @@ fun ProfileView(
                     SpacerHeight(0)
                     ElevatedCard(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth().padding(horizontal = 4.dp)
                     ) {
                         //Фото
                         Column(
@@ -170,32 +172,35 @@ fun ProfileView(
                                         .clip(CircleShape)
                                         .background(Gray350)
                                 ) {
-                                    Log.e("photo", state.photo)
-                                    // Фото пользователя
-                                    val imgState = rememberAsyncImagePainter(
+                                    SubcomposeAsyncImage(
                                         model = ImageRequest.Builder(LocalContext.current)
                                             .data(state.photo)
-                                            .size(Size.ORIGINAL).build()
-                                    ).state
-                                    if (imgState is AsyncImagePainter.State.Error) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
-                                            contentDescription = "",
-                                            modifier = Modifier
-                                                .fillMaxSize(0.85f)
-                                                .align(Alignment.Center),
-                                            tint = Gray800
-                                        )
-                                    }
-                                    if (imgState is AsyncImagePainter.State.Success) {
-                                        Image(
-                                            modifier = Modifier
-                                                .fillMaxWidth(1f)
-                                                .clip(RoundedCornerShape(15.dp)),
-                                            painter = imgState.painter,
-                                            contentDescription = "",
-                                            contentScale = ContentScale.Crop
-                                        )
+                                            .size(Size.ORIGINAL)
+                                            .build(),
+                                        contentDescription = "",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(15.dp)),
+                                        contentScale = ContentScale.Crop
+                                    ) {
+                                        when (painter.state) {
+                                            is AsyncImagePainter.State.Loading -> {
+                                                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                    CircularProgressIndicator(modifier = Modifier.size(40.dp))
+                                                }
+                                            }
+                                            is AsyncImagePainter.State.Error -> {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.sentiment_very_satisfied_24dp),
+                                                    contentDescription = "",
+                                                    modifier = Modifier
+                                                        .fillMaxSize(0.85f)
+                                                        .align(Alignment.Center),
+                                                    tint = Gray800
+                                                )
+                                            }
+                                            else -> SubcomposeAsyncImageContent()
+                                        }
                                     }
                                 }
                                 IconButton(
@@ -393,7 +398,7 @@ fun ProfileView(
                         }
                         SpacerHeight(16)
                     }
-                    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                    ElevatedCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
                         Text(
                             "Тема", style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(top = 10.dp, start = 20.dp)
@@ -440,7 +445,7 @@ fun ProfileView(
                     }
 
                     ElevatedCard(
-                        modifier = Modifier.height(100.dp),
+                        modifier = Modifier.height(100.dp).padding(horizontal = 4.dp),
                     ) {
                         Button(
                             onClick = { showAboutDialog = true }, shape = RectangleShape,

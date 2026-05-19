@@ -115,7 +115,7 @@ fun CuratorCourseDetailView(
                     SpacerHeight(8)
                     ElevatedCard(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth().padding(horizontal = 4.dp)
                     ) {
                         Column(
                             modifier = Modifier
@@ -266,45 +266,60 @@ fun CuratorCourseDetailView(
                                 // Если курс не сегодня или статус уже изменён, показываем статус текстом
                                 when (participant.status) {
                                     2 -> {
-                                        if (state.value.certificateMessage != null) {
-                                            SpacerHeight(4)
-                                            Text(
-                                                text = state.value.certificateMessage!!,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = if (state.value.certificateMessage!!.contains(
-                                                        "успешно"
-                                                    )
-                                                ) BrandColor else MaterialTheme.colorScheme.error
-                                            )
-                                        }
-                                        Column() {
-                                            Text(
-                                                "Присутствовал",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = BrandColor
-                                            )
-                                            SpacerHeight(5)
-                                            if (participant.certificateIssued) {
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            // Левая колонка – статусы
+                                            Column(modifier = Modifier.weight(1f)) {
                                                 Text(
-                                                    "Сертификат выдан",
+                                                    text = "Присутствовал",
                                                     style = MaterialTheme.typography.bodyLarge,
                                                     color = BrandColor
                                                 )
-                                            } else {
-                                                Button(
+                                                if (participant.certificateIssued) {
+                                                    SpacerHeight(4)
+                                                    Text(
+                                                        text = "Сертификат выдан",
+                                                        style = MaterialTheme.typography.bodyLarge,
+                                                        color = BrandColor
+                                                    )
+                                                }
+                                            }
+
+                                            // Правая кнопка – действие
+                                            if (participant.certificateIssued) {
+                                                // Кнопка отмены сертификата
+                                                OutlinedButton(
                                                     onClick = {
-                                                        viewModel.issueCertificate(
-                                                            participant.attendanceId
+                                                        viewModel.showRevokeConfirm(
+                                                            attendanceId = participant.attendanceId,
+                                                            userId = participant.user.user_id.toString(),
+                                                            userName = "${participant.user.name} ${participant.user.surname}"
                                                         )
                                                     },
+                                                    enabled = !participant.isRevoking,
+                                                    modifier = Modifier.width(200.dp).height(ButtonHeight),
+                                                    shape = RoundedCornerShape(8.dp)
+                                                ) {
+                                                    if (participant.isRevoking) {
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(16.dp),
+                                                            strokeWidth = 2.dp
+                                                        )
+                                                    } else {
+                                                        Text("Отменить сертификат", style = MaterialTheme.typography.displaySmall)
+                                                    }
+                                                }
+                                            } else {
+                                                // Кнопка выдачи сертификата
+                                                Button(
+                                                    onClick = { viewModel.issueCertificate(participant.attendanceId) },
                                                     enabled = !participant.isIssuing,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(ButtonHeight),
+                                                    modifier = Modifier.width(200.dp).height(ButtonHeight),
                                                     shape = RoundedCornerShape(8.dp),
-                                                    colors = ButtonDefaults.buttonColors(
-                                                        containerColor = BrandColor
-                                                    )
+                                                    colors = ButtonDefaults.buttonColors(containerColor = BrandColor)
                                                 ) {
                                                     if (participant.isIssuing) {
                                                         CircularProgressIndicator(
@@ -313,11 +328,7 @@ fun CuratorCourseDetailView(
                                                             strokeWidth = 2.dp
                                                         )
                                                     } else {
-                                                        Text(
-                                                            "Выдать сертификат",
-                                                            color = White,
-                                                            style = MaterialTheme.typography.displaySmall
-                                                        )
+                                                        Text("Выдать сертификат", style = MaterialTheme.typography.displaySmall, color = White)
                                                     }
                                                 }
                                             }
@@ -353,6 +364,21 @@ fun CuratorCourseDetailView(
                 text = { Text("${dialog.userName} ${if (dialog.newStatus == 2) "присутствовал(а)" else "отсутствовал(а)"} на курсе «${dialog.courseName}»?") },
                 confirmButton = { TextButton(onClick = { viewModel.confirmAttendance() }) { Text("Подтвердить") } },
                 dismissButton = { TextButton(onClick = { viewModel.hideConfirm() }) { Text("Отмена") } }
+            )
+        }
+        // Диалог отмены выдачи сертификата
+        if (state.value.revokeConfirmDialog != null) {
+            val dialog = state.value.revokeConfirmDialog!!
+            AlertDialog(
+                onDismissRequest = { viewModel.hideRevokeConfirm() },
+                title = { Text("Отмена выдачи сертификата") },
+                text = { Text("Вы уверены, что хотите отменить выдачу сертификата пользователю ${dialog.userName}?") },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.confirmRevoke() }) { Text("Отменить выдачу") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { viewModel.hideRevokeConfirm() }) { Text("Назад") }
+                }
             )
         }
     }

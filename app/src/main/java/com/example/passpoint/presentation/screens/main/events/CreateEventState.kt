@@ -6,5 +6,7 @@ data class CreateEventState(
     val place: String = "",
     val isSending: Boolean = false,
     val error: String? = null,
-    val showDatePicker: Boolean = false
+    val showDatePicker: Boolean = false,
+    val imageUrl: String? = null,
+    val isUploadingImage: Boolean = false
 )

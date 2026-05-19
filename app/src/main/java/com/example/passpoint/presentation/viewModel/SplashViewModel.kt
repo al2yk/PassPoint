@@ -19,7 +19,7 @@ class SplashViewModel @Inject constructor() : ViewModel() {
      */
     fun launch(controller: NavHostController) {
         viewModelScope.launch {
-            delay(3000)
+            delay(1500)
             if(UserRepository.act == 0) {
                 controller.navigate(NavigationRoutes.ONBOARDING) {
                     popUpTo(NavigationRoutes.SPLASH) {

@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.size.Size
@@ -55,7 +57,7 @@ fun CuratorUsersView(
             else -> Column(modifier = Modifier.fillMaxSize()) {
                 SpacerHeight(8)
                 ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -105,11 +107,12 @@ fun CuratorUsersView(
                         items(state.filteredUsers) { userInfo ->
                             ElevatedCard(
                                 modifier = Modifier
-                                    .fillMaxWidth()
+                                    .fillMaxWidth().padding(horizontal = 4.dp)
                                     .padding(vertical = 4.dp)
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
                                     Row(verticalAlignment = Alignment.CenterVertically) {
+                                        // Фото
                                         // Фото
                                         Box(
                                             modifier = Modifier
@@ -117,29 +120,31 @@ fun CuratorUsersView(
                                                 .clip(CircleShape)
                                                 .background(Gray350)
                                         ) {
-                                            val imgState = rememberAsyncImagePainter(
+                                            SubcomposeAsyncImage(
                                                 model = ImageRequest.Builder(LocalContext.current)
                                                     .data(userInfo.user.photo)
-                                                    .size(Size.ORIGINAL).build()
-                                            ).state
-                                            if (imgState is AsyncImagePainter.State.Error) {
-                                                Icon(
-                                                    painter = painterResource(R.drawable.person_24dp),
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .fillMaxSize(0.6f)
-                                                        .align(Alignment.Center),
-                                                    tint = Gray600
-                                                )
-                                            } else if (imgState is AsyncImagePainter.State.Success) {
-                                                androidx.compose.foundation.Image(
-                                                    painter = imgState.painter,
-                                                    contentDescription = null,
-                                                    modifier = Modifier
-                                                        .fillMaxSize()
-                                                        .clip(CircleShape),
-                                                    contentScale = ContentScale.Crop
-                                                )
+                                                    .size(Size.ORIGINAL)
+                                                    .build(),
+                                                contentDescription = null,
+                                                modifier = Modifier.fillMaxSize().clip(CircleShape),
+                                                contentScale = ContentScale.Crop
+                                            ) {
+                                                when (painter.state) {
+                                                    is AsyncImagePainter.State.Loading -> {
+                                                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                                            CircularProgressIndicator(modifier = Modifier.size(30.dp))
+                                                        }
+                                                    }
+                                                    is AsyncImagePainter.State.Error -> {
+                                                        Icon(
+                                                            painter = painterResource(R.drawable.person_24dp),
+                                                            contentDescription = null,
+                                                            modifier = Modifier.fillMaxSize(0.6f).align(Alignment.Center),
+                                                            tint = Gray600
+                                                        )
+                                                    }
+                                                    else -> SubcomposeAsyncImageContent()
+                                                }
                                             }
                                         }
                                         SpacerWidth(12)

@@ -10,5 +10,6 @@ data class CourseWithEnrollment (
     val place: String,
     val curator: String?,
     val capacity: Int,
-    val enrolled_count: Int
+    val enrolled_count: Int,
+    val photo: String? = null
 )

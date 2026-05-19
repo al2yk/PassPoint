@@ -125,7 +125,7 @@ fun NewsView(
             else -> {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     SpacerHeight(8)
-                    ElevatedCard(shape = (RoundedCornerShape(20.dp))) {
+                    ElevatedCard(modifier = Modifier.padding(horizontal = 4.dp),shape = (RoundedCornerShape(20.dp))) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -159,7 +159,7 @@ fun NewsView(
                             filteredNews.forEach { news ->
                                 ElevatedCard(
                                     shape = RoundedCornerShape(20.dp),
-                                    modifier = Modifier.clickable {
+                                    modifier = Modifier.padding(horizontal = 4.dp).clickable {
                                         controller.navigate("${NavigationRoutes.NEWS_DETAIL}?newsId=${news.id}")
                                     }
                                 ) {

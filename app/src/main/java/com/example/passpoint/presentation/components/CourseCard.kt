@@ -1,18 +1,28 @@
 package com.example.passpoint.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
+import coil.request.ImageRequest
 import com.example.passpoint.data.dto.CourseWithEnrollment
 import com.example.passpoint.domain.UserRepository
 import com.example.passpoint.domain.utils.formatDateRu
@@ -33,7 +43,8 @@ fun CourseCard(
     onQrClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
     onEditClick: (() -> Unit)? = null,
-    curatorName: String = ""
+    curatorName: String = "",
+    modifier: Modifier = Modifier
 ) {
     Text(course.name, style = MaterialTheme.typography.headlineSmall)
     SpacerHeight(14)
@@ -60,6 +71,37 @@ fun CourseCard(
             text = curatorName,
             style = MaterialTheme.typography.bodyLarge
         )
+    }
+    if (course.photo != null) {
+        SpacerHeight(12)
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                .data(course.photo)
+                .crossfade(true)
+                .build(),
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .clip(RoundedCornerShape(15.dp)),
+            contentScale = ContentScale.Crop
+        ) {
+            when (painter.state) {
+                is AsyncImagePainter.State.Loading -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is AsyncImagePainter.State.Error -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Ошибка загрузки")
+                    }
+                }
+
+                else -> SubcomposeAsyncImageContent()
+            }
+        }
     }
     if (showButtons && UserRepository.role == 1) {
         if (isRegistered) {
@@ -98,13 +140,12 @@ fun CourseCard(
             SpacerHeight(16)
             val noPlacesLeft = (course.capacity - course.enrolled_count) <= 0
             if (noPlacesLeft) {
-                // Кнопка без действия, неактивная
                 OutlinedButton(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(ButtonHeight),
-                    enabled = false,                         // нельзя нажать
-                    onClick = {},                            // пустое действие
+                    enabled = false,
+                    onClick = {},
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
@@ -114,7 +155,6 @@ fun CourseCard(
                     )
                 }
             } else {
-                // Обычная кнопка записи
                 OutlinedButton(
                     modifier = Modifier
                         .fillMaxWidth()

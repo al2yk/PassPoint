@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -127,7 +128,7 @@ fun CreateNewsView(
             if (!viewModel.isEditMode) {
                 SpacerHeight(8)
                 ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -156,7 +157,7 @@ fun CreateNewsView(
             SpacerHeight(8)
 
             ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -295,11 +296,13 @@ fun CreateNewsView(
 
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.add_24dp),
+                            painter = if (state.imageUrl == null) painterResource(R.drawable.add_24dp) else painterResource(
+                                R.drawable.cached_24dp
+                            ),
                             contentDescription = null
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Добавить фото")
+                        Text( if (state.imageUrl == null) "Добавить фото" else "Изменить фото")
                     }
 
                     // Превью загруженного изображения или индикатор загрузки
@@ -313,7 +316,8 @@ fun CreateNewsView(
                                 .fillMaxWidth()
                                 .height(200.dp)
                                 .padding(top = 8.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
                         )
                     }
                     SpacerHeight(12)

@@ -62,7 +62,7 @@ fun CuratorPastCoursesView(
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(state.courses) { course ->
                         SpacerHeight(8)
-                        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                        ElevatedCard(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp)) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 CourseCard(
                                     course = course,

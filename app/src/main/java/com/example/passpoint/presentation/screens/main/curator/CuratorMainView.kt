@@ -8,8 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,8 +35,8 @@ fun CuratorMainView(
     val state = viewModel.state
     val listState = rememberLazyListState()
 
-    // При изменении сортировки или переключении фильтра – плавно наверх
-    LaunchedEffect(state.sortAscending) {
+    // Прокрутка вверх при изменении типа сортировки
+    LaunchedEffect(state.sortType) {
         listState.animateScrollToItem(0)
     }
 
@@ -71,7 +70,7 @@ fun CuratorMainView(
                 Column(modifier = Modifier.fillMaxSize()) {
                     SpacerHeight(8)
                     ElevatedCard(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -98,18 +97,64 @@ fun CuratorMainView(
                                     colors = OutlinedTextFieldDefaults.colors(
                                         focusedBorderColor = BrandColor,
                                         unfocusedBorderColor = Gray600
-                                    )
+                                    ),
+                                    singleLine = true
                                 )
                                 SpacerWidth(12)
-                                OutlinedButton(
-                                    onClick = { viewModel.toggleSort() },
-                                    modifier = Modifier.width(100.dp).height(56.dp),
-                                    shape = RoundedCornerShape(8.dp)
-                                ) {
-                                    Text(
-                                        if (state.sortAscending) "А-Я" else "Я-А",
-                                        style = MaterialTheme.typography.displaySmall
-                                    )
+
+                                var expanded by remember { mutableStateOf(false) }
+                                Box {
+                                    OutlinedButton(
+                                        onClick = { expanded = true },
+                                        modifier = Modifier.width(100.dp).height(56.dp),
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = when (state.sortType) {
+                                                CuratorCourseSortType.NAME_ASC -> "А-Я"
+                                                CuratorCourseSortType.NAME_DESC -> "Я-А"
+                                                CuratorCourseSortType.DATE_ASC -> "Дата ↑"
+                                                CuratorCourseSortType.DATE_DESC -> "Дата ↓"
+                                            },
+                                            style = MaterialTheme.typography.displaySmall
+                                        )
+                                        SpacerWidth(4)
+                                    }
+                                    DropdownMenu(
+                                        expanded = expanded,
+                                        onDismissRequest = { expanded = false },
+                                        modifier = Modifier.width(100.dp),
+                                        containerColor = MaterialTheme.colorScheme.background,
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("А-Я") },
+                                            onClick = {
+                                                viewModel.setSortType(CuratorCourseSortType.NAME_ASC)
+                                                expanded = false
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Я-А") },
+                                            onClick = {
+                                                viewModel.setSortType(CuratorCourseSortType.NAME_DESC)
+                                                expanded = false
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Дата ↓") },
+                                            onClick = {
+                                                viewModel.setSortType(CuratorCourseSortType.DATE_DESC)
+                                                expanded = false
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("Дата ↑") },
+                                            onClick = {
+                                                viewModel.setSortType(CuratorCourseSortType.DATE_ASC)
+                                                expanded = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -117,25 +162,23 @@ fun CuratorMainView(
                     SpacerHeight(8)
 
                     when {
-                        // 1. Поиск активен, но ничего не найдено
                         state.filteredCourses.isEmpty() && state.searchQuery.isNotBlank() -> {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Text("Ничего не найдено", style = MaterialTheme.typography.bodyLarge, color = Gray600)
                             }
                         }
-                        // 2. Вообще нет курсов (базовый список пуст)
                         state.filteredCourses.isEmpty() -> {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Text("На вас не назначено курсов", style = MaterialTheme.typography.bodyLarge, color = Gray600)
                             }
                         }
-                        // 3. Есть отфильтрованные курсы
                         else -> {
                             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                                 items(state.filteredCourses, key = { it.id }) { course ->
                                     ElevatedCard(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .padding(horizontal = 4.dp)
                                             .clickable {
                                                 controller.navigate(
                                                     NavigationRoutes.CURATOR_COURSE_DETAIL.replace("{courseId}", course.id.toString())

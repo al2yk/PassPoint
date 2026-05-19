@@ -1,11 +1,14 @@
 package com.example.passpoint.presentation.viewModel
 
+import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.passpoint.data.dto.EventCreateRequest
 import com.example.passpoint.domain.model.Result
+import com.example.passpoint.domain.repository.Repository
 import com.example.passpoint.domain.useCase.CreateEventUseCase
 import com.example.passpoint.domain.useCase.GetEventsUseCase
 import com.example.passpoint.domain.useCase.UpdateEventUseCase
@@ -14,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 sealed class CreateEventEvent {
@@ -25,6 +29,8 @@ class CreateEventViewModel @Inject constructor(
     private val createEventUseCase: CreateEventUseCase,
     private val updateEventUseCase: UpdateEventUseCase,
     private val getEventsUseCase: GetEventsUseCase,
+    private val repository: Repository,
+    private val application: Application,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -41,9 +47,18 @@ class CreateEventViewModel @Inject constructor(
         if (isEditMode) loadEvent(eventId!!)
     }
 
-    fun updateName(value: String) { _state.value = _state.value.copy(name = value, error = null) }
-    fun updatePlace(value: String) { _state.value = _state.value.copy(place = value, error = null) }
-    fun showDatePicker(show: Boolean) { _state.value = _state.value.copy(showDatePicker = show) }
+    fun updateName(value: String) {
+        _state.value = _state.value.copy(name = value, error = null)
+    }
+
+    fun updatePlace(value: String) {
+        _state.value = _state.value.copy(place = value, error = null)
+    }
+
+    fun showDatePicker(show: Boolean) {
+        _state.value = _state.value.copy(showDatePicker = show)
+    }
+
     fun onDateSelected(date: String) {
         _state.value = _state.value.copy(date = date, showDatePicker = false, error = null)
     }
@@ -59,7 +74,8 @@ class CreateEventViewModel @Inject constructor(
             val request = EventCreateRequest(
                 name = current.name,
                 date = current.date,
-                place = current.place
+                place = current.place,
+                photo = current.imageUrl ?: ""
             )
             val result = if (isEditMode) {
                 updateEventUseCase(eventId!!, request)
@@ -72,15 +88,56 @@ class CreateEventViewModel @Inject constructor(
                     _event.send(CreateEventEvent.Success)
                 }
                 is Result.Failure -> {
-                    _state.value = _state.value.copy(isSending = false, error = result.exception.message)
+                    _state.value = _state.value.copy(
+                        isSending = false,
+                        error = result.exception.message
+                    )
                 }
+            }
+        }
+    }
+
+    fun onPhotoPicked(uri: Uri?) {
+        if (uri == null) return
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isUploadingImage = true, error = null)
+            try {
+                val inputStream = application.contentResolver.openInputStream(uri)
+                val byteArray = inputStream?.readBytes()
+                inputStream?.close()
+                if (byteArray != null) {
+                    val fileName = "event_${UUID.randomUUID()}.jpg"
+                    val result = repository.uploadEventImage(fileName, byteArray)
+                    if (result is Result.Success) {
+                        val publicUrl = "https://tzeqggnubimyfappfuab.supabase.co/storage/v1/object/public/EVENTS/$fileName"
+                        _state.value = _state.value.copy(
+                            imageUrl = publicUrl,
+                            isUploadingImage = false
+                        )
+                    } else {
+                        _state.value = _state.value.copy(
+                            error = (result as Result.Failure).exception.message,
+                            isUploadingImage = false
+                        )
+                    }
+                } else {
+                    _state.value = _state.value.copy(
+                        error = "Не удалось прочитать файл",
+                        isUploadingImage = false
+                    )
+                }
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(
+                    error = "Ошибка загрузки: ${e.message}",
+                    isUploadingImage = false
+                )
             }
         }
     }
 
     private fun loadEvent(id: Int) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isSending = true) // показываем загрузку
+            _state.value = _state.value.copy(isSending = true)
             when (val result = getEventsUseCase()) {
                 is Result.Success -> {
                     val event = result.data.find { it.id == id }
@@ -89,14 +146,21 @@ class CreateEventViewModel @Inject constructor(
                             name = event.name,
                             date = event.date,
                             place = event.place,
+                            imageUrl = event.photo,
                             isSending = false
                         )
                     } else {
-                        _state.value = _state.value.copy(error = "Мероприятие не найдено", isSending = false)
+                        _state.value = _state.value.copy(
+                            error = "Мероприятие не найдено",
+                            isSending = false
+                        )
                     }
                 }
                 is Result.Failure -> {
-                    _state.value = _state.value.copy(error = result.exception.message, isSending = false)
+                    _state.value = _state.value.copy(
+                        error = result.exception.message,
+                        isSending = false
+                    )
                 }
             }
         }

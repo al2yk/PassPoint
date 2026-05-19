@@ -111,47 +111,50 @@ class WidgetUpdateWorker @AssistedInject constructor(
 
         val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
 
-        // Выбираем ресурсы и цвета в зависимости от темы
+        val brandColor = 0xFFFF5A00.toInt()
+
+        // Ресурсы и цвета
         val bgRes = if (isDark) R.drawable.widget_bg_dark else R.drawable.widget_bg_light
         val cardBgRes = if (isDark) R.drawable.widget_card_bg_dark else R.drawable.widget_card_bg_light
         val primaryTextColor = if (isDark) Color.WHITE else Color.BLACK
         val secondaryTextColor = if (isDark) Color.parseColor("#CCCCCC") else Color.parseColor("#666666")
-        val errorTextColor = Color.parseColor("#FF8888")
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(applicationContext.packageName, R.layout.widget_layout)
 
-            // Устанавливаем фон всего виджета
+            // Фон всего виджета
             views.setInt(R.id.widget_layout, "setBackgroundResource", bgRes)
+            // Заголовок – брендовый цвет + текст
+            views.setTextViewText(R.id.widget_title, "Ближайшие события")
+            views.setTextColor(R.id.widget_title, brandColor)
 
-            // Настройка заголовка
-            views.setTextColor(R.id.widget_title, primaryTextColor)
-
-            // Настройка блока мероприятия
+            // Настройка мероприятия
             if (event != null) {
                 views.setInt(R.id.widget_event_container, "setBackgroundResource", cardBgRes)
                 views.setTextViewText(R.id.widget_event_name, event.name)
                 views.setTextColor(R.id.widget_event_name, primaryTextColor)
-                views.setTextColor(R.id.widget_event_label, secondaryTextColor)
                 val eventDate = parseDate(event.date)?.format(dateFormatter) ?: event.date
                 views.setTextViewText(R.id.widget_event_date, eventDate)
                 views.setTextColor(R.id.widget_event_date, secondaryTextColor)
+                // Подкрашиваем иконку мероприятия (если хотим цветную)
+                views.setInt(R.id.widget_event_icon, "setColorFilter", brandColor)
                 views.setViewVisibility(R.id.widget_event_container, View.VISIBLE)
+                // PendingIntent
                 val eventIntent = WidgetProvider.getPendingIntent(applicationContext, "events")
                 views.setOnClickPendingIntent(R.id.widget_event_container, eventIntent)
             } else {
                 views.setViewVisibility(R.id.widget_event_container, View.GONE)
             }
 
-            // Настройка блока курса
+            // Настройка курса
             if (course != null) {
                 views.setInt(R.id.widget_course_container, "setBackgroundResource", cardBgRes)
                 views.setTextViewText(R.id.widget_course_name, course.name)
                 views.setTextColor(R.id.widget_course_name, primaryTextColor)
-                views.setTextColor(R.id.widget_course_label, secondaryTextColor)
                 val courseDate = parseDate(course.date)?.format(dateFormatter) ?: course.date
                 views.setTextViewText(R.id.widget_course_date, courseDate)
                 views.setTextColor(R.id.widget_course_date, secondaryTextColor)
+                views.setInt(R.id.widget_course_icon, "setColorFilter", brandColor)
                 views.setViewVisibility(R.id.widget_course_container, View.VISIBLE)
                 val courseIntent = WidgetProvider.getPendingIntent(applicationContext, "courses")
                 views.setOnClickPendingIntent(R.id.widget_course_container, courseIntent)

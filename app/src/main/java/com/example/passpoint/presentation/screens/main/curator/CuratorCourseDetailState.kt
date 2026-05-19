@@ -10,8 +10,9 @@ data class CuratorCourseDetailState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val confirmDialog: AttendanceConfirmDialog? = null,
-    val isIssuingCertificate: Boolean = false,     // новое
-    val certificateMessage: String? = null         // новое (для уведомления)
+    val revokeConfirmDialog: RevokeConfirmDialog? = null,   // для отмены выдачи
+    val isIssuingCertificate: Boolean = false,
+    val certificateMessage: String? = null
 )
 
 data class ParticipantInfo(
@@ -19,12 +20,21 @@ data class ParticipantInfo(
     val attendanceId: Int,
     val status: Int?,
     val certificateIssued: Boolean = false,
-    val isIssuing: Boolean = false
+    val isIssuing: Boolean = false,
+    val isRevoking: Boolean = false    // флаг загрузки при отмене
 )
 
 data class AttendanceConfirmDialog(
     val attendanceId: Int,
     val userName: String,
     val courseName: String,
-    val newStatus: Int  // 2 или 3
+    val newStatus: Int
+)
+
+data class RevokeConfirmDialog(
+    val attendanceId: Int,
+    val userId: String,
+    val userName: String,
+    val courseId: Int,
+    val certificateUrl: String?
 )

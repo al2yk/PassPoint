@@ -61,4 +61,8 @@ interface Repository {
     suspend fun createCertificate(request: CertificateCreateRequest): Result<Certificate>
     suspend fun uploadCertificateFile(fileName: String, fileBytes: ByteArray): Result<Unit>
     suspend fun getCertificatesByCourse(courseId: Int): Result<List<Certificate>>
+    suspend fun uploadCourseImage(fileName: String, imageBytes: ByteArray): Result<Unit>
+    suspend fun uploadEventImage(fileName: String, imageBytes: ByteArray): Result<Unit>
+    suspend fun deleteCertificate(userId: String, courseId: Int): Result<Unit>
+    suspend fun deleteCertificateFile(fileName: String): Result<Unit>
 }

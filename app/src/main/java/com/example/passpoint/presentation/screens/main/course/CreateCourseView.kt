@@ -1,5 +1,9 @@
 package com.example.passpoint.presentation.screens.main.course
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -28,7 +33,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -42,13 +49,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.passpoint.R
 import com.example.passpoint.presentation.components.SpacerHeight
 import com.example.passpoint.presentation.components.WarningMessage
@@ -84,6 +94,11 @@ fun CreateCourseView(
                 }
             }
         }
+    }
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        viewModel.onPhotoPicked(uri)
     }
 
     val textFieldColors = OutlinedTextFieldDefaults.colors(
@@ -124,7 +139,7 @@ fun CreateCourseView(
                 SpacerHeight(8)
 
                 ElevatedCard(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -153,7 +168,7 @@ fun CreateCourseView(
             SpacerHeight(8)
 
             ElevatedCard(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -370,6 +385,42 @@ fun CreateCourseView(
                     )
                     SpacerHeight(16)
 
+                    OutlinedButton(
+                        onClick = {
+                            imagePickerLauncher.launch("image/*")
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(ButtonHeight),
+                        shape = RoundedCornerShape(8.dp)
+
+                    ) {
+                        Icon(
+                            painter = if (state.imageUrl == null) painterResource(R.drawable.add_24dp) else painterResource(
+                                R.drawable.cached_24dp
+                            ),
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text( if (state.imageUrl == null) "Добавить фото" else "Изменить фото")
+                    }
+
+                    if (state.isUploadingImage) {
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    } else if (state.imageUrl != null) {
+                        AsyncImage(
+                            model = state.imageUrl,
+                            contentDescription = "Загруженное фото",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .padding(top = 8.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+
+                        )
+                    }
+                    SpacerHeight(16)
                     // Ошибка
                     if (state.error != null) {
                         WarningMessage(text = state.error)

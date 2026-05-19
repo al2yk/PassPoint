@@ -550,4 +550,46 @@ class UserRepositoryImpl @Inject constructor(
             Result.Success(response)
         } catch (e: Exception) { Result.Failure(e) }
     }
+    override suspend fun uploadCourseImage(fileName: String, imageBytes: ByteArray): Result<Unit> {
+        return try {
+            val requestBody = imageBytes.toRequestBody("image/*".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("image", fileName, requestBody)
+            val response = userApi.uploadCourseImage(fileName, imagePart)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка загрузки фото курса: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun uploadEventImage(fileName: String, imageBytes: ByteArray): Result<Unit> {
+        return try {
+            val requestBody = imageBytes.toRequestBody("image/*".toMediaTypeOrNull())
+            val imagePart = MultipartBody.Part.createFormData("image", fileName, requestBody)
+            val response = userApi.uploadEventImage(fileName, imagePart)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка загрузки фото мероприятия: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+    override suspend fun deleteCertificate(userId: String, courseId: Int): Result<Unit> {
+        return try {
+            val response = userApi.deleteCertificate("eq.$userId", "eq.$courseId")
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка удаления сертификата: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
+
+    override suspend fun deleteCertificateFile(fileName: String): Result<Unit> {
+        return try {
+            val response = userApi.deleteCertificateFile(fileName)
+            if (response.isSuccessful) Result.Success(Unit)
+            else Result.Failure(Exception("Ошибка удаления файла: ${response.code()}"))
+        } catch (e: Exception) {
+            Result.Failure(e)
+        }
+    }
 }

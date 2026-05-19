@@ -6,5 +6,6 @@ data class CourseCreateRequest(
     val date: String,
     val place: String,
     val curator: String,
-    val capacity: Int
+    val capacity: Int,
+    val photo: String = ""
 )

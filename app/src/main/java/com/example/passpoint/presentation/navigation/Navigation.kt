@@ -85,7 +85,8 @@ fun Navigation(isOnline: Boolean) {
         NavigationRoutes.EDIT_PROFILE,
         NavigationRoutes.CURATOR_PAST_COURSES,
         NavigationRoutes.CURATOR_COURSE_DETAIL,
-        NavigationRoutes.CERTIFICATES
+        NavigationRoutes.CERTIFICATES,
+        NavigationRoutes.EDIT_NEWS
     )
 
     // Проверка, является ли текущий маршрут детальным экраном новости
